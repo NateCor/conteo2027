@@ -1,6 +1,6 @@
-# Conteo 2026 - FEUC Election Dashboard
+# Conteo 2027 - FEUC Election Dashboard
 
-A modernized static dashboard for visualizing vote counting in FEUC (Federación de Estudiantes de la Universidad Católica) elections. Originally built for 2017, completely modernized for the 2026 election cycle.
+A modernized static dashboard for visualizing vote counting in FEUC (Federación de Estudiantes de la Universidad Católica) elections. Originally built for 2017, completely modernized for the 2027 election cycle.
 
 ## 🚀 Tech Stack
 
