@@ -1,0 +1,616 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Conteo Elecciones FEUC 2026 | El PUClítico</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" type="image/png" href="/src/images/favicon.png">
+    <link rel="stylesheet" type="text/css" href="/src/scss/style.scss">
+    <script type="module" src="/src/js/main.js"></script>
+  </head>
+  <body>
+    <section class="hero is-medium is-primary">
+      <div class="hero-head">
+        <div class="container" id="header"><a href="https://www.elpuclitico.cl" target="_blank"><span id="logo"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 257.2 47.5"><style>.a{fill:#FFF;}</style><rect y="38.9" width="43.3" height="2.5"/><path d="M53.3 16.2h0.1c1.5-3.1 4.2-4.5 7.4-4.5 7.7 0 10 6.5 10 12.8 0 6.3-2.3 12.8-10 12.8 -3.1 0-5.9-1.2-7-3.4l-0.1 0.1V41c0 1.4 0.4 2.2 1.8 2.2h2.1v4.1H41.4v-4.1h1.9c1.5 0 1.8-0.8 1.8-2.2V18.8c0-1.4-0.4-2.2-1.8-2.2h-2v-4.1h11.9V16.2zM53.7 24.7c0 5 1.2 8.2 4.1 8.2 2.9 0 4.1-3.1 4.1-8.2 0-5-1.2-8.2-4.1-8.2C54.9 16.5 53.7 19.6 53.7 24.7z" class="a"/><path d="M94.2 36.5v-3.9h-0.1c-2.3 3.3-4.7 4.7-8.8 4.7 -5.8 0-7.8-2.5-7.8-8V18.8c0-1.4-0.4-2.2-1.8-2.2h-1.7v-4.1h12v15.1c0 3.6 0 5 3.9 5 2.4 0 3.8-2.2 3.8-4.4v-9.5c0-1.4-0.4-2.2-1.8-2.2h-2.3v-4.1h12.6v17.7c0 1.4 0.4 2.2 1.8 2.2h1.8v4.1H94.2z" class="a"/><path d="M131.8 28.1c-0.2 6.6-4.9 9.1-10.6 9.1 -7.6 0-12.7-4.2-12.7-12.8 0-8.6 6.2-12.8 12.7-12.8 5.5 0 10.6 2.7 10.6 8.3 0 2.7-1.7 5-4.6 5 -2.5 0-4.5-1-4.5-3.7 0-2.4 1.6-3.7 3.9-3.7 -0.9-1.1-2.5-1.7-4.1-1.7 -2.6 0-5 2.6-5 8.5s1.5 8.5 5 8.5c2.7 0 3.9-2.3 4.2-4.7H131.8z" class="a"/><path d="M143.6 31.7c0 1.6 0.4 2.4 2.1 2.4h3.3v2.4h-15.1V34h3.3c1.7 0 2.1-0.8 2.1-2.4V7.2c0-1.6-1.2-2.4-2.1-2.4h-3.3V2.5h9.7V31.7z" class="a"/><path d="M160.7 31.7c0 1.6 0.4 2.4 2.1 2.4h3.3v2.4H151V34h3.3c1.7 0 2.1-0.8 2.1-2.4V17.2c0-1.6-0.4-2.4-2.1-2.4H151v-2.4h9.7V31.7zM153.7 9l6.4-6.6c1.5-1.5 2.1-2.4 3.4-2.4 1 0 1.9 1 1.9 1.9 0 1-0.5 1.4-2.3 2.6L156.1 9H153.7z" class="a"/><path d="M168.4 12.5c4.8-0.7 5.7-5.8 6-10h2.7v10h7.3v2.4h-7.3v16.9c0 2.1 0.8 3 2.6 3 2.2 0 3.6-2.1 3.6-5v-3h2.4V29c0 5-1.5 8.2-7 8.2 -4.5 0-5.9-3-5.9-5.8V14.9h-4.4V12.5z" class="a"/><path d="M197.7 31.7c0 1.6 0.4 2.4 2.1 2.4h3.3v2.4H188V34h3.3c1.7 0 2.1-0.8 2.1-2.4V17.2c0-1.6-0.4-2.4-2.1-2.4H188v-2.4h9.7V31.7zM194.9 7.5c-1.5 0-2.8-1.2-2.8-2.8 0-1.5 1.2-2.8 2.8-2.8 1.5 0 2.8 1.3 2.8 2.8C197.6 6.3 196.3 7.5 194.9 7.5z" class="a"/><path d="M228 27.6c-0.7 6.9-5 9.6-11.7 9.6 -6.4 0-11.3-4.3-11.3-12.8 0-7.6 5.4-12.8 12.7-12.8 4.6 0 10.4 2.4 10.4 7.7 0 2.1-1.2 3.5-3.2 3.5 -1.3 0-2.5-1.1-2.5-2.4 0-1.7 0.9-2.7 2.6-2.9 -0.8-2.5-4.2-3.5-6.5-3.5 -6.5 0-8.6 5.6-8.6 10.4 0 4.7 2.1 10.4 7.6 10.4 4.1 0 6.7-2.8 7.5-7.2H228z" class="a"/><path d="M257.2 24.5c0 7.4-5 12.8-13.2 12.8 -8.3 0-13.2-5.4-13.2-12.8s5-12.8 13.2-12.8C252.2 11.7 257.2 17.1 257.2 24.5zM235.6 24.5c0 5.5 2 10.4 8.4 10.4 6.4 0 8.4-4.8 8.4-10.4s-2-10.4-8.4-10.4C237.6 14.1 235.6 18.9 235.6 24.5z" class="a"/><path d="M4.9 24.8c0 5.2 1.1 10 7.2 10 4.1 0 6.6-2.2 7.7-6.2h3c-1.1 5.5-4.7 8.6-10.7 8.6 -7.6 0-12-4.4-12-12.8C0 16 4.4 11.7 12 11.7c8.3 0 10.9 5.8 11.4 13.1H4.9zM18.5 22.3c0-4.5-2-8.3-6.7-8.3 -4.8 0-7 3.8-7 8.3H18.5z" class="a"/><path d="M35.2 31.7c0 1.6 0.4 2.4 2.1 2.4h3.3v2.4H25.5V34h3.3c1.7 0 2.1-0.8 2.1-2.4V7.2c0-1.6-1.2-2.4-2.1-2.4h-3.3V2.5h9.7V31.7z" class="a"/><rect x="55.5" y="38.9" width="201.7" height="2.5"/></svg>
+</span></a><span>Elecciones FEUC 2026</span></div>
+      </div>
+      <div class="hero-body" id="bar-graph-hero">
+        <div class="container">
+          <div class="columns">
+            <div class="column" id="bind-summary-lista">
+              <h2 class="title is-4">Total Lista FEUC</h2>
+              <div class="bar-full-graph">
+                <div class="bar-item">
+                  <div class="legend">NAU!</div>
+                  <div class="percentage">{naupc}%</div>
+                </div>
+                <div class="bar-item">
+                  <div class="legend">Amanecer</div>
+                  <div class="percentage">{mgpc}%</div>
+                </div>
+                <div class="bar-full-item">
+                  <div class="bar-holder">
+                    <div class="bar bar-nau" rv-width="naupc"></div>
+                    <div class="bar bar-mg" rv-width="mgpc"></div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="column" id="bind-summary-sup">
+              <h2 class="title is-4">Total Consejero Superior</h2>
+              <div class="bar-full-graph">
+                <div class="bar-item">
+                  <div class="legend">NAU!</div>
+                  <div class="percentage">{naupc}%</div>
+                </div>
+                <div class="bar-item">
+                  <div class="legend">Amanecer</div>
+                  <div class="percentage">{mgpc}%</div>
+                </div>
+                <div class="bar-full-item">
+                  <div class="bar-holder">
+                    <div class="bar bar-nau" rv-width="naupc"></div>
+                    <div class="bar bar-mg" rv-width="mgpc"></div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+    <section class="section">
+      <div class="container">
+        <!-- include refresh-notification-->
+        <!-- include error-loading-notification-->
+        <h2 class="title is-2">Detalle 
+          <!-- span.tag.update-notif  Actualizando…-->
+        </h2>
+        <div class="box">
+          <div class="title is-3">Total Universidad</div>
+          <div class="day-selector">
+            <input type="radio" name="total-dia" value="dia1" id="total-dia-dia1">
+            <label for="total-dia-dia1"><span class="icon">🗓</span>Día 1</label>
+            <input type="radio" name="total-dia" value="dia2" id="total-dia-dia2">
+            <label for="total-dia-dia2"><span class="icon">🗓</span>Día 2</label>
+            <input type="radio" name="total-dia" value="total" id="total-dia-total" checked>
+            <label for="total-dia-total"><span class="icon">🗓</span>Ambos días</label>
+          </div>
+          <div class="columns">
+            <div class="column" id="bind-total-lista">
+              <h3 class="title is-4">Lista FEUC</h3>
+              <div class="chartgraph">
+                <canvas id="total-lista"></canvas>
+              </div>
+              <div class="votes">
+                <div class="vote vote-nau">
+                  <div class="label">NAU!</div>
+                  <div class="units">{nau}</div>
+                  <div class="percentage">{naupc}%</div>
+                </div>
+                <div class="vote vote-sdd">
+                  <div class="label">Solidaridad</div>
+                  <div class="units">{sdd}</div>
+                  <div class="percentage">{sddpc}%</div>
+                </div>
+                <div class="vote vote-mg">
+                  <div class="label">Amanecer</div>
+                  <div class="units">{mg}</div>
+                  <div class="percentage">{mgpc}%</div>
+                </div>
+              </div>
+              <div class="votes">
+                <div class="vote vote-elp">
+                  <div class="label">1A</div>
+                  <div class="units">{elp}</div>
+                  <div class="percentage">{elppc}%</div>
+                </div>
+                <div class="vote vote-proy">
+                  <div class="label">Avanzar</div>
+                  <div class="units">{proy}</div>
+                  <div class="percentage">{proypc}%</div>
+                </div>
+                <div class="vote">
+                  <div class="label">Blancos</div>
+                  <div class="units">{b}</div>
+                  <div class="percentage">{bpc}%</div>
+                </div>
+                <div class="vote">
+                  <div class="label">Nulos</div>
+                  <div class="units">{n}</div>
+                  <div class="percentage">{npc}%</div>
+                </div>
+              </div>
+              <div class="vote-counter">votos: {votos} - válidos: {votosve} <span rv-if="escrutada"><span class="tag is-small is-info">escrutada</span></span><span rv-unless="escrutada"><span class="tag is-small">no escrutada</span></span>
+              </div>
+            </div>
+            <div class="column" id="bind-total-sup">
+              <h3 class="title is-4">Consejero Superior</h3>
+              <div class="chartgraph">
+                <canvas id="total-sup"></canvas>
+              </div>
+              <div class="votes">
+                <div class="vote vote-nau">
+                  <div class="label">NAU!</div>
+                  <div class="units">{nau}</div>
+                  <div class="percentage">{naupc}%</div>
+                </div>
+                <div class="vote vote-mg">
+                  <div class="label">Amanecer</div>
+                  <div class="units">{mg}</div>
+                  <div class="percentage">{mgpc}%</div>
+                </div>
+              </div>
+              <div class="votes">
+                <div class="vote">
+                  <div class="label">Blancos</div>
+                  <div class="units">{b}</div>
+                  <div class="percentage">{bpc}%</div>
+                </div>
+                <div class="vote">
+                  <div class="label">Nulos</div>
+                  <div class="units">{n}</div>
+                  <div class="percentage">{npc}%</div>
+                </div>
+              </div>
+              <div class="vote-counter">votos: {votos} - válidos: {votosve} <span rv-if="escrutada"><span class="tag is-small is-info">escrutada</span></span><span rv-unless="escrutada"><span class="tag is-small">no escrutada</span></span>
+              </div>
+            </div>
+          </div>
+        </div>
+        <!-- include vote-message-->
+        <div class="box">
+          <div class="title is-3">Mesas</div>
+          <form name="selected-mesa">
+            <p class="control">
+              <select class="input is-large">
+                <option value="agro1">Agronomía 1</option>
+                <option value="agro2">Agronomía 2</option>
+                <option value="arqui">Arquitectura</option>
+                <option value="dno">Diseño</option>
+                <option value="collnat">College Naturales</option>
+                <option value="collsoc">College Sociales y Artes</option>
+                <option value="collcc">College Casa Central</option>
+                <option value="colllc">College Lo Contador</option>
+                <option value="collo">College Oriente</option>
+                <option value="comer1">Comercial 1</option>
+                <option value="comer2">Comercial 2</option>
+                <option value="com">Comunicaciones</option>
+                <option value="constru">Construcción Civil</option>
+                <option value="csbiocc">Cs. Biológicas CC</option>
+                <option value="csbiosj">Cs. Biológicas SJ</option>
+                <option value="der1">Derecho 1</option>
+                <option value="der2">Derecho 2</option>
+                <option value="enfsj">Enfermería San Joaquín</option>
+                <option value="enfcc">Enfermería Casa Central</option>
+                <option value="fismat">Física y Matemática</option>
+                <option value="geo">Geografía, Historia y Ciencia Política</option>
+                <option value="let">Letras y Filosofía</option>
+                <option value="ing1">Ingeniería 1</option>
+                <option value="ing2">Ingeniería 2</option>
+                <option value="ing3">Ingeniería 3</option>
+                <option value="ing4">Ingeniería 4</option>
+                <option value="ing5">Ingenieria 5</option>
+                <option value="med">Medicina</option>
+                <option value="sotero">Medicina Sótero del Río</option>
+                <option value="odontosj">Odontología SJ</option>
+                <option value="odontocc">Odontología CC</option>
+                <option value="saludcc">Salud CC</option>
+                <option value="saludsj">Salud SJ</option>
+                <option value="oriente">Oriente</option>
+                <option value="educa1">Pedagogía en Educación Parvularia, Media y PFP</option>
+                <option value="educa2">Pedagogía Básica</option>
+                <option value="psi">Psicología</option>
+                <option value="quim">Química</option>
+                <option value="soc">Sociales</option>
+                <option value="teo">Teología</option>
+                <option value="relig">Pedagogía en Religión</option>
+                <option value="vill">Villarrica</option>
+              </select>
+            </p>
+          </form>
+          <div class="day-selector">
+            <input type="radio" name="mesa-dia" value="dia1" id="mesa-dia-dia1">
+            <label for="mesa-dia-dia1"><span class="icon">🗓</span>Día 1</label>
+            <input type="radio" name="mesa-dia" value="dia2" id="mesa-dia-dia2">
+            <label for="mesa-dia-dia2"><span class="icon">🗓</span>Día 2</label>
+            <input type="radio" name="mesa-dia" value="total" id="mesa-dia-total" checked>
+            <label for="mesa-dia-total"><span class="icon">🗓</span>Ambos días</label>
+          </div>
+          <div class="columns">
+            <div class="column" id="bind-mesa-lista">
+              <h3 class="title is-4">Lista FEUC</h3>
+              <div class="chartgraph">
+                <canvas id="mesa-lista"></canvas>
+              </div>
+              <div class="votes">
+                <div class="vote vote-nau">
+                  <div class="label">NAU!</div>
+                  <div class="units">{nau}</div>
+                  <div class="percentage">{naupc}%</div>
+                </div>
+                <div class="vote vote-sdd">
+                  <div class="label">Solidaridad</div>
+                  <div class="units">{sdd}</div>
+                  <div class="percentage">{sddpc}%</div>
+                </div>
+                <div class="vote vote-mg">
+                  <div class="label">Amanecer</div>
+                  <div class="units">{mg}</div>
+                  <div class="percentage">{mgpc}%</div>
+                </div>
+              </div>
+              <div class="votes">
+                <div class="vote vote-elp">
+                  <div class="label">1A</div>
+                  <div class="units">{elp}</div>
+                  <div class="percentage">{elppc}%</div>
+                </div>
+                <div class="vote vote-proy">
+                  <div class="label">Avanzar</div>
+                  <div class="units">{proy}</div>
+                  <div class="percentage">{proypc}%</div>
+                </div>
+                <div class="vote">
+                  <div class="label">Blancos</div>
+                  <div class="units">{b}</div>
+                  <div class="percentage">{bpc}%</div>
+                </div>
+                <div class="vote">
+                  <div class="label">Nulos</div>
+                  <div class="units">{n}</div>
+                  <div class="percentage">{npc}%</div>
+                </div>
+              </div>
+              <div class="vote-counter">votos: {votos} - válidos: {votosve} <span rv-if="escrutada"><span class="tag is-small is-info">escrutada</span></span><span rv-unless="escrutada"><span class="tag is-small">no escrutada</span></span>
+              </div>
+            </div>
+            <div class="column" id="bind-mesa-sup">
+              <h3 class="title is-4">Consejero Superior</h3>
+              <div class="chartgraph">
+                <canvas id="mesa-sup"></canvas>
+              </div>
+              <div class="votes">
+                <div class="vote vote-nau">
+                  <div class="label">NAU!</div>
+                  <div class="units">{nau}</div>
+                  <div class="percentage">{naupc}%</div>
+                </div>
+                <div class="vote vote-mg">
+                  <div class="label">Amanecer</div>
+                  <div class="units">{mg}</div>
+                  <div class="percentage">{mgpc}%</div>
+                </div>
+              </div>
+              <div class="votes">
+                <div class="vote">
+                  <div class="label">Blancos</div>
+                  <div class="units">{b}</div>
+                  <div class="percentage">{bpc}%</div>
+                </div>
+                <div class="vote">
+                  <div class="label">Nulos</div>
+                  <div class="units">{n}</div>
+                  <div class="percentage">{npc}%</div>
+                </div>
+              </div>
+              <div class="vote-counter">votos: {votos} - válidos: {votosve} <span rv-if="escrutada"><span class="tag is-small is-info">escrutada</span></span><span rv-unless="escrutada"><span class="tag is-small">no escrutada</span></span>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="box">
+          <div class="title is-3">Territorios</div>
+          <form name="selected-terri">
+            <p class="control">
+              <select class="input is-large">
+                <option value="agro">Agronomía</option>
+                <option value="astrofismat">Astronomía - Física - Matemática</option>
+                <option value="coll">College</option>
+                <option value="comer">Comercial</option>
+                <option value="com">Comunicaciones</option>
+                <option value="constru">Construcción Civil</option>
+                <option value="csbio">Cs. Biológicas</option>
+                <option value="der">Derecho</option>
+                <option value="educa">Educación</option>
+                <option value="enf">Enfermería</option>
+                <option value="hum">Humanidades</option>
+                <option value="ing">Ingeniería</option>
+                <option value="loconta">Lo Contador</option>
+                <option value="med">Medicina</option>
+                <option value="odonto">Odontología</option>
+                <option value="oriente">Oriente</option>
+                <option value="psi">Psicología</option>
+                <option value="quim">Química</option>
+                <option value="salud">Salud</option>
+                <option value="soc">Sociales</option>
+                <option value="vill">Villarrica</option>
+              </select>
+            </p>
+          </form>
+          <div class="day-selector">
+            <input type="radio" name="terri-dia" value="dia1" id="terri-dia-dia1">
+            <label for="terri-dia-dia1"><span class="icon">🗓</span>Día 1</label>
+            <input type="radio" name="terri-dia" value="dia2" id="terri-dia-dia2">
+            <label for="terri-dia-dia2"><span class="icon">🗓</span>Día 2</label>
+            <input type="radio" name="terri-dia" value="total" id="terri-dia-total" checked>
+            <label for="terri-dia-total"><span class="icon">🗓</span>Ambos días</label>
+          </div>
+          <div class="columns">
+            <div class="column" id="bind-terri-lista">
+              <h3 class="title is-4">Lista FEUC</h3>
+              <div class="chartgraph">
+                <canvas id="terri-lista"></canvas>
+              </div>
+              <div class="votes">
+                <div class="vote vote-nau">
+                  <div class="label">NAU!</div>
+                  <div class="units">{nau}</div>
+                  <div class="percentage">{naupc}%</div>
+                </div>
+                <div class="vote vote-sdd">
+                  <div class="label">Solidaridad</div>
+                  <div class="units">{sdd}</div>
+                  <div class="percentage">{sddpc}%</div>
+                </div>
+                <div class="vote vote-mg">
+                  <div class="label">Amanecer</div>
+                  <div class="units">{mg}</div>
+                  <div class="percentage">{mgpc}%</div>
+                </div>
+              </div>
+              <div class="votes">
+                <div class="vote vote-elp">
+                  <div class="label">1A</div>
+                  <div class="units">{elp}</div>
+                  <div class="percentage">{elppc}%</div>
+                </div>
+                <div class="vote vote-proy">
+                  <div class="label">Avanzar</div>
+                  <div class="units">{proy}</div>
+                  <div class="percentage">{proypc}%</div>
+                </div>
+                <div class="vote">
+                  <div class="label">Blancos</div>
+                  <div class="units">{b}</div>
+                  <div class="percentage">{bpc}%</div>
+                </div>
+                <div class="vote">
+                  <div class="label">Nulos</div>
+                  <div class="units">{n}</div>
+                  <div class="percentage">{npc}%</div>
+                </div>
+              </div>
+              <div class="vote-counter">votos: {votos} - válidos: {votosve} <span rv-if="escrutada"><span class="tag is-small is-info">escrutado</span></span><span rv-unless="escrutada"><span class="tag is-small">no escrutado</span></span>
+              </div>
+            </div>
+            <div class="column" id="bind-terri-sup">
+              <h3 class="title is-4">Consejero Superior</h3>
+              <div class="chartgraph">
+                <canvas id="terri-sup"></canvas>
+              </div>
+              <div class="votes">
+                <div class="vote vote-nau">
+                  <div class="label">NAU!</div>
+                  <div class="units">{nau}</div>
+                  <div class="percentage">{naupc}%</div>
+                </div>
+                <div class="vote vote-mg">
+                  <div class="label">Amanecer</div>
+                  <div class="units">{mg}</div>
+                  <div class="percentage">{mgpc}%</div>
+                </div>
+              </div>
+              <div class="votes">
+                <div class="vote">
+                  <div class="label">Blancos</div>
+                  <div class="units">{b}</div>
+                  <div class="percentage">{bpc}%</div>
+                </div>
+                <div class="vote">
+                  <div class="label">Nulos</div>
+                  <div class="units">{n}</div>
+                  <div class="percentage">{npc}%</div>
+                </div>
+              </div>
+              <div class="vote-counter">votos: {votos} - válidos: {votosve} <span rv-if="escrutada"><span class="tag is-small is-info">escrutado</span></span><span rv-unless="escrutada"><span class="tag is-small">no escrutado</span></span>
+              </div>
+            </div>
+          </div>
+        </div>
+        <!-- include territoriales-->
+        <div class="box">
+          <div class="title is-3">Presupuesto Participativo</div>
+          <form name="selected-ppto">
+            <p class="control">
+              <select class="input is-large">
+                <option value="total">Total Universidad</option>
+                <option value="agro">Agronomía</option>
+                <option value="astrofismat">Astronomía - Física - Matemática</option>
+                <option value="coll">College</option>
+                <option value="comer">Comercial</option>
+                <option value="com">Comunicaciones</option>
+                <option value="constru">Construcción Civil</option>
+                <option value="csbio">Cs. Biológicas</option>
+                <option value="der">Derecho</option>
+                <option value="educa">Educación</option>
+                <option value="enf">Enfermería</option>
+                <option value="hum">Humanidades</option>
+                <option value="ing">Ingeniería</option>
+                <option value="loconta">Lo Contador</option>
+                <option value="med">Medicina</option>
+                <option value="odonto">Odontología</option>
+                <option value="oriente">Oriente</option>
+                <option value="psi">Psicología</option>
+                <option value="quim">Química</option>
+                <option value="salud">Salud</option>
+                <option value="soc">Sociales</option>
+                <option value="vill">Villarrica</option>
+              </select>
+            </p>
+          </form>
+          <div class="day-selector">
+            <input type="radio" name="ppto-dia" value="dia1" id="ppto-dia-dia1">
+            <label for="ppto-dia-dia1"><span class="icon">🗓</span>Día 1</label>
+            <input type="radio" name="ppto-dia" value="dia2" id="ppto-dia-dia2">
+            <label for="ppto-dia-dia2"><span class="icon">🗓</span>Día 2</label>
+            <input type="radio" name="ppto-dia" value="total" id="ppto-dia-total" checked>
+            <label for="ppto-dia-total"><span class="icon">🗓</span>Ambos días</label>
+          </div>
+          <div class="columns" id="bind-projects">
+            <div class="column">
+              <div class="bar-graph panel-graph">
+                <div class="bar-item project-bar-item" rv-each-ppto="projects" rv-addclass="ppto.id">
+                  <div class="legend">{ppto.name}</div>
+                  <div class="bar-holder">
+                    <div class="bar bar-undefined" rv-width="ppto.pc"></div>
+                  </div>
+                  <div class="percentage">{ppto.pc}%</div>
+                </div>
+              </div>
+            </div>
+            <div class="column">
+              <div class="chartgraph">
+                <canvas id="ppto"></canvas>
+              </div>
+              <div class="votes">
+                <div class="vote vote-mapau">
+                  <div class="label">MAPAU</div>
+                  <div class="units">{mapau}</div>
+                  <div class="percentage">{mapaupc}%</div>
+                </div>
+                <div class="vote vote-ani">
+                  <div class="label">Animalia</div>
+                  <div class="units">{ani}</div>
+                  <div class="percentage">{anipc}%</div>
+                </div>
+                <div class="vote vote-tdi-coll">
+                  <div class="label">ESI</div>
+                  <div class="units">{tdicoll}</div>
+                  <div class="percentage">{tdicollpc}%</div>
+                </div>
+                <div class="vote vote-tdi-cai">
+                  <div class="label">TDI CAi</div>
+                  <div class="units">{tdicai}</div>
+                  <div class="percentage">{tdicaipc}%</div>
+                </div>
+              </div>
+              <div class="votes">
+                <div class="vote vote-caco">
+                  <div class="label">Paulo Freire</div>
+                  <div class="units">{caco}</div>
+                  <div class="percentage">{cacopc}%</div>
+                </div>
+                <div class="vote vote-spch">
+                  <div class="label">Obra UC</div>
+                  <div class="units">{spch}</div>
+                  <div class="percentage">{spchpc}%</div>
+                </div>
+                <div class="vote vote-jsf">
+                  <div class="label">UCeanos</div>
+                  <div class="units">{jsf}</div>
+                  <div class="percentage">{jsfpc}%</div>
+                </div>
+                <div class="vote vote-clmun">
+                  <div class="label">TVP</div>
+                  <div class="units">{clmun}</div>
+                  <div class="percentage">{clmunpc}%</div>
+                </div>
+                <div class="vote vote-proy">
+                  <div class="label">Proyecta</div>
+                  <div class="units">{proy}</div>
+                  <div class="percentage">{proypc}%</div>
+                </div>
+              </div>
+              <div class="votes">
+                <div class="vote">
+                  <div class="label">Blancos</div>
+                  <div class="units">{b}</div>
+                  <div class="percentage">{bpc}%</div>
+                </div>
+                <div class="vote">
+                  <div class="label">Nulos</div>
+                  <div class="units">{n}</div>
+                  <div class="percentage">{npc}%</div>
+                </div>
+              </div>
+              <div class="vote-counter">votos: {votos} - válidos: {votosve} <span rv-if="escrutada"><span class="tag is-small is-info">escrutado</span></span><span rv-unless="escrutada"><span class="tag is-small">no escrutado</span></span>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="columns">
+          <div class="column">
+            <div class="box" id="bind-mesas"><span class="title is-3">Mesas Escrutadas</span><span>  </span><span class="subtitle">{actual} de {total}</span>
+              <div class="table-wrap">
+                <table class="table is-narrow">
+                  <thead>
+                    <tr>
+                      <td>Mesa</td>
+                      <td>Día 1</td>
+                      <td>Día 2</td>
+                    </tr>
+                  </thead>
+                  <tr rv-each-mesa="mesas">
+                    <td>{mesa.name}</td>
+                    <td><span class="tag is-medium is-success" rv-if="mesa.dia1">Sí</span><span class="tag is-medium" rv-unless="mesa.dia1">No</span></td>
+                    <td><span class="tag is-medium is-success" rv-if="mesa.dia2">Sí</span><span class="tag is-medium" rv-unless="mesa.dia2">No</span></td>
+                  </tr>
+                </table>
+              </div>
+            </div>
+          </div>
+          <div class="column">
+            <div class="box" id="bind-participacion"><span class="title is-3">Participación</span><span>  </span><span class="subtitle">por territorio</span>
+              <div class="table-wrap bar-graph panel-graph">
+                <div class="bar-item" rv-each-terri="terris">
+                  <div class="legend">{terri.name}</div>
+                  <div class="bar-holder">
+                    <div class="bar bar-undefined" rv-width="terri.pc"></div>
+                  </div>
+                  <div class="percentage">{terri.pc}%</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+    <section class="section">
+      <div class="container has-text-centered">
+        <p><a class="button is-outlined is-primary" href="http://www.elpuclitico.cl/conteo2017/primera" target="_blank"><span class="icon">👀</span>Ver resultados primera vuelta<span class="icon">🗳</span></a> <a class="button is-outlined is-primary" href="https://docs.google.com/spreadsheets/d/1eFW5Ww21HZWbvmlDElfuS2TcLWcCnkY-tGia-goi-NE/pubhtml" target="_blank"><span class="icon">👀</span>Ver planilla en Google Sheets<span class="icon">📊</span></a>
+        </p>
+      </div>
+    </section>
+    <!--.section
+    .container
+      .message
+        .message-body
+          strong ¿Buscas nuestro spreadsheet?
+          = ' '
+          | Durante el conteo no publicaremos nuestro
+          | spreadsheet para evitar caídas. Puedes rellenar un formulario
+          | solicitando permiso enviando un correo a
+          | direccion@elpuclitico.cl
+    
+    -->
+    <footer class="footer">
+      <div class="container has-text-centered">
+        <div class="content">
+          <p>Hecho con <span class="icon is-small">&#x2764;</span>
+            por <a href="http://pedroaste.cl" target="_blank">Pedro Pablo Aste Kompen</a> para El PUClítico
+          </p>
+          <p><small><a href="http://creativecommons.org/licenses/by-nc-nd/4.0/" target="_blank"><span class="icon">🏷</span> (cc) by-nc-nd</a> - <a href="https://github.com/wachunei/conteo2017" target="_blank"><span class="icon">📜</span> código en github</a></small></p>
+        </div>
+      </div>
+    </footer>
+    <script>
+      (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+      (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+      m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+      })(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
+      ga('create', 'UA-68253227-1', 'auto');
+      ga('send', 'pageview');
+    </script>
+  </body>
+</html>

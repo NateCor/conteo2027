@@ -1,0 +1,28 @@
+{
+  "name": "conteo2026",
+  "version": "2.0.0",
+  "description": "Modernized vote counting dashboard for FEUC elections",
+  "type": "module",
+  "scripts": {
+    "dev": "node scripts/build-html.js && vite",
+    "build": "npm run fetch-data && node scripts/build-html.js && vite build",
+    "preview": "vite preview",
+    "fetch-data": "node scripts/fetch-data.js"
+  },
+  "dependencies": {
+    "bulma": "^0.2.3",
+    "chart.js": "^2.9.4",
+    "jquery": "^3.1.1",
+    "pug": "^3.0.3",
+    "rivets": "^0.9.4",
+    "underscore": "^1.8.3",
+    "whatwg-fetch": "^3.6.20"
+  },
+  "devDependencies": {
+    "axios": "^1.6.7",
+    "dotenv": "^16.4.5",
+    "sass": "^1.71.0",
+    "vite": "^5.1.4",
+    "xlsx": "^0.18.5"
+  }
+}
