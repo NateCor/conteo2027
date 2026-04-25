@@ -1,5 +1,4 @@
-import { PARTY_CONFIG, PROJECT_CONFIG } from './config.js';
-import { defaultProjects } from './projectsArray.js';
+import { PARTY_CONFIG, PROJECT_CONFIG, getActiveParties, getActiveProjects } from './config.js';
 
 export const defaultChartsOptions = {
   responsive: true,
@@ -19,8 +18,9 @@ export const defaultChartsOptions = {
 };
 
 export function listaDefaultData() {
-  const labels = Object.values(PARTY_CONFIG.lista).map(p => p.name);
-  const colors = Object.values(PARTY_CONFIG.lista).map(p => p.color);
+  const activeParties = getActiveParties('lista');
+  const labels = [...activeParties.map(p => p.name), 'Blancos', 'Nulos'];
+  const colors = [...activeParties.map(p => p.color), '#FFFFFF', '#000000'];
   const data = labels.map(() => 100 / labels.length);
   return {
     labels: labels,
@@ -34,8 +34,9 @@ export function listaDefaultData() {
 };
 
 export function supDefaultData() {
-  const labels = Object.values(PARTY_CONFIG.sup).map(p => p.name);
-  const colors = Object.values(PARTY_CONFIG.sup).map(p => p.color);
+  const activeParties = getActiveParties('sup');
+  const labels = [...activeParties.map(p => p.name), 'Blancos', 'Nulos'];
+  const colors = [...activeParties.map(p => p.color), '#FFFFFF', '#000000'];
   const data = labels.map(() => 100 / labels.length);
   return {
     labels: labels,
@@ -49,13 +50,9 @@ export function supDefaultData() {
 };
 
 export function projectsDefaultData() {
-  // Use the actual projects from projectsArray.js
-  const labels = defaultProjects.map(p => p.name);
-  const colors = defaultProjects.map(p => {
-    // Get color from PROJECT_CONFIG if available
-    const config = PROJECT_CONFIG[p.id];
-    return config ? config.color : '#999999';
-  });
+  const activeProjects = getActiveProjects();
+  const labels = [...activeProjects.map(p => p.name), 'Blancos', 'Nulos'];
+  const colors = [...activeProjects.map(p => p.color), '#FFFFFF', '#000000'];
   const data = labels.map(() => 100 / labels.length);
   
   return {

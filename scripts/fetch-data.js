@@ -2,144 +2,241 @@ import axios from 'axios';
 import xlsx from 'xlsx';
 import fs from 'fs';
 import path from 'path';
+import { fileURLToPath } from 'url';
 import dotenv from 'dotenv';
 
 dotenv.config();
 
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+const ROOT_DIR = path.join(__dirname, '..');
+
+// Load configuration files
+const ELECTION_CONFIG = JSON.parse(
+  fs.readFileSync(path.join(ROOT_DIR, 'config', 'election.json'), 'utf8')
+);
+const TERRITORIES_CONFIG = JSON.parse(
+  fs.readFileSync(path.join(ROOT_DIR, 'config', 'territories.json'), 'utf8')
+);
+
 const SHEET_URL = process.env.SHEET_URL;
-const CACHE_FILE = 'temp/last_count.xlsx';
-const OUTPUT_FILE = 'public/data.json';
+const CACHE_FILE = path.join(ROOT_DIR, 'temp', 'last_count.xlsx');
+const OUTPUT_FILE = path.join(ROOT_DIR, 'public', 'data.json');
 
-const TERRITORY_MAP = {
-  "Agronomía y Sistemas Naturales": "agro",
-  "Ciencias Biológicas": "csbio",
-  "Ciencias de la Salud": "salud",
-  "Ciencias Exactas": "astrofismat",
-  "College": "coll",
-  "Ing. Comercial": "comer",
-  "Comunicaciones": "com",
-  "Construcción Civil": "constru",
-  "Derecho": "der",
-  "Educación": "educa",
-  "Enfermería": "enf",
-  "Gobierno": "soc",
-  "Humanidades": "hum",
-  "Ingeniería": "ing",
-  "Lo Contador": "loconta",
-  "Medicina": "med",
-  "Odontología": "odonto",
-  "Oriente": "oriente",
-  "Psicología": "psi",
-  "Química": "quim",
-  "Sociales y Teología": "soc",
-  "Villarica": "vill"
-};
+// Build maps from configuration
+const TERRITORY_MAP = TERRITORIES_CONFIG.territories;
+const MESA_MAP = TERRITORIES_CONFIG.mesas;
 
-const MESA_MAP = {
-  "Agronomía 1": "agro1",
-  "Agronomía 2": "agro2",
-  "Ing. en RRNN": "collnat",
-  "CCBB Casa Central 1": "csbiocc",
-  "CCBB San Joaquin 2": "csbiosj",
-  "Veterinaria": "csbiosj",
-  "Kinesiología": "saludsj",
-  "Fonoaudiología": "saludsj",
-  "Terapia Ocupacional": "saludsj",
-  "Nutrición": "saludcc",
-  "CCEE 1": "comer1",
-  "College 1": "collcc",
-  "College 2": "collsoc",
-  "College 3": "collnat",
-  "College 4": "colllc",
-  "College 5": "collo",
-  "Comercial 1": "comer1",
-  "Comercial 2": "comer2",
-  "Comercial 3": "comer2",
-  "Comercial 4": "comer2",
-  "Comercial 5": "comer2",
-  "Comunicaciones 1": "com",
-  "Construcción Civil 1": "constru",
-  "Construcción CIvil 2": "constru",
-  "Derecho 1": "der1",
-  "Derecho 2": "der2",
-  "Derecho 3": "der2",
-  "Educación 1": "educa1",
-  "Educación 2": "educa2",
-  "Educación 3": "educa2",
-  "Educación 4": "educa2",
-  "Educación 5": "educa2",
-  "Educación 6": "educa2",
-  "Enfermería San Joaquin": "enfsj",
-  "Enfermería Casa Central": "enfcc",
-  "Gobierno 1": "soc",
-  "CP, Geografía e Historia": "soc",
-  "Letras y Filosofía": "hum",
-  "Ingeniería 1": "ing1",
-  "Ingeniería 2": "ing2",
-  "Ingeniería 3": "ing3",
-  "Ingeniería 4": "ing4",
-  "Ingeniería 5": "ing5",
-  "Arquitectura": "arqui",
-  "Diseño": "dno",
-  "Medicina Casa Central 1": "med",
-  "Medicina Hosp. Sótero del Río": "sotero",
-  "Odontología San Joaquin 1": "odontosj",
-  "Oriente 1": "oriente",
-  "Oriente 2": "oriente",
-  "Psicología 1": "psi",
-  "Química 1": "quim",
-  "Sociales 1": "soc",
-  "Sociales 2": "soc",
-  "Sociales 3": "soc",
-  "Campus Villarica": "vill"
-};
+// Build party maps from election config
+function buildPartyMap() {
+  const map = {};
+  ['lista', 'sup'].forEach(type => {
+    ELECTION_CONFIG.parties[type].forEach(party => {
+      party.excelNames.forEach(name => {
+        const cleanName = name.replace(/^>>/, '').trim();
+        map[cleanName] = party.key;
+      });
+    });
+  });
+  
+  // Add Blancos and Nulos (not parties but required columns)
+  map['Blancos'] = 'b';
+  map['Nulos'] = 'n';
+  
+  return map;
+}
 
-const PARTY_MAP = {
-  'NAU!': 'nau',
-  'Amanecer': 'mg',
-  'Solidaridad': 'sdd',
-  '1A': 'elp',
-  'Avanzar': 'proy',
-  'Blancos': 'b',
-  'Nulos': 'n'
-};
+// Build project maps from election config
+function buildProjectMap() {
+  const map = {};
+  ELECTION_CONFIG.projects.forEach(project => {
+    project.excelNames.forEach(name => {
+      const cleanName = name.replace(/^>>/, '').trim();
+      map[cleanName] = project.key;
+    });
+  });
+  return map;
+}
 
-const PROJECT_MAP = {
-  'Trabajos de Invierno CAi': 'tdicai',
-  'Estudiantes por la ESI': 'tdicoll',
-  'Animalia UC': 'ani',
-  'Escuela Popular Paulo Freire': 'caco',
-  'La Obra UC': 'spch',
-  'UCeanos': 'jsf',
-  'Trabajos de Verano Proyecta': 'clmun',
-  'Blancos': 'b',
-  'Nulos': 'n'
-};
+const PARTY_MAP = buildPartyMap();
+const PROJECT_MAP = buildProjectMap();
+const TOTAL_VOTERS = ELECTION_CONFIG.election.totalVoters;
 
-const TOTAL_VOTERS = 26500;
+// Ensure directories exist
+if (!fs.existsSync(path.join(ROOT_DIR, 'temp'))) fs.mkdirSync(path.join(ROOT_DIR, 'temp'));
+if (!fs.existsSync(path.join(ROOT_DIR, 'public'))) fs.mkdirSync(path.join(ROOT_DIR, 'public'));
+
+// Validation errors collector
+const validationErrors = [];
+const validationWarnings = [];
 
 async function fetchData() {
   if (!SHEET_URL) {
-    console.error('SHEET_URL is not defined in .env');
-    return;
+    console.error('[ERROR] SHEET_URL is not defined in .env file');
+    console.error('  → Create a .env file with: SHEET_URL=https://your-sharepoint-url.xlsx');
+    process.exit(1);
   }
 
   let buffer;
   try {
-    const response = await axios.get(SHEET_URL, { responseType: 'arraybuffer', maxRedirects: 5 });
+    console.log('Downloading Excel from:', SHEET_URL);
+    const response = await axios.get(SHEET_URL, { 
+      responseType: 'arraybuffer', 
+      maxRedirects: 5,
+      timeout: 30000 
+    });
     buffer = response.data;
     fs.writeFileSync(CACHE_FILE, Buffer.from(buffer));
+    console.log('Downloaded and cached successfully.');
   } catch (error) {
+    console.error('[WARNING] Failed to download:', error.message);
     if (fs.existsSync(CACHE_FILE)) {
+      console.log('Using cached file from:', CACHE_FILE);
       buffer = fs.readFileSync(CACHE_FILE);
     } else {
+      console.error('[ERROR] No cache available and download failed.');
       process.exit(1);
     }
   }
 
   const workbook = xlsx.read(buffer, { type: 'buffer' });
+  
+  // Validate Excel structure
+  const isValid = validateExcel(workbook);
+  
+  if (!isValid) {
+    console.error('\n[ERROR] Excel validation failed. Please fix the issues above and try again.');
+    process.exit(1);
+  }
+
   const data = transformWorkbook(workbook);
   fs.writeFileSync(OUTPUT_FILE, JSON.stringify(data, null, 2));
+  console.log('\n✓ Data transformed and saved to', OUTPUT_FILE);
+}
+
+function validateExcel(workbook) {
+  console.log('\n=== Validating Excel Structure ===\n');
+  
+  const sheetNames = workbook.SheetNames;
+  console.log(`Found ${sheetNames.length} sheets: ${sheetNames.join(', ')}`);
+  
+  // Check expected sheets
+  const expectedSheets = ['Directiva FEUC', 'Consejería Superior', 'Presupuestos Participativos'];
+  const sheetMap = {
+    'lista': null,
+    'sup': null,
+    'ppto': null
+  };
+  
+  sheetNames.forEach(name => {
+    const lower = name.toLowerCase();
+    if (lower.includes('directiva') || lower.includes('lista')) {
+      sheetMap.lista = name;
+    } else if (lower.includes('consejería') || lower.includes('superior')) {
+      sheetMap.sup = name;
+    } else if (lower.includes('presupuesto') || lower.includes('participativo')) {
+      sheetMap.ppto = name;
+    }
+  });
+  
+  if (!sheetMap.lista) {
+    validationErrors.push('Sheet "Directiva FEUC" not found');
+  }
+  if (!sheetMap.sup) {
+    validationErrors.push('Sheet "Consejería Superior" not found');
+  }
+  if (!sheetMap.ppto) {
+    validationWarnings.push('Sheet "Presupuestos Participativos" not found (may not be available for this election)');
+  }
+  
+  // Validate party columns in Lista and Sup sheets
+  ['lista', 'sup'].forEach(type => {
+    if (!sheetMap[type]) return;
+    
+    const sheet = workbook.Sheets[sheetMap[type]];
+    const rows = xlsx.utils.sheet_to_json(sheet, { header: 1 });
+    const headers = rows[0].map(h => h ? h.replace(/^>>/, '').trim() : '');
+    
+    console.log(`\nValidating ${sheetMap[type]}...`);
+    
+    // Check which configured parties are active
+    const activeParties = ELECTION_CONFIG.parties[type].filter(p => p.active);
+    
+    activeParties.forEach(party => {
+      const found = party.excelNames.some(name => {
+        const cleanName = name.replace(/^>>/, '').trim();
+        return headers.includes(cleanName);
+      });
+      
+      if (found) {
+        console.log(`  ✓ ${party.displayName} (${party.key})`);
+      } else {
+        validationWarnings.push(`Party "${party.displayName}" (${party.key}) not found in ${sheetMap[type]}`);
+        console.log(`  ⚠ ${party.displayName} (${party.key}) - not found`);
+      }
+    });
+    
+    // Check for unknown columns
+    const knownColumns = new Set();
+    ELECTION_CONFIG.parties[type].forEach(party => {
+      party.excelNames.forEach(name => {
+        knownColumns.add(name.replace(/^>>/, '').trim());
+      });
+    });
+    knownColumns.add('Blancos');
+    knownColumns.add('Nulos');
+    knownColumns.add('Campus');
+    knownColumns.add('Territorio');
+    knownColumns.add('Mesa');
+    
+    headers.forEach(header => {
+      if (header && !knownColumns.has(header)) {
+        validationErrors.push(`Unknown column "${header}" in ${sheetMap[type]}. Add it to config/election.json first!`);
+      }
+    });
+  });
+  
+  // Validate project columns in PPTO sheet
+  if (sheetMap.ppto) {
+    const sheet = workbook.Sheets[sheetMap.ppto];
+    const rows = xlsx.utils.sheet_to_json(sheet, { header: 1 });
+    const headers = rows[0].map(h => h ? h.replace(/^>>/, '').trim() : '');
+    
+    console.log(`\nValidating ${sheetMap.ppto}...`);
+    
+    const activeProjects = ELECTION_CONFIG.projects.filter(p => p.active);
+    
+    activeProjects.forEach(project => {
+      const found = project.excelNames.some(name => {
+        const cleanName = name.replace(/^>>/, '').trim();
+        return headers.includes(cleanName);
+      });
+      
+      if (found) {
+        console.log(`  ✓ ${project.displayName} (${project.key})`);
+      } else {
+        validationWarnings.push(`Project "${project.displayName}" (${project.key}) not found in ${sheetMap.ppto}`);
+        console.log(`  ⚠ ${project.displayName} (${project.key}) - not found`);
+      }
+    });
+  }
+  
+  // Print results
+  console.log('\n=== Validation Results ===');
+  
+  if (validationWarnings.length > 0) {
+    console.log('\n[WARNINGS]:');
+    validationWarnings.forEach(w => console.log(`  ⚠ ${w}`));
+  }
+  
+  if (validationErrors.length > 0) {
+    console.log('\n[ERRORS]:');
+    validationErrors.forEach(e => console.log(`  ✗ ${e}`));
+    return false;
+  }
+  
+  console.log('\n✓ Validation passed!\n');
+  return true;
 }
 
 function transformWorkbook(workbook) {
@@ -149,37 +246,78 @@ function transformWorkbook(workbook) {
     total: { lista: { mesa: {}, terri: {}, total: {} }, sup: { mesa: {}, terri: {}, total: {} }, ppto: { terri: {}, total: {} } },
   };
 
-  parseMainSheet(workbook.Sheets[workbook.SheetNames[0]], converted, 'lista');
-  parseMainSheet(workbook.Sheets[workbook.SheetNames[1]], converted, 'sup');
-  parsePptoSheet(workbook.Sheets[workbook.SheetNames[2]], converted);
+  const sheetNames = workbook.SheetNames;
+  
+  // Find sheet names
+  let listaSheetName = sheetNames[0];
+  let supSheetName = sheetNames[1];
+  let pptoSheetName = sheetNames[2];
+  
+  sheetNames.forEach(name => {
+    const lower = name.toLowerCase();
+    if (lower.includes('directiva') || lower.includes('lista')) {
+      listaSheetName = name;
+    } else if (lower.includes('consejería') || lower.includes('superior')) {
+      supSheetName = name;
+    } else if (lower.includes('presupuesto') || lower.includes('participativo')) {
+      pptoSheetName = name;
+    }
+  });
+
+  console.log('Processing sheets:');
+  console.log(`  Lista: ${listaSheetName}`);
+  console.log(`  Sup: ${supSheetName}`);
+  console.log(`  PPTO: ${pptoSheetName}`);
+
+  parseMainSheet(workbook.Sheets[listaSheetName], converted, 'lista');
+  parseMainSheet(workbook.Sheets[supSheetName], converted, 'sup');
+  parsePptoSheet(workbook.Sheets[pptoSheetName], converted);
 
   calculateAggregates(converted);
   return converted;
 }
 
 function parseMainSheet(sheet, converted, tipo) {
+  if (!sheet) {
+    console.log(`  Skipping ${tipo} - sheet not found`);
+    return;
+  }
+  
   const rows = xlsx.utils.sheet_to_json(sheet, { header: 1 });
   if (rows.length < 2) return;
 
   const headers = rows[0];
   const dayRow = rows[1];
+  let lastTerritory = null;
 
   for (let i = 2; i < rows.length; i++) {
     const row = rows[i];
-    const rawTerritory = row[1];
+    let rawTerritory = row[1];
     const rawMesa = row[2];
     
-    // Stop at total rows or if mesa is missing
-    if (!rawMesa || rawMesa === 'Total' || rawTerritory === 'Total' || rawTerritory === '% de válidamente emitidas') {
-      console.log(`Stopping at row ${i}: rawMesa="${rawMesa}", rawTerritory="${rawTerritory}"`);
+    // Skip total/summary rows (check both territory column and first column)
+    if (rawTerritory === 'Total' || rawTerritory === '% de válidamente emitidas' || 
+        row[0] === 'Total' || row[0] === '% de válidamente emitidas') {
       break;
+    }
+
+    // Skip if no mesa (empty row or summary row)
+    if (!rawMesa) {
+      continue;
+    }
+
+    // Use last territory if current is empty (Excel has merged cells visually)
+    if (!rawTerritory && lastTerritory) {
+      rawTerritory = lastTerritory;
+    }
+
+    // Update last territory tracker
+    if (rawTerritory) {
+      lastTerritory = rawTerritory;
     }
 
     const territoryId = TERRITORY_MAP[rawTerritory] || rawTerritory;
     const mesaId = MESA_MAP[rawMesa] || rawMesa;
-
-    if (rawTerritory && !TERRITORY_MAP[rawTerritory]) console.warn(`[WARNING] Unmapped Territory: "${rawTerritory}"`);
-    if (rawMesa && !MESA_MAP[rawMesa]) console.warn(`[WARNING] Unmapped Mesa: "${rawMesa}"`);
 
     if (!converted.dia1[tipo].mesa[mesaId]) {
       converted.dia1[tipo].mesa[mesaId] = createDefaultObject(mesaId, rawMesa);
@@ -192,7 +330,10 @@ function parseMainSheet(sheet, converted, tipo) {
 
     // Use dayRow.length instead of headers.length to include all data columns
     for (let j = 3; j < dayRow.length; j++) {
-      const partyName = headers[j] || findPreviousHeader(headers, j);
+      let partyName = headers[j] || findPreviousHeader(headers, j);
+      if (partyName) {
+        partyName = partyName.replace(/^>>/, '').trim();
+      }
       const day = dayRow[j];
       const votes = parseInt(row[j]) || 0;
       const key = PARTY_MAP[partyName];
@@ -204,10 +345,16 @@ function parseMainSheet(sheet, converted, tipo) {
     }
   }
   
-  console.log(`Parsed ${Object.keys(converted.dia1[tipo].mesa).length} mesas for ${tipo}`);
+  const mesaCount = Object.keys(converted.dia1[tipo].mesa).length;
+  console.log(`  ✓ Parsed ${mesaCount} mesas for ${tipo}`);
 }
 
 function parsePptoSheet(sheet, converted) {
+  if (!sheet) {
+    console.log('  Skipping ppto - sheet not found');
+    return;
+  }
+  
   const rows = xlsx.utils.sheet_to_json(sheet, { header: 1 });
   if (rows.length < 2) return;
 
@@ -218,21 +365,19 @@ function parsePptoSheet(sheet, converted) {
   for (let i = 2; i < rows.length; i++) {
     const row = rows[i];
     let rawTerritory = row[1];
-    const rawMesa = row[2];
 
-    // Skip total/summary rows (check both territory column and first column)
+    // Skip total/summary rows
     if (rawTerritory === 'Total' || rawTerritory === '% de válidamente emitidas' || 
         row[0] === 'Total' || row[0] === '% de válidamente emitidas') {
       break;
     }
 
-    // Use last territory if current is empty (Excel has merged cells visually)
+    // Use last territory if current is empty
     if (!rawTerritory && lastTerritory) {
       rawTerritory = lastTerritory;
     }
 
-    // Skip if no territory and no mesa (empty row)
-    if (!rawTerritory && !rawMesa) {
+    if (!rawTerritory) {
       continue;
     }
 
@@ -252,7 +397,10 @@ function parsePptoSheet(sheet, converted) {
 
     // Use dayRow.length instead of headers.length to include all data columns
     for (let j = 3; j < dayRow.length; j++) {
-      const projName = headers[j] || findPreviousHeader(headers, j);
+      let projName = headers[j] || findPreviousHeader(headers, j);
+      if (projName) {
+        projName = projName.replace(/^>>/, '').trim();
+      }
       const day = dayRow[j];
       const votes = parseInt(row[j]) || 0;
       const key = PROJECT_MAP[projName];
@@ -263,8 +411,9 @@ function parsePptoSheet(sheet, converted) {
       }
     }
   }
-
-  console.log(`Parsed ${Object.keys(converted.dia1.ppto.terri).length} PPTO territories`);
+  
+  const terriCount = Object.keys(converted.dia1.ppto.terri).length;
+  console.log(`  ✓ Parsed ${terriCount} PPTO territories`);
 }
 
 function findPreviousHeader(headers, index) {
@@ -287,12 +436,12 @@ function createDefaultObject(id, name) {
 
 function calculateAggregates(converted) {
   ['lista', 'sup'].forEach(tipo => {
-    // Phase 1: Aggregate dia1 and dia2 totals separately
+    // Process each day
     ['dia1', 'dia2'].forEach(dia => {
       const dayData = converted[dia][tipo];
       const totalObj = dayData.total = createDefaultObject('total', 'Total');
       
-      // Aggregate mesas into territories and totals
+      // Aggregate territories from mesas
       Object.values(dayData.mesa).forEach(mesa => {
         const tId = mesa.territoryId;
         if (!dayData.terri[tId]) {
@@ -312,8 +461,6 @@ function calculateAggregates(converted) {
 
       Object.values(dayData.terri).forEach(t => calculatePercentages(t));
       calculatePercentages(totalObj);
-      
-      console.log(`${tipo} ${dia} total:`, totalObj.nau, 'NAU! votes,', totalObj.mg, 'Amanecer votes');
     });
 
     // Phase 2: Calculate combined totals (dia1 + dia2)
@@ -357,13 +504,14 @@ function calculateAggregates(converted) {
         tTotal[k] = t1[k] + t2[k];
       });
       calculatePercentages(tTotal);
-      tTotal.participacion = Math.round((tTotal.votos / 1500) * 100);
+      // No per-territory participation (no eligible voter data available)
+      tTotal.participacion = 0;
     });
     
     calculatePercentages(totalData.total);
     totalData.total.participacion = Math.round((totalData.total.votos / TOTAL_VOTERS) * 100);
     
-    console.log(`${tipo} COMBINED total:`, totalData.total.nau, 'NAU! votes,', totalData.total.mg, 'Amanecer votes');
+    console.log(`  ✓ ${tipo} total: ${totalData.total.nau} NAU!, ${totalData.total.mg} Amanecer`);
   });
 
   // PPTO Total aggregation
@@ -406,6 +554,8 @@ function calculateAggregates(converted) {
     });
   });
   calculatePercentages(pDataTotal.total, true);
+  
+  console.log(`  ✓ PPTO total: ${pDataTotal.total.votos} votes`);
 }
 
 function calculatePercentages(obj, isPpto = false) {

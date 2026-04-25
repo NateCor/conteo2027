@@ -1,3 +1,41 @@
+# macOS
 .DS_Store
-node_modules
-build
+
+# Dependencies
+node_modules/
+
+# Build output
+dist/
+build/
+
+# Vite
+.vite/
+
+# Generated data (recreated via fetch-data)
+public/data.json
+
+# Excel/election data files (DO NOT COMMIT!)
+*.xlsx
+*.xls
+*.xlsm
+*.xlsb
+*.csv
+temp/
+
+# Environment variables (contains SHEET_URL)
+.env
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Logs
+*.log
+npm-debug.log*
+
+# OS
+Thumbs.db
+desktop.ini

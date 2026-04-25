@@ -57,21 +57,35 @@ npm run preview
 ```
 Serves the production build locally for testing
 
+### 🧪 Test Excel Compatibility
+```bash
+npm run test-excel -- ./temp/your-excel-file.xlsx
+```
+Tests an Excel file for compatibility with the dashboard parser. Shows:
+- All territories and mesas found
+- Any unmapped names that need configuration updates
+- Column structure analysis
+- Generates `temp/test-output.json` for review
+
 ## 📁 Project Structure
 
 ```
 conteo2026/
+├── config/
+│   ├── election.json             # Election metadata, parties & projects
+│   └── territories.json          # Territory & mesa mappings (rarely changes)
 ├── public/
 │   └── data.json                 # Generated vote data (auto-created)
 ├── scripts/
 │   ├── fetch-data.js            # Excel download & parser
-│   └── build-html.js            # Pug compiler
+│   ├── build-html.js            # Pug compiler
+│   └── test-excel.js            # Excel compatibility tester
 ├── src/
 │   ├── js/
 │   │   ├── main.js              # Main application logic
 │   │   ├── dataFetcher.js       # JSON data loader
 │   │   ├── chartVars.js         # Chart.js configuration
-│   │   ├── config.js            # Party/project colors & constants
+│   │   ├── config.js            # Reads from config/election.json
 │   │   ├── projectsArray.js     # Project definitions
 │   │   └── movementColors.js    # Legacy color definitions
 │   ├── pug/
@@ -91,6 +105,78 @@ conteo2026/
 └── README.md
 ```
 
+## 🔄 Updating for New Elections
+
+### Quick Start (3 steps)
+1. Edit `config/election.json` with new party/project names
+2. Update the Excel file on SharePoint (ensure column headers match config)
+3. Run `npm run fetch-data`
+
+### Detailed Guide
+
+#### Step 1: Update `config/election.json`
+
+This is the **single source of truth** for all election-specific data:
+
+```json
+{
+  "election": {
+    "name": "Elecciones FEUC 2027",
+    "year": 2027,
+    "round": "Primera Vuelta",
+    "totalVoters": 27000,
+    "lastUpdated": "2027-10-22"
+  },
+  "parties": {
+    "lista": [
+      {
+        "key": "nau",
+        "excelNames": ["NAU!", "Candidaturas NAU!"],
+        "displayName": "NAU!",
+        "color": "#6fd528",
+        "active": true
+      },
+      // Add all parties here
+    ]
+  }
+}
+```
+
+**Important:**
+- `excelNames`: Must match the Excel column headers exactly
+- `displayName`: What appears on the dashboard
+- `active`: Set to `true` for parties participating in this election
+- The fetch script will **hard fail** if it finds unknown Excel columns
+
+#### Step 2: Update Excel on SharePoint
+- Ensure column headers match the `excelNames` in config
+- Ensure sheet names match expected format (Directiva FEUC, Consejería Superior, etc.)
+
+#### Step 3: Fetch and Build
+```bash
+npm run fetch-data   # Downloads and validates Excel
+npm run build        # Builds the dashboard
+```
+
+### Configuration Files
+
+| File | Purpose | Update Frequency |
+|------|---------|------------------|
+| `config/election.json` | Parties, projects, election metadata | Every election |
+| `config/territories.json` | Territory and mesa mappings | Rarely (university structure changes) |
+| `.env` | SharePoint URL | Per election |
+
+### Validation Rules
+- **Hard Fail**: Unknown Excel column found → Add it to config first
+- **Warning**: Config party not in Excel → Party didn't participate
+- **Success**: All Excel columns match config exactly
+
+### Error Messages
+```
+[ERROR] Found unknown party in Excel: "New Party X"
+         → Add it to config/election.json first!
+```
+
 ## ⚙️ Configuration
 
 ### Environment Variables
@@ -101,43 +187,29 @@ Create a `.env` file in the project root:
 SHEET_URL=https://your-sharepoint-site.com/path/to/excel.xlsx?download=1
 ```
 
-### Party Configuration
-
-Edit `src/js/config.js` to update party names and colors:
-
-```javascript
-export const PARTY_CONFIG = {
-  lista: {
-    nau: { name: 'NAU!', color: '#6fd528' },
-    mg: { name: 'Amanecer', color: '#FFC0CB' },
-    // Add more parties as needed
-  }
-};
-```
-
-### Total Voters (Padrón)
-
-Update the estimated total voter count:
-
-```javascript
-export const TOTAL_VOTERS = 26500; // Update for each election cycle
-```
-
 ## 📥 Data Pipeline
 
-The system uses a two-stage data pipeline:
+The system uses a centralized configuration and automated data pipeline:
 
-1. **Fetch**: `scripts/fetch-data.js`
+1. **Configuration**: `config/election.json`
+   - Defines party names, colors, and Excel column mappings
+   - Defines project names and colors
+   - Single source of truth for election-specific data
+
+2. **Territory Mapping**: `config/territories.json`
+   - Maps Excel territory/mesa names to dashboard IDs
+   - Rarely changes between elections
+
+3. **Fetch Script**: `scripts/fetch-data.js`
    - Downloads Excel from SharePoint URL
+   - Validates Excel columns against configuration
+   - Fails hard on unknown parties (enforces correct configuration)
+   - Warns on missing parties (they may not have participated)
+   - Strips `>>` prefixes from Excel columns automatically
    - Caches to `temp/last_count.xlsx`
    - Falls back to cache if download fails
 
-2. **Transform**: Parses 3 sheets:
-   - **Sheet 1**: Lista FEUC votes
-   - **Sheet 2**: Consejería Superior votes
-   - **Sheet 3**: Presupuesto Participativo votes
-
-3. **Output**: Generates `public/data.json` with structure:
+4. **Output**: Generates `public/data.json` with structure:
    ```json
    {
      "dia1": { "lista": {...}, "sup": {...}, "ppto": {...} },
@@ -148,15 +220,16 @@ The system uses a two-stage data pipeline:
 
 ### Excel Structure
 
-The parser expects paired columns for each party:
-- Column 3-4: NAU! (Día 1, Día 2)
-- Column 5-6: Amanecer (Día 1, Día 2)
-- Column 7-8: Blancos (Día 1, Día 2)
-- Column 9-10: Nulos (Día 1, Día 2)
+The parser expects paired columns for each party (Day 1, Day 2):
+- Columns 3-4: First party
+- Columns 5-6: Second party
+- And so on...
+
+The configuration file tells the parser which Excel column names map to which internal keys.
 
 ## 🗺️ Territory Mapping
 
-Excel territory names are mapped to dashboard IDs:
+Excel territory names are mapped to dashboard IDs in `config/territories.json`:
 
 | Excel Name | Dashboard ID |
 |------------|--------------|
@@ -167,7 +240,9 @@ Excel territory names are mapped to dashboard IDs:
 | Ing. Comercial | comer |
 | ... | ... |
 
-See `scripts/fetch-data.js` for complete `TERRITORY_MAP` and `MESA_MAP`.
+See `config/territories.json` for complete territory and mesa mappings.
+
+**Note:** Territory changes are rare. Only update this file if the university creates/closes departments or renames territories.
 
 ## 🚀 Deployment
 
@@ -200,6 +275,24 @@ jobs:
       - run: npm run deploy  # Your deploy command
 ```
 
+## 🧪 Testing New Excel Files
+
+Before using a new Excel file in production, test it for compatibility:
+
+```bash
+# 1. Copy the Excel to temp/
+cp "path/to/new-election.xlsx" temp/new-election.xlsx
+
+# 2. Run the test script
+npm run test-excel -- temp/new-election.xlsx
+
+# 3. Check the output
+# - ✅ All mapped = ready to use
+# - ❌ Unmapped entries = need to update TERRITORY_MAP or MESA_MAP
+```
+
+If there are unmapped entries, update the maps in `scripts/fetch-data.js` before using the file.
+
 ## 🐛 Troubleshooting
 
 ### Data Not Updating
@@ -215,6 +308,18 @@ jobs:
 ### Build Errors
 - Delete `node_modules` and `package-lock.json`, then `npm install`
 - Ensure Node.js version is 18+ (check with `node --version`)
+
+## 🚫 Git Ignore
+
+The following files are excluded from version control:
+
+- `node_modules/` - Dependencies (reinstall with `npm install`)
+- `dist/` - Build output (regenerate with `npm run build`)
+- `public/data.json` - Generated data (regenerate with `npm run fetch-data`)
+- `temp/last_count.xlsx` - Cached Excel file
+- `.env` - Environment variables (contains SHEET_URL)
+- `.DS_Store` - macOS metadata
+- `.vscode/`, `.idea/` - IDE settings
 
 ## 📝 Legacy Notes
 

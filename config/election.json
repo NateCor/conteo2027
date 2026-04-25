@@ -1,0 +1,158 @@
+{
+  "election": {
+    "name": "Elecciones FEUC 2026",
+    "year": 2026,
+    "round": "2da Vuelta",
+    "totalVoters": 26501,
+    "lastUpdated": "2026-04-25",
+    "notes": "Second round election - only top 2 parties participate"
+  },
+  "parties": {
+    "lista": [
+      {
+        "key": "nau",
+        "excelNames": ["NAU!", "Candidaturas NAU!"],
+        "displayName": "NAU!",
+        "color": "#6fd528",
+        "active": true
+      },
+      {
+        "key": "mg",
+        "excelNames": ["Amanecer", "Candidaturas Amanecer"],
+        "displayName": "Amanecer",
+        "color": "#FFC0CB",
+        "active": true
+      },
+      {
+        "key": "sdd",
+        "excelNames": ["Solidaridad", "Candidaturas Solidaridad"],
+        "displayName": "Solidaridad",
+        "color": "#E01E25",
+        "active": false
+      },
+      {
+        "key": "elp",
+        "excelNames": ["1A", "Movimiento Gremial", "Candidaturas 1A", "Candidaturas Movimiento Gremial"],
+        "displayName": "1A",
+        "color": "#e9841d",
+        "active": false
+      },
+      {
+        "key": "proy",
+        "excelNames": ["Avanzar", "Candidaturas Avanzar"],
+        "displayName": "Avanzar",
+        "color": "#3EACDE",
+        "active": false
+      },
+      {
+        "key": "ind",
+        "excelNames": ["Independientes", "Candidaturas Independientes"],
+        "displayName": "Independientes",
+        "color": "#489389",
+        "active": false
+      }
+    ],
+    "sup": [
+      {
+        "key": "nau",
+        "excelNames": ["NAU!", "Candidaturas NAU!"],
+        "displayName": "NAU!",
+        "color": "#6fd528",
+        "active": true
+      },
+      {
+        "key": "mg",
+        "excelNames": ["Amanecer", "Candidaturas Amanecer"],
+        "displayName": "Amanecer",
+        "color": "#FFC0CB",
+        "active": true
+      },
+      {
+        "key": "sdd",
+        "excelNames": ["Solidaridad", "Candidaturas Solidaridad"],
+        "displayName": "Solidaridad",
+        "color": "#E01E25",
+        "active": false
+      },
+      {
+        "key": "elp",
+        "excelNames": ["1A", "Movimiento Gremial", "Candidaturas 1A", "Candidaturas Movimiento Gremial"],
+        "displayName": "1A",
+        "color": "#e9841d",
+        "active": false
+      },
+      {
+        "key": "proy",
+        "excelNames": ["Avanzar", "Candidaturas Avanzar"],
+        "displayName": "Avanzar",
+        "color": "#3EACDE",
+        "active": false
+      }
+    ]
+  },
+  "projects": [
+    {
+      "key": "tdicai",
+      "excelNames": ["Trabajos de Invierno CAi"],
+      "displayName": "TDI CAi",
+      "color": "#FFFF00",
+      "active": true
+    },
+    {
+      "key": "tdicoll",
+      "excelNames": ["Estudiantes por la ESI"],
+      "displayName": "ESI",
+      "color": "#e9841d",
+      "active": true
+    },
+    {
+      "key": "ani",
+      "excelNames": ["Animalia UC"],
+      "displayName": "Animalia",
+      "color": "#6fd528",
+      "active": true
+    },
+    {
+      "key": "caco",
+      "excelNames": ["Escuela Popular Paulo Freire"],
+      "displayName": "Paulo Freire",
+      "color": "#FF00FF",
+      "active": true
+    },
+    {
+      "key": "spch",
+      "excelNames": ["La Obra UC"],
+      "displayName": "Obra UC",
+      "color": "#1C4587",
+      "active": true
+    },
+    {
+      "key": "jsf",
+      "excelNames": ["UCeanos"],
+      "displayName": "UCeanos",
+      "color": "#C00",
+      "active": true
+    },
+    {
+      "key": "clmun",
+      "excelNames": ["Trabajos de Verano Proyecta"],
+      "displayName": "TVP",
+      "color": "#FFFFFF",
+      "active": true
+    },
+    {
+      "key": "mapau",
+      "excelNames": ["MAPAU"],
+      "displayName": "MAPAU",
+      "color": "#80583e",
+      "active": false
+    },
+    {
+      "key": "proy",
+      "excelNames": ["Proyecta"],
+      "displayName": "Proyecta",
+      "color": "#3EACDE",
+      "active": false
+    }
+  ]
+}

@@ -4,7 +4,7 @@ import { getData, getServerData, defaultObject } from './dataFetcher.js';
 import { defaultProjects } from './projectsArray.js';
 import rivets from 'rivets';
 import _ from 'underscore';
-import { PARTY_CONFIG, TOTAL_VOTERS } from './config.js';
+import { PARTY_CONFIG, TOTAL_VOTERS, getActiveProjects } from './config.js';
 
 import {
   defaultChartsOptions,
@@ -187,8 +187,8 @@ $(document).ready(() => {
     let selectedTerri = $('form[name=selected-terri] select').val();
     let selectedPpto = $('form[name=selected-ppto] select').val();
 
-    const listaKeys = Object.keys(PARTY_CONFIG.lista).map(k => k + 'pc');
-    const supKeys = Object.keys(PARTY_CONFIG.sup).map(k => k + 'pc');
+    const listaKeys = [...Object.keys(PARTY_CONFIG.lista).map(k => k + 'pc'), 'bpc', 'npc'];
+    const supKeys = [...Object.keys(PARTY_CONFIG.sup).map(k => k + 'pc'), 'bpc', 'npc'];
 
     if (sender === 'getData') {
       summaryLista = _.extendOwn(summaryLista, mainData.total.lista.total);
@@ -339,14 +339,14 @@ $(document).ready(() => {
         project.pc = extendObj[`${project.id}pc`];
       });
 
+      const projectsKeys = [...getActiveProjects().map(p => p.key + 'pc'), 'bpc', 'npc'];
       let newProjectsData = _.chain(extendObj)
-        .pick('mapaupc', 'anipc', 'tdicollpc', 'elppc', 'tdicaipc',
-        'cacopc', 'spchpc', 'jsfpc', 'clmunpc', 'proypc')
+        .pick(projectsKeys)
         .map(parseFloat).value();
       if (_.any(newProjectsData, (n) => n > 0)) {
         chartProjects.data.datasets[0].data = newProjectsData;
       } else {
-        chartProjects.data.datasets[0].data = Array(10).fill(10);
+        chartProjects.data.datasets[0].data = getDefaults(projectsKeys.length);
       }
       chartProjects.update();
 
