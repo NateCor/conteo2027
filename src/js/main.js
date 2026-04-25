@@ -4,7 +4,7 @@ import { getData, getServerData, defaultObject } from './dataFetcher.js';
 import { defaultProjects } from './projectsArray.js';
 import rivets from 'rivets';
 import _ from 'underscore';
-import { PARTY_CONFIG, TOTAL_VOTERS, getActiveProjects } from './config.js';
+import { PARTY_CONFIG, TOTAL_VOTERS, getActiveProjects, getActiveParties } from './config.js';
 
 import {
   defaultChartsOptions,
@@ -187,8 +187,8 @@ $(document).ready(() => {
     let selectedTerri = $('form[name=selected-terri] select').val();
     let selectedPpto = $('form[name=selected-ppto] select').val();
 
-    const listaKeys = [...Object.keys(PARTY_CONFIG.lista).map(k => k + 'pc'), 'bpc', 'npc'];
-    const supKeys = [...Object.keys(PARTY_CONFIG.sup).map(k => k + 'pc'), 'bpc', 'npc'];
+    const listaKeys = [...getActiveParties('lista').map(p => p.key + 'pc'), 'bpc', 'npc'];
+    const supKeys = [...getActiveParties('sup').map(p => p.key + 'pc'), 'bpc', 'npc'];
 
     if (sender === 'getData') {
       summaryLista = _.extendOwn(summaryLista, mainData.total.lista.total);
