@@ -2,91 +2,84 @@
   "election": {
     "name": "Elecciones FEUC 2026",
     "year": 2026,
-    "round": "2da Vuelta",
+    "round": "Primera Vuelta",
     "totalVoters": 26501,
     "lastUpdated": "2026-04-25",
-    "notes": "Second round election - only top 2 parties participate"
+    "notes": "First round election - all parties participate"
   },
   "parties": {
     "lista": [
       {
         "key": "nau",
-        "excelNames": ["NAU!", "Candidaturas NAU!"],
+        "excelNames": ["NAU!"],
         "displayName": "NAU!",
         "color": "#6fd528",
         "active": true
       },
       {
         "key": "mg",
-        "excelNames": ["Amanecer", "Candidaturas Amanecer"],
+        "excelNames": ["Amanecer"],
         "displayName": "Amanecer",
         "color": "#FFC0CB",
         "active": true
       },
       {
         "key": "sdd",
-        "excelNames": ["Solidaridad", "Candidaturas Solidaridad"],
+        "excelNames": ["Solidaridad"],
         "displayName": "Solidaridad",
         "color": "#E01E25",
-        "active": false
+        "active": true
       },
       {
         "key": "elp",
-        "excelNames": ["1A", "Movimiento Gremial", "Candidaturas 1A", "Candidaturas Movimiento Gremial"],
+        "excelNames": ["1A", "Movimiento Gremial"],
         "displayName": "1A",
         "color": "#e9841d",
-        "active": false
+        "active": true
       },
       {
         "key": "proy",
-        "excelNames": ["Avanzar", "Candidaturas Avanzar"],
+        "excelNames": ["Avanzar"],
         "displayName": "Avanzar",
         "color": "#3EACDE",
-        "active": false
-      },
-      {
-        "key": "ind",
-        "excelNames": ["Independientes", "Candidaturas Independientes"],
-        "displayName": "Independientes",
-        "color": "#489389",
-        "active": false
+        "active": true
       }
     ],
     "sup": [
       {
         "key": "nau",
-        "excelNames": ["NAU!", "Candidaturas NAU!"],
+        "excelNames": ["NAU!"],
         "displayName": "NAU!",
         "color": "#6fd528",
         "active": true
       },
       {
         "key": "mg",
-        "excelNames": ["Amanecer", "Candidaturas Amanecer"],
+        "excelNames": ["Amanecer"],
         "displayName": "Amanecer",
         "color": "#FFC0CB",
         "active": true
       },
       {
         "key": "sdd",
-        "excelNames": ["Solidaridad", "Candidaturas Solidaridad"],
+        "excelNames": ["Solidaridad"],
         "displayName": "Solidaridad",
         "color": "#E01E25",
-        "active": false
+        "active": true
       },
       {
         "key": "elp",
-        "excelNames": ["1A", "Movimiento Gremial", "Candidaturas 1A", "Candidaturas Movimiento Gremial"],
+        "excelNames": ["1A", "Movimiento Gremial"],
         "displayName": "1A",
         "color": "#e9841d",
-        "active": false
+        "active": true
       },
       {
         "key": "proy",
-        "excelNames": ["Avanzar", "Candidaturas Avanzar"],
+        "excelNames": ["Avanzar"],
         "displayName": "Avanzar",
         "color": "#3EACDE",
-        "active": false
+        "active": true
       }
     ]
   },

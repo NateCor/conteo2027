@@ -156,6 +156,12 @@ workbook.SheetNames.forEach((sheetName, sheetIndex) => {
   console.log(`📄 Sheet ${sheetIndex + 1}: ${sheetName}`);
   console.log(`${'─'.repeat(60)}`);
   
+  // Skip Territorial sheets
+  if (sheetName.toLowerCase().includes('territorial')) {
+    console.log('   ⚠️  Skipping Territorial sheet (not supported)');
+    return;
+  }
+  
   const sheet = workbook.Sheets[sheetName];
   const rows = xlsx.utils.sheet_to_json(sheet, { header: 1 });
   
@@ -217,13 +223,16 @@ workbook.SheetNames.forEach((sheetName, sheetIndex) => {
     
     // Check parties/projects in columns
     for (let j = 3; j < Math.min(headers.length, dayRow.length); j++) {
-      const header = headers[j] || findPreviousHeader(headers, j);
-      if (header) {
+      const rawHeader = headers[j] || findPreviousHeader(headers, j);
+      if (rawHeader) {
+        // Strip >> prefix for comparison
+        const header = rawHeader.replace(/^>>/, '').trim();
+        
         if (!isPpto && !PARTY_MAP[header]) {
-          warnings.unmappedParties.add(header);
+          warnings.unmappedParties.add(rawHeader);
         }
         if (isPpto && !PROJECT_MAP[header]) {
-          warnings.unmappedProjects.add(header);
+          warnings.unmappedProjects.add(rawHeader);
         }
       }
     }

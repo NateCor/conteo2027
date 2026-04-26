@@ -23,6 +23,11 @@ const SHEET_URL = process.env.SHEET_URL;
 const CACHE_FILE = path.join(ROOT_DIR, 'temp', 'last_count.xlsx');
 const OUTPUT_FILE = path.join(ROOT_DIR, 'public', 'data.json');
 
+// Parse command line arguments
+const args = process.argv.slice(2);
+const fileArgIndex = args.indexOf('--file');
+const LOCAL_FILE = fileArgIndex !== -1 ? args[fileArgIndex + 1] : null;
+
 // Build maps from configuration
 const TERRITORY_MAP = TERRITORIES_CONFIG.territories;
 const MESA_MAP = TERRITORIES_CONFIG.mesas;
@@ -71,32 +76,52 @@ const validationErrors = [];
 const validationWarnings = [];
 
 async function fetchData() {
-  if (!SHEET_URL) {
-    console.error('[ERROR] SHEET_URL is not defined in .env file');
-    console.error('  → Create a .env file with: SHEET_URL=https://your-sharepoint-url.xlsx');
-    process.exit(1);
-  }
-
   let buffer;
-  try {
-    console.log('Downloading Excel from:', SHEET_URL);
-    const response = await axios.get(SHEET_URL, { 
-      responseType: 'arraybuffer', 
-      maxRedirects: 5,
-      timeout: 30000 
-    });
-    buffer = response.data;
-    fs.writeFileSync(CACHE_FILE, Buffer.from(buffer));
-    console.log('Downloaded and cached successfully.');
-  } catch (error) {
-    console.error('[WARNING] Failed to download:', error.message);
-    if (fs.existsSync(CACHE_FILE)) {
-      console.log('Using cached file from:', CACHE_FILE);
-      buffer = fs.readFileSync(CACHE_FILE);
+  
+  // Option 1: Use local file if specified
+  if (LOCAL_FILE) {
+    const localPath = path.resolve(ROOT_DIR, LOCAL_FILE);
+    if (fs.existsSync(localPath)) {
+      console.log('Using local file:', localPath);
+      buffer = fs.readFileSync(localPath);
     } else {
-      console.error('[ERROR] No cache available and download failed.');
+      console.error(`[ERROR] Local file not found: ${localPath}`);
       process.exit(1);
     }
+  } 
+  // Option 2: Download from URL
+  else if (SHEET_URL) {
+    try {
+      console.log('Downloading Excel from:', SHEET_URL);
+      const response = await axios.get(SHEET_URL, { 
+        responseType: 'arraybuffer', 
+        maxRedirects: 5,
+        timeout: 30000 
+      });
+      buffer = response.data;
+      fs.writeFileSync(CACHE_FILE, Buffer.from(buffer));
+      console.log('Downloaded and cached successfully.');
+    } catch (error) {
+      console.error('[WARNING] Failed to download:', error.message);
+      if (fs.existsSync(CACHE_FILE)) {
+        console.log('Using cached file from:', CACHE_FILE);
+        buffer = fs.readFileSync(CACHE_FILE);
+      } else {
+        console.error('[ERROR] No cache available and download failed.');
+        process.exit(1);
+      }
+    }
+  } 
+  // Option 3: Use cached file
+  else if (fs.existsSync(CACHE_FILE)) {
+    console.log('Using cached file from:', CACHE_FILE);
+    buffer = fs.readFileSync(CACHE_FILE);
+  }
+  else {
+    console.error('[ERROR] No file source available.');
+    console.error('  → Either provide SHEET_URL in .env or use --file flag');
+    console.error('  → Example: npm run fetch-data -- --file temp/test.xlsx');
+    process.exit(1);
   }
 
   const workbook = xlsx.read(buffer, { type: 'buffer' });
@@ -132,7 +157,7 @@ function validateExcel(workbook) {
     const lower = name.toLowerCase();
     if (lower.includes('directiva') || lower.includes('lista')) {
       sheetMap.lista = name;
-    } else if (lower.includes('consejería') || lower.includes('superior')) {
+    } else if (lower.includes('superior') && !lower.includes('territorial')) {
       sheetMap.sup = name;
     } else if (lower.includes('presupuesto') || lower.includes('participativo')) {
       sheetMap.ppto = name;
@@ -248,13 +273,20 @@ function transformWorkbook(workbook) {
 
   const sheetNames = workbook.SheetNames;
   
-  // Find sheet names
+  // Find sheet names (ignore Territorial sheets)
   let listaSheetName = sheetNames[0];
   let supSheetName = sheetNames[1];
   let pptoSheetName = sheetNames[2];
   
   sheetNames.forEach(name => {
     const lower = name.toLowerCase();
+    
+    // Skip Territorial sheets (they contain "Candidaturas" prefixed names)
+    if (lower.includes('territorial')) {
+      console.log(`  Skipping sheet: ${name} (Territorial - not supported)`);
+      return;
+    }
+    
     if (lower.includes('directiva') || lower.includes('lista')) {
       listaSheetName = name;
     } else if (lower.includes('consejería') || lower.includes('superior')) {

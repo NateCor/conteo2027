@@ -148,6 +148,54 @@ This is the **single source of truth** for all election-specific data:
 - `active`: Set to `true` for parties participating in this election
 - The fetch script will **hard fail** if it finds unknown Excel columns
 
+#### Election Round Configuration
+
+The dashboard supports both **first round** (5+ parties) and **second round** (2 parties) elections.
+
+**For First Round Elections:**
+```json
+{
+  "election": {
+    "round": "Primera Vuelta",
+    "totalVoters": 26501
+  },
+  "parties": {
+    "lista": [
+      { "key": "nau", "active": true, ... },
+      { "key": "mg", "active": true, ... },
+      { "key": "sdd", "active": true, ... },
+      { "key": "elp", "active": true, ... },
+      { "key": "proy", "active": true, ... }
+    ]
+  }
+}
+```
+
+**For Second Round Elections:**
+```json
+{
+  "election": {
+    "round": "2da Vuelta",
+    "totalVoters": 26501
+  },
+  "parties": {
+    "lista": [
+      { "key": "nau", "active": true, ... },
+      { "key": "mg", "active": true, ... },
+      { "key": "sdd", "active": false, ... },
+      { "key": "elp", "active": false, ... },
+      { "key": "proy", "active": false, ... }
+    ]
+  }
+}
+```
+
+**To switch between rounds:**
+1. Update `election.round` to reflect the current election type
+2. Set `active: true` only for participating parties
+3. Update `election.totalVoters` if the eligible voter count changed
+4. Run `npm run fetch-data` to generate new data
+
 #### Step 2: Update Excel on SharePoint
 - Ensure column headers match the `excelNames` in config
 - Ensure sheet names match expected format (Directiva FEUC, Consejería Superior, etc.)
