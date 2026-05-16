@@ -58,3 +58,9 @@ export function getActiveProjects() {
       color: p.color
     }));
 }
+
+// Detect election type based on number of active parties
+export function getElectionType() {
+  const activeParties = electionConfig.parties.lista.filter(p => p.active);
+  return activeParties.length > 2 ? 'firstRound' : 'secondRound';
+}

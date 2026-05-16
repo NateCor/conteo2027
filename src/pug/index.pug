@@ -15,7 +15,8 @@ html
           span Elecciones FEUC 2026
       #bar-graph-hero.hero-body
         .container
-          .columns
+          // Second Round: Traditional 2-bar display
+          .columns#bind-second-round
             .column#bind-summary-lista
               h2.title.is-4 Total Lista FEUC
               .bar-full-graph
@@ -42,6 +43,26 @@ html
                   .bar-holder
                     .bar.bar-nau(rv-width='naupc')
                     .bar.bar-mg(rv-width='mgpc')
+          // First Round: Ranked party display
+          .columns#bind-header
+            .column
+              h2.title.is-4 Lista FEUC
+              .party-ranked-list
+                .party-item(rv-each-party="lista.parties", rv-class-advances="party.advances")
+                  .rank {party.index}
+                  .color-dot(rv-style-background="party.color")
+                  .name {party.name}
+                  .percentage {party.pc}%
+                  .badge(rv-if="party.advances") Avanza
+            .column
+              h2.title.is-4 Consejero Superior
+              .party-ranked-list
+                .party-item(rv-each-party="sup.parties", rv-class-advances="party.advances")
+                  .rank {party.index}
+                  .color-dot(rv-style-background="party.color")
+                  .name {party.name}
+                  .percentage {party.pc}%
+                  .badge(rv-if="party.advances") Avanza
     section.section
       .container
         // include refresh-notification

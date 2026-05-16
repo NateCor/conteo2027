@@ -16,7 +16,8 @@
       </div>
       <div class="hero-body" id="bar-graph-hero">
         <div class="container">
-          <div class="columns">
+          <!-- Second Round: Traditional 2-bar display-->
+          <div class="columns" id="bind-second-round">
             <div class="column" id="bind-summary-lista">
               <h2 class="title is-4">Total Lista FEUC</h2>
               <div class="bar-full-graph">
@@ -52,6 +53,33 @@
                     <div class="bar bar-nau" rv-width="naupc"></div>
                     <div class="bar bar-mg" rv-width="mgpc"></div>
                   </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <!-- First Round: Ranked party display-->
+          <div class="columns" id="bind-header">
+            <div class="column">
+              <h2 class="title is-4">Lista FEUC</h2>
+              <div class="party-ranked-list">
+                <div class="party-item" rv-each-party="lista.parties" rv-class-advances="party.advances">
+                  <div class="rank">{party.index}</div>
+                  <div class="color-dot" rv-style-background="party.color"></div>
+                  <div class="name">{party.name}</div>
+                  <div class="percentage">{party.pc}%</div>
+                  <div class="badge" rv-if="party.advances">Avanza</div>
+                </div>
+              </div>
+            </div>
+            <div class="column">
+              <h2 class="title is-4">Consejero Superior</h2>
+              <div class="party-ranked-list">
+                <div class="party-item" rv-each-party="sup.parties" rv-class-advances="party.advances">
+                  <div class="rank">{party.index}</div>
+                  <div class="color-dot" rv-style-background="party.color"></div>
+                  <div class="name">{party.name}</div>
+                  <div class="percentage">{party.pc}%</div>
+                  <div class="badge" rv-if="party.advances">Avanza</div>
                 </div>
               </div>
             </div>
@@ -135,6 +163,11 @@
                   <div class="units">{nau}</div>
                   <div class="percentage">{naupc}%</div>
                 </div>
+                <div class="vote vote-sdd">
+                  <div class="label">Solidaridad</div>
+                  <div class="units">{sdd}</div>
+                  <div class="percentage">{sddpc}%</div>
+                </div>
                 <div class="vote vote-mg">
                   <div class="label">Amanecer</div>
                   <div class="units">{mg}</div>
@@ -142,6 +175,16 @@
                 </div>
               </div>
               <div class="votes">
+                <div class="vote vote-elp">
+                  <div class="label">1A</div>
+                  <div class="units">{elp}</div>
+                  <div class="percentage">{elppc}%</div>
+                </div>
+                <div class="vote vote-proy">
+                  <div class="label">Avanzar</div>
+                  <div class="units">{proy}</div>
+                  <div class="percentage">{proypc}%</div>
+                </div>
                 <div class="vote">
                   <div class="label">Blancos</div>
                   <div class="units">{b}</div>
@@ -312,6 +355,11 @@
                   <div class="units">{nau}</div>
                   <div class="percentage">{naupc}%</div>
                 </div>
+                <div class="vote vote-sdd">
+                  <div class="label">Solidaridad</div>
+                  <div class="units">{sdd}</div>
+                  <div class="percentage">{sddpc}%</div>
+                </div>
                 <div class="vote vote-mg">
                   <div class="label">Amanecer</div>
                   <div class="units">{mg}</div>
@@ -319,6 +367,16 @@
                 </div>
               </div>
               <div class="votes">
+                <div class="vote vote-elp">
+                  <div class="label">1A</div>
+                  <div class="units">{elp}</div>
+                  <div class="percentage">{elppc}%</div>
+                </div>
+                <div class="vote vote-proy">
+                  <div class="label">Avanzar</div>
+                  <div class="units">{proy}</div>
+                  <div class="percentage">{proypc}%</div>
+                </div>
                 <div class="vote">
                   <div class="label">Blancos</div>
                   <div class="units">{b}</div>
@@ -431,6 +489,11 @@
                   <div class="units">{nau}</div>
                   <div class="percentage">{naupc}%</div>
                 </div>
+                <div class="vote vote-sdd">
+                  <div class="label">Solidaridad</div>
+                  <div class="units">{sdd}</div>
+                  <div class="percentage">{sddpc}%</div>
+                </div>
                 <div class="vote vote-mg">
                   <div class="label">Amanecer</div>
                   <div class="units">{mg}</div>
@@ -438,6 +501,16 @@
                 </div>
               </div>
               <div class="votes">
+                <div class="vote vote-elp">
+                  <div class="label">1A</div>
+                  <div class="units">{elp}</div>
+                  <div class="percentage">{elppc}%</div>
+                </div>
+                <div class="vote vote-proy">
+                  <div class="label">Avanzar</div>
+                  <div class="units">{proy}</div>
+                  <div class="percentage">{proypc}%</div>
+                </div>
                 <div class="vote">
                   <div class="label">Blancos</div>
                   <div class="units">{b}</div>

@@ -365,3 +365,87 @@ $vote-units-bg: rgba(0, 0, 0, 0.15);
   -moz-appearance: menulist;
   appearance: menulist;
 }
+
+/* Dynamic Header for First-Round Elections */
+.party-ranked-list {
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 8px;
+  padding: 12px;
+  margin-top: 12px;
+  
+  .party-item {
+    display: flex;
+    align-items: center;
+    padding: 10px 0;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    transition: background 0.2s;
+    
+    &:last-child {
+      border-bottom: none;
+    }
+    
+    &.advances {
+      background: rgba(255, 255, 255, 0.05);
+      font-weight: bold;
+      
+      &:after {
+        content: '';
+        position: absolute;
+        right: 0;
+        top: 50%;
+        transform: translateY(-50%);
+        width: 8px;
+        height: 8px;
+        background: $color-nau;
+        border-radius: 50%;
+      }
+    }
+    
+    .rank {
+      width: 24px;
+      text-align: center;
+      font-size: 14px;
+      color: rgba(255, 255, 255, 0.7);
+    }
+    
+    .color-dot {
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+      margin: 0 12px;
+      display: inline-block;
+      vertical-align: middle;
+    }
+    
+    .name {
+      flex: 1;
+      font-size: 16px;
+    }
+    
+    .percentage {
+      width: 60px;
+      text-align: right;
+      font-size: 16px;
+      font-weight: bold;
+    }
+    
+    .badge {
+      background: $color-nau;
+      color: white;
+      padding: 4px 8px;
+      border-radius: 4px;
+      font-size: 10px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-left: 12px;
+    }
+  }
+}
+
+/* Bar colors for party dots */
+.bar-nau { background-color: $color-nau; }
+.bar-mg { background-color: $color-mg; }
+.bar-sdd { background-color: $color-sdd; }
+.bar-elp { background-color: $color-elp; }
+.bar-proy { background-color: $color-proy; }
+.bar-ind { background-color: $color-ind; }

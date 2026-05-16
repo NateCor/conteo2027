@@ -4,7 +4,7 @@ import { getData, getServerData, defaultObject } from './dataFetcher.js';
 import { defaultProjects } from './projectsArray.js';
 import rivets from 'rivets';
 import _ from 'underscore';
-import { PARTY_CONFIG, TOTAL_VOTERS, getActiveProjects, getActiveParties } from './config.js';
+import { PARTY_CONFIG, TOTAL_VOTERS, getActiveProjects, getActiveParties, getElectionType } from './config.js';
 
 import {
   defaultChartsOptions,
@@ -87,6 +87,14 @@ $(document).ready(() => {
   let projects = _.extend({ projects: defaultProjects }, defaultObject);
   let participacion = { terris: [] };
   let mesasEscrutadas = { mesas: [], actual: 0, total: 81 };
+  let headerData = { 
+    electionType: getElectionType(),
+    isFirstRound: getElectionType() === 'firstRound',
+    lista: { parties: [] },
+    sup: { parties: [] }
+  };
+  
+  console.log('Header data initialized:', headerData.electionType, 'isFirstRound:', headerData.isFirstRound);
 
   rivets.binders.width = function (el, value) {
     el.style.width = `${value}%`;
@@ -104,6 +112,10 @@ $(document).ready(() => {
     }
   };
 
+  rivets.binders['style-background'] = function (el, value) {
+    el.style.backgroundColor = value;
+  };
+
   rivets.bind($('#bind-summary-lista'), summaryLista);
   rivets.bind($('#bind-summary-sup'), summarySup);
   rivets.bind($('#bind-total-lista'), totalLista);
@@ -115,6 +127,18 @@ $(document).ready(() => {
   rivets.bind($('#bind-projects'), projects);
   rivets.bind($('#bind-mesas'), mesasEscrutadas);
   rivets.bind($('#bind-participacion'), participacion);
+  rivets.bind($('#bind-header'), headerData);
+  rivets.bind($('#bind-second-round'), headerData);
+
+  // Show/hide header sections based on election type
+  const updateHeaderVisibility = () => {
+    const isFirstRound = headerData.isFirstRound;
+    $('#bind-header').toggle(isFirstRound);
+    $('#bind-second-round').toggle(!isFirstRound);
+  };
+
+  // Initial visibility update
+  updateHeaderVisibility();
 
   $(document).on(
     'change',
@@ -193,6 +217,44 @@ $(document).ready(() => {
     if (sender === 'getData') {
       summaryLista = _.extendOwn(summaryLista, mainData.total.lista.total);
       summarySup = _.extendOwn(summarySup, mainData.total.sup.total);
+
+      // Update header data with ranked parties
+      const updateHeaderParties = (type) => {
+        const parties = getActiveParties(type);
+        const total = mainData.total[type].total;
+        return parties.map(p => ({
+          key: p.key,
+          name: p.name,
+          color: p.color,
+          colorClass: `bar-${p.key}`,
+          pc: total[`${p.key}pc`] || 0,
+          votes: total[p.key] || 0,
+          advances: false // Will be updated below
+        })).sort((a, b) => b.pc - a.pc);
+      };
+
+      // Mark top 2 as advancing in first round
+      const markAdvancing = (parties) => {
+        if (headerData.electionType === 'firstRound') {
+          parties[0].advances = true;
+          parties[1].advances = true;
+        }
+        // Add index for rank display
+        parties.forEach((p, i) => {
+          p.index = i + 1;
+        });
+        return parties;
+      };
+
+      headerData.lista.parties = markAdvancing(updateHeaderParties('lista'));
+      headerData.sup.parties = markAdvancing(updateHeaderParties('sup'));
+      
+      console.log('Header data updated:', headerData);
+      console.log('Lista parties:', headerData.lista.parties);
+      console.log('Sup parties:', headerData.sup.parties);
+
+      // Update header visibility based on election type
+      updateHeaderVisibility();
 
       let escrutadasActual = 0;
       const mesaEntries = Object.values(mainData.total.lista.mesa);
