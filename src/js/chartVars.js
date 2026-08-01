@@ -1,4 +1,4 @@
-import { PARTY_CONFIG, PROJECT_CONFIG, getActiveParties, getActiveProjects } from './config.js';
+import { getActiveParties, getActiveProjects } from './config.js';
 
 export const defaultChartsOptions = {
   responsive: true,

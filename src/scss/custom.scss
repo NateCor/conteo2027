@@ -1,22 +1,5 @@
-$color-mg: #FFC0CB; // Amanecer (Pink)
-$color-nau: #6fd528; // NAU! (Green)
-$color-sdd: #E01E25; // Solidaridad (Red)
-$color-crecer: white;
-$color-crecer-alt: #aaa;
-$color-ia: purple;
-$color-jjcc: #eeed2e;
-$color-ind: #489389;
-$color-mapau: #80583e;
-$color-ani: #6fd528;
-$color-tdi-coll: #FBA63E;
-$color-elp: #e9841d; // 1A (Orange)
-$color-tdi-cai: #FF0;
-$color-caco: #F0F;
-$color-spch: #1C4587;
-$color-jsf: #C00;
-$color-clmun: #FFF;
-$color-clmun-alt: #AAA;
-$color-proy: #3EACDE; // Avanzar (Blue)
+// Color variables are auto-generated from config/election.json
+// See src/scss/_colors-auto.scss (do not edit manually)
 
 #bar-graph-hero {
   padding-bottom: 20px;
@@ -81,6 +64,10 @@ $color-proy: #3EACDE; // Avanzar (Blue)
         transition: all 0.2s;
       }
 
+      .bar-default {
+        background: lighten($primary, 5);
+      }
+
       .bar-mg {
         background: $color-mg;
       }
@@ -102,12 +89,7 @@ $color-proy: #3EACDE; // Avanzar (Blue)
       padding: 9px 0;
     }
 
-    @each $project, $color in (
-      mapau: $color-mapau, ani: $color-ani, tdicoll: $color-tdi-coll,
-      elp: $color-elp, tdicai: $color-tdi-cai, caco: $color-caco,
-      spch: $color-spch, jsf: $color-jsf, clmun: $color-clmun-alt,
-      proy: $color-proy
-    ) {
+    @each $project, $color in $party-colors {
       &.#{$project} .bar-holder .bar {
         background-color: $color;
       }
@@ -228,24 +210,16 @@ $vote-units-bg: rgba(0, 0, 0, 0.15);
     cursor: pointer;
     color: black;
 
-    @each $mov, $color in (
-      mg: $color-mg, nau: $color-nau,
-      sdd: $color-sdd, crecer: $color-crecer,
-      ia: $color-ia, jjcc: $color-jjcc, ind: $color-ind,
-      mapau: $color-mapau, ani: $color-ani, 'tdi-coll': $color-tdi-coll,
-      elp: $color-elp, 'tdi-cai': $color-tdi-cai, caco: $color-caco,
-      spch: $color-spch, jsf: $color-jsf, clmun: $color-clmun,
-      proy: $color-proy
-    ) {
+    @each $mov, $color in $party-colors {
       &.vote-#{$mov} {
         background-color: $color;
-        @if $mov and $mov != "crecer" and $mov != "jjcc"
-          and $mov != "tdi-cai" and $mov != "clmun" and $mov != "mg" { color: white;}
+        // Light backgrounds need dark text
+        @if $mov == mg or $mov == tdicai or $mov == clmun { color: black; }
+        @else { color: white; }
 
         .label {
-          color: white;
-          @if $mov and $mov == "crecer" or $mov == "jjcc"
-            or $mov == "tdi-cai" or $mov == "clmun" or $mov == "mg" { color: #444;}
+          @if $mov == mg or $mov == tdicai or $mov == clmun { color: #444; }
+          @else { color: white; }
           opacity: 1;
         }
       }
@@ -344,12 +318,7 @@ $vote-units-bg: rgba(0, 0, 0, 0.15);
   text-transform: uppercase;
   position: relative;
 
-  @each $mov, $color in (
-    mg: $color-mg, nau: $color-nau,
-    sdd: $color-sdd, crecer: $color-crecer-alt,
-    ia: $color-ia, jjcc: $color-jjcc, ind: $color-ind,
-    elp: $color-elp, proy: $color-proy
-  ) {
+  @each $mov, $color in $party-colors {
     &.#{$mov}:before {
       content: '•';
       margin-right: 6px;
@@ -387,18 +356,6 @@ $vote-units-bg: rgba(0, 0, 0, 0.15);
     &.advances {
       background: rgba(255, 255, 255, 0.05);
       font-weight: bold;
-      
-      &:after {
-        content: '';
-        position: absolute;
-        right: 0;
-        top: 50%;
-        transform: translateY(-50%);
-        width: 8px;
-        height: 8px;
-        background: $color-nau;
-        border-radius: 50%;
-      }
     }
     
     .rank {
@@ -413,8 +370,7 @@ $vote-units-bg: rgba(0, 0, 0, 0.15);
       height: 12px;
       border-radius: 50%;
       margin: 0 12px;
-      display: inline-block;
-      vertical-align: middle;
+      flex-shrink: 0;
     }
     
     .name {
@@ -430,7 +386,7 @@ $vote-units-bg: rgba(0, 0, 0, 0.15);
     }
     
     .badge {
-      background: $color-nau;
+      background: rgba(255, 255, 255, 0.25);
       color: white;
       padding: 4px 8px;
       border-radius: 4px;
@@ -442,10 +398,36 @@ $vote-units-bg: rgba(0, 0, 0, 0.15);
   }
 }
 
-/* Bar colors for party dots */
-.bar-nau { background-color: $color-nau; }
-.bar-mg { background-color: $color-mg; }
-.bar-sdd { background-color: $color-sdd; }
-.bar-elp { background-color: $color-elp; }
-.bar-proy { background-color: $color-proy; }
-.bar-ind { background-color: $color-ind; }
+/* Bar color classes are auto-generated in _colors-auto.scss */
+
+/* Mobile responsive */
+@media screen and (max-width: 768px) {
+  #logo {
+    width: 140px;
+  }
+
+  #header .title {
+    margin: 5px 10px;
+    padding: 5px 0 0 5px;
+    font-size: 1.2rem;
+  }
+
+  .party-ranked-list {
+    .party-item {
+      .name {
+        font-size: 14px;
+      }
+
+      .percentage {
+        width: 50px;
+        font-size: 14px;
+      }
+
+      .badge {
+        font-size: 9px;
+        padding: 3px 6px;
+        margin-left: 8px;
+      }
+    }
+  }
+}

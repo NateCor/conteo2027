@@ -2,9 +2,7 @@
   "metadata": {
     "description": "Territory and Mesa mappings - update when university structure changes",
     "lastUpdated": "2026-04-25",
-    "totalMesas": 56,
-    "totalTerritories": 21,
-    "notes": "Territories rarely change. Mesas may change if university creates/closes departments."
+    "notes": "Territories rarely change. Mesas may change if university creates/closes departments. Note: 'Gobierno' and 'Sociales y Teología' both map to 'soc' (intentional — they are aggregated into the same territory on the dashboard)."
   },
   "territories": {
     "Agronomía y Sistemas Naturales": "agro",

@@ -14,6 +14,9 @@ build/
 # Generated data (recreated via fetch-data)
 public/data.json
 
+# Auto-generated SCSS (recreated via generate-scss-colors)
+src/scss/_colors-auto.scss
+
 # Excel/election data files (DO NOT COMMIT!)
 *.xlsx
 *.xls

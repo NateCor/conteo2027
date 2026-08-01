@@ -17,7 +17,10 @@ mixin bar-item(name, pc, colorcode)
   .bar-item&attributes(attributes)
     .legend= name
     .bar-holder
-      .bar(class=`bar-${colorcode}`, rv-width=`${pc}`)
+      if colorcode
+        .bar(class=`bar-${colorcode}`, rv-width=`${pc}`)
+      else
+        .bar.bar-default(rv-width=`${pc}`)
     .percentage {#{pc}}%
 
 mixin selector(kind)

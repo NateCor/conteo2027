@@ -13,6 +13,14 @@ export const PARTY_CONFIG = {
 // Build project configuration from election config
 export const PROJECT_CONFIG = buildProjectMap(electionConfig.projects);
 
+// Runtime data from data.json (null until loaded)
+let runtimeData = null;
+
+// Set runtime data (called after data.json is fetched)
+export function setRuntimeData(data) {
+  runtimeData = data;
+}
+
 // Helper function to build party map
 function buildPartyMap(parties) {
   const map = {};
@@ -37,19 +45,35 @@ function buildProjectMap(projects) {
   return map;
 }
 
+// Get active party keys — prefers runtime data (from Excel), falls back to config active flags
+function getActivePartyKeys(type) {
+  if (runtimeData && runtimeData.activeParties && runtimeData.activeParties[type]) {
+    return runtimeData.activeParties[type];
+  }
+  return electionConfig.parties[type].filter(p => p.active).map(p => p.key);
+}
+
 // Export active parties for dynamic chart generation
 export function getActiveParties(type) {
-  return electionConfig.parties[type]
-    .filter(p => p.active)
-    .map(p => ({
-      key: p.key,
-      name: p.displayName,
-      color: p.color
-    }));
+  const activeKeys = getActivePartyKeys(type);
+  return activeKeys
+    .map(key => {
+      const p = electionConfig.parties[type].find(party => party.key === key);
+      return p ? { key: p.key, name: p.displayName, color: p.color } : null;
+    })
+    .filter(Boolean);
 }
 
 // Export active projects for dynamic chart generation
 export function getActiveProjects() {
+  if (runtimeData && runtimeData.activeParties && runtimeData.activeParties.projects) {
+    return runtimeData.activeParties.projects
+      .map(key => {
+        const p = electionConfig.projects.find(proj => proj.key === key);
+        return p ? { key: p.key, name: p.displayName, color: p.color } : null;
+      })
+      .filter(Boolean);
+  }
   return electionConfig.projects
     .filter(p => p.active)
     .map(p => ({
@@ -61,6 +85,9 @@ export function getActiveProjects() {
 
 // Detect election type based on number of active parties
 export function getElectionType() {
+  if (runtimeData && runtimeData.electionType) {
+    return runtimeData.electionType;
+  }
   const activeParties = electionConfig.parties.lista.filter(p => p.active);
   return activeParties.length > 2 ? 'firstRound' : 'secondRound';
 }

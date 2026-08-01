@@ -4,10 +4,11 @@
   "description": "Modernized vote counting dashboard for FEUC elections",
   "type": "module",
   "scripts": {
-    "dev": "node scripts/build-html.js && vite",
-    "build": "npm run fetch-data && node scripts/build-html.js && vite build",
+    "dev": "node scripts/generate-scss-colors.js && node scripts/build-html.js && vite",
+    "build": "npm run fetch-data && node scripts/generate-scss-colors.js && node scripts/build-html.js && vite build",
     "preview": "vite preview",
     "fetch-data": "node scripts/fetch-data.js",
+    "generate-colors": "node scripts/generate-scss-colors.js",
     "test-excel": "node scripts/test-excel.js"
   },
   "dependencies": {

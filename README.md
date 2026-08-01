@@ -1,8 +1,8 @@
-# Conteo 2027 - FEUC Election Dashboard
+# Conteo FEUC - Election Dashboard
 
-A modernized static dashboard for visualizing vote counting in FEUC (Federación de Estudiantes de la Universidad Católica) elections. Originally built for 2017, completely modernized for the 2027 election cycle.
+A modernized static dashboard for visualizing vote counting in FEUC (Federación de Estudiantes de la Universidad Católica) elections. Originally built for 2017, completely modernized for the 2026 election cycle.
 
-## 🚀 Tech Stack
+## Tech Stack
 
 - **Build Tool**: [Vite](https://vitejs.dev/) (replaced legacy Gulp 3)
 - **Template Engine**: [Pug](https://pugjs.org/)
@@ -11,290 +11,210 @@ A modernized static dashboard for visualizing vote counting in FEUC (Federación
 - **Data Binding**: [Rivets.js](http://rivetsjs.com/)
 - **Data Source**: Microsoft Excel (SharePoint) via automated pipeline
 
-## 📊 Features
+## Features
 
 - **Real-time Vote Visualization**: Pie charts and bar graphs for Lista FEUC, Consejero Superior, and Presupuesto Participativo
-- **Territory Breakdown**: View results by campus territory (Campus San Joaquín, Casa Central, Lo Contador, Oriente, Villarrica)
+- **Dynamic Header**: Automatically adapts between first-round (ranked party list) and second-round (2-party bar) display
+- **Territory Breakdown**: View results by campus territory
 - **Day-by-Day Analysis**: Toggle between Day 1, Day 2, or combined totals
 - **Mesa-Level Detail**: Drill down to individual voting tables
 - **Participation Tracking**: Monitor voter turnout by territory
-- **Automated Data Pipeline**: Fetches latest data from Excel and transforms it to JSON
+- **Auto-Detection**: Active parties are automatically detected from the Excel file — no manual config editing needed to switch election rounds
+- **Automated Color Generation**: SCSS color classes are generated from `config/election.json` at build time
 
-## 🛠️ Installation
+## Installation
 
 ```bash
 # Clone the repository
-git clone https://github.com/your-org/conteo2026.git
-cd conteo2026
+git clone https://github.com/wachunei/conteo2017.git
+cd conteo2017-master
 
 # Install dependencies
 npm install
+
+# Set up environment
+cp .env.example .env
+# Edit .env to add your SharePoint URL (optional — can use --file flag instead)
 ```
 
-## 🏃 Running Locally
+## Running Locally
 
 ### Development Mode
 ```bash
 npm run dev
 ```
-Starts Vite dev server with hot reload at `http://localhost:3000`
+Starts Vite dev server with hot reload at `http://localhost:3000`.
 
 ### Fetch Latest Data
 ```bash
+# From SharePoint (requires SHEET_URL in .env)
 npm run fetch-data
+
+# From a local Excel file
+npm run fetch-data -- --file temp/your-excel-file.xlsx
+
+# With a custom total voter count (overrides config/election.json)
+npm run fetch-data -- --file temp/your-excel-file.xlsx --total-voters 26501
 ```
-Downloads Excel from SharePoint, parses it, and generates `public/data.json`
+Downloads/parses the Excel, auto-detects active parties, and generates `public/data.json`.
 
 ### Build for Production
 ```bash
 npm run build
 ```
-Generates optimized static files in `dist/` folder
+Fetches data, generates SCSS colors, compiles Pug templates, and builds optimized static files in `dist/`.
 
 ### Preview Production Build
 ```bash
 npm run preview
 ```
-Serves the production build locally for testing
 
-### 🧪 Test Excel Compatibility
+### Test Excel Compatibility
 ```bash
-npm run test-excel -- ./temp/your-excel-file.xlsx
+npm run test-excel -- temp/your-excel-file.xlsx
 ```
-Tests an Excel file for compatibility with the dashboard parser. Shows:
-- All territories and mesas found
-- Any unmapped names that need configuration updates
-- Column structure analysis
-- Generates `temp/test-output.json` for review
+Validates an Excel file against config maps. Reports any unmapped territories, mesas, parties, or projects.
 
-## 📁 Project Structure
+## Project Structure
 
 ```
-conteo2026/
+conteo2017-master/
 ├── config/
-│   ├── election.json             # Election metadata, parties & projects
+│   ├── election.json             # Election metadata, parties, projects, colors
 │   └── territories.json          # Territory & mesa mappings (rarely changes)
 ├── public/
 │   └── data.json                 # Generated vote data (auto-created)
 ├── scripts/
-│   ├── fetch-data.js            # Excel download & parser
-│   ├── build-html.js            # Pug compiler
-│   └── test-excel.js            # Excel compatibility tester
+│   ├── fetch-data.js             # Excel download, validation, parser
+│   ├── build-html.js             # Pug compiler (injects config data)
+│   ├── generate-scss-colors.js   # Generates _colors-auto.scss from config
+│   └── test-excel.js             # Excel compatibility tester
 ├── src/
 │   ├── js/
-│   │   ├── main.js              # Main application logic
-│   │   ├── dataFetcher.js       # JSON data loader
-│   │   ├── chartVars.js         # Chart.js configuration
-│   │   ├── config.js            # Reads from config/election.json
-│   │   ├── projectsArray.js     # Project definitions
-│   │   └── movementColors.js    # Legacy color definitions
+│   │   ├── main.js               # Main application logic
+│   │   ├── dataFetcher.js        # JSON data loader
+│   │   ├── chartVars.js          # Chart.js configuration
+│   │   ├── config.js             # Reads config + runtime data
+│   │   └── projectsArray.js      # Project definitions
 │   ├── pug/
-│   │   ├── index.pug            # Main page template
-│   │   ├── vote-pills-*.pug     # Vote display pills
-│   │   └── [other templates]    # Territories, mesas, etc.
+│   │   ├── index.pug             # Main page template
+│   │   ├── vote-pills-*.pug      # Vote display pills (generated from config)
+│   │   └── [other templates]     # Territories, mesas, etc.
 │   ├── scss/
-│   │   ├── style.scss           # Main stylesheet
-│   │   └── custom.scss          # Custom Bulma overrides
+│   │   ├── style.scss            # Main stylesheet entry
+│   │   ├── _colors-auto.scss     # Auto-generated colors (do not edit)
+│   │   └── custom.scss           # Custom Bulma overrides
 │   └── images/
 │       └── favicon.png
 ├── temp/
-│   └── last_count.xlsx          # Cached Excel file
-├── .env                         # Environment variables (SHEET_URL)
+│   └── last_count.xlsx           # Cached Excel file (gitignored)
+├── .env.example                  # Environment variable template
+├── .env                          # Environment variables (gitignored)
 ├── package.json
 ├── vite.config.js
 └── README.md
 ```
 
-## 🔄 Updating for New Elections
+## Updating for New Elections
 
-### Quick Start (3 steps)
-1. Edit `config/election.json` with new party/project names
-2. Update the Excel file on SharePoint (ensure column headers match config)
-3. Run `npm run fetch-data`
+### Simplified Workflow (No Code Changes Needed)
 
-### Detailed Guide
+The system now **auto-detects** which parties are active from the Excel file itself. Switching between election rounds requires **no JSON editing**:
 
-#### Step 1: Update `config/election.json`
+1. Place the new Excel file in `temp/` (or update `SHEET_URL` in `.env`)
+2. Run `npm run fetch-data -- --file temp/new-file.xlsx --total-voters 26501`
+3. Run `npm run build`
 
-This is the **single source of truth** for all election-specific data:
+That's it. The script reads the Excel headers, detects which parties are present, and writes the active party list to `data.json`. The frontend reads this at runtime.
 
-```json
-{
-  "election": {
-    "name": "Elecciones FEUC 2027",
-    "year": 2027,
-    "round": "Primera Vuelta",
-    "totalVoters": 27000,
-    "lastUpdated": "2027-10-22"
-  },
-  "parties": {
-    "lista": [
-      {
-        "key": "nau",
-        "excelNames": ["NAU!", "Candidaturas NAU!"],
-        "displayName": "NAU!",
-        "color": "#6fd528",
-        "active": true
-      },
-      // Add all parties here
-    ]
-  }
-}
-```
+### When You Need to Edit Config
 
-**Important:**
-- `excelNames`: Must match the Excel column headers exactly
-- `displayName`: What appears on the dashboard
-- `active`: Set to `true` for parties participating in this election
-- The fetch script will **hard fail** if it finds unknown Excel columns
+You only need to edit `config/election.json` when:
 
-#### Election Round Configuration
+- **Adding a new party** that doesn't exist in the config yet (new party appearing in the Excel)
+- **Changing party colors or display names**
+- **Adding a new project** for Presupuesto Participativo
+- **Changing `totalVoters`** (or use `--total-voters` CLI flag to avoid editing)
 
-The dashboard supports both **first round** (5+ parties) and **second round** (2 parties) elections.
-
-**For First Round Elections:**
-```json
-{
-  "election": {
-    "round": "Primera Vuelta",
-    "totalVoters": 26501
-  },
-  "parties": {
-    "lista": [
-      { "key": "nau", "active": true, ... },
-      { "key": "mg", "active": true, ... },
-      { "key": "sdd", "active": true, ... },
-      { "key": "elp", "active": true, ... },
-      { "key": "proy", "active": true, ... }
-    ]
-  }
-}
-```
-
-**For Second Round Elections:**
-```json
-{
-  "election": {
-    "round": "2da Vuelta",
-    "totalVoters": 26501
-  },
-  "parties": {
-    "lista": [
-      { "key": "nau", "active": true, ... },
-      { "key": "mg", "active": true, ... },
-      { "key": "sdd", "active": false, ... },
-      { "key": "elp", "active": false, ... },
-      { "key": "proy", "active": false, ... }
-    ]
-  }
-}
-```
-
-**To switch between rounds:**
-1. Update `election.round` to reflect the current election type
-2. Set `active: true` only for participating parties
-3. Update `election.totalVoters` if the eligible voter count changed
-4. Run `npm run fetch-data` to generate new data
-
-#### Step 2: Update Excel on SharePoint
-- Ensure column headers match the `excelNames` in config
-- Ensure sheet names match expected format (Directiva FEUC, Consejería Superior, etc.)
-
-#### Step 3: Fetch and Build
-```bash
-npm run fetch-data   # Downloads and validates Excel
-npm run build        # Builds the dashboard
-```
-
-### Configuration Files
+### Config File Reference
 
 | File | Purpose | Update Frequency |
 |------|---------|------------------|
-| `config/election.json` | Parties, projects, election metadata | Every election |
+| `config/election.json` | Parties, projects, colors, election metadata | Only when parties change |
 | `config/territories.json` | Territory and mesa mappings | Rarely (university structure changes) |
-| `.env` | SharePoint URL | Per election |
+| `.env` | SharePoint URL | Per election (or use `--file` flag) |
+
+### How Auto-Detection Works
+
+1. `fetch-data.js` reads the Excel header row
+2. For each party in `config/election.json`, it checks if any of the party's `excelNames` appear as a column header
+3. Parties found in the Excel are marked as active; missing parties are inactive
+4. The detected active party keys are written to `data.json` as `activeParties`
+5. The election type (`firstRound` or `secondRound`) is derived: >2 active parties = first round
+6. At runtime, `src/js/config.js` reads `activeParties` from the fetched data instead of the `active` flags
+
+This means the `active` field in `election.json` is now a **fallback only** (used before data loads). You generally don't need to change it.
+
+### Excel Structure Requirements
+
+The parser expects:
+- Sheets named "Directiva FEUC", "Consejería Superior", and optionally "Presupuestos Participativos"
+- Paired columns for each party (Day 1, Day 2)
+- Column headers matching `excelNames` in `config/election.json`
+- Columns: Campus, Territorio, Mesa, then party columns, then Blancos, Nulos
 
 ### Validation Rules
-- **Hard Fail**: Unknown Excel column found → Add it to config first
-- **Warning**: Config party not in Excel → Party didn't participate
-- **Success**: All Excel columns match config exactly
 
-### Error Messages
-```
-[ERROR] Found unknown party in Excel: "New Party X"
-         → Add it to config/election.json first!
-```
+- **Hard Fail**: Unknown Excel column found → Add it to `config/election.json` first
+- **Info**: Config party not in Excel → Party simply not active for this round (no action needed)
+- **Skip**: Territorial sheets are automatically skipped
 
-## ⚙️ Configuration
+## Environment Variables
 
-### Environment Variables
-
-Create a `.env` file in the project root:
+Create a `.env` file (see `.env.example`):
 
 ```env
 SHEET_URL=https://your-sharepoint-site.com/path/to/excel.xlsx?download=1
 ```
 
-## 📥 Data Pipeline
+Leave `SHEET_URL` empty to use `--file` flag instead.
 
-The system uses a centralized configuration and automated data pipeline:
+## Data Pipeline
 
-1. **Configuration**: `config/election.json`
-   - Defines party names, colors, and Excel column mappings
-   - Defines project names and colors
-   - Single source of truth for election-specific data
+1. **Configuration**: `config/election.json` defines all parties, projects, colors, and Excel column mappings
+2. **Color Generation**: `scripts/generate-scss-colors.js` reads `election.json` and generates `src/scss/_colors-auto.scss` with SCSS variables and `.bar-*` classes
+3. **HTML Compilation**: `scripts/build-html.js` injects config data into Pug templates (election name, year, vote-pills)
+4. **Fetch Script**: `scripts/fetch-data.js` downloads/parses Excel, auto-detects active parties, validates, and generates `public/data.json`
+5. **Frontend**: `src/js/config.js` reads runtime data from `data.json` (active parties, election type, total voters)
 
-2. **Territory Mapping**: `config/territories.json`
-   - Maps Excel territory/mesa names to dashboard IDs
-   - Rarely changes between elections
+### Output: `public/data.json`
+```json
+{
+  "dia1": { "lista": {...}, "sup": {...}, "ppto": {...} },
+  "dia2": { "lista": {...}, "sup": {...}, "ppto": {...} },
+  "total": { "lista": {...}, "sup": {...}, "ppto": {...} },
+  "activeParties": { "lista": ["nau", "mg", ...], "sup": [...], "projects": [...] },
+  "electionType": "firstRound",
+  "totalVoters": 26501
+}
+```
 
-3. **Fetch Script**: `scripts/fetch-data.js`
-   - Downloads Excel from SharePoint URL
-   - Validates Excel columns against configuration
-   - Fails hard on unknown parties (enforces correct configuration)
-   - Warns on missing parties (they may not have participated)
-   - Strips `>>` prefixes from Excel columns automatically
-   - Caches to `temp/last_count.xlsx`
-   - Falls back to cache if download fails
+## Testing New Excel Files
 
-4. **Output**: Generates `public/data.json` with structure:
-   ```json
-   {
-     "dia1": { "lista": {...}, "sup": {...}, "ppto": {...} },
-     "dia2": { "lista": {...}, "sup": {...}, "ppto": {...} },
-     "total": { "lista": {...}, "sup": {...}, "ppto": {...} }
-   }
-   ```
+Before using a new Excel file in production, test it for compatibility:
 
-### Excel Structure
+```bash
+# 1. Run the test script
+npm run test-excel -- temp/new-election.xlsx
 
-The parser expects paired columns for each party (Day 1, Day 2):
-- Columns 3-4: First party
-- Columns 5-6: Second party
-- And so on...
+# 2. Check the output
+# - OK = ready to use
+# - UNMAPPED = need to update config/election.json or config/territories.json
+```
 
-The configuration file tells the parser which Excel column names map to which internal keys.
+If there are unmapped entries, update the config files (not the scripts — all maps are in `config/`).
 
-## 🗺️ Territory Mapping
-
-Excel territory names are mapped to dashboard IDs in `config/territories.json`:
-
-| Excel Name | Dashboard ID |
-|------------|--------------|
-| Agronomía y Sistemas Naturales | agro |
-| Ciencias Biológicas | csbio |
-| Ciencias de la Salud | salud |
-| College | coll |
-| Ing. Comercial | comer |
-| ... | ... |
-
-See `config/territories.json` for complete territory and mesa mappings.
-
-**Note:** Territory changes are rare. Only update this file if the university creates/closes departments or renames territories.
-
-## 🚀 Deployment
-
-### Static Hosting (Recommended)
+## Deployment
 
 The `dist/` folder contains static files suitable for any static host:
 
@@ -311,7 +231,7 @@ For live election night updates, set up a GitHub Action to run every 5 minutes:
 name: Update Data
 on:
   schedule:
-    - cron: '*/5 * * * *'  # Every 5 minutes
+    - cron: '*/5 * * * *'
 jobs:
   update:
     runs-on: ubuntu-latest
@@ -320,63 +240,43 @@ jobs:
       - run: npm ci
       - run: npm run fetch-data
       - run: npm run build
-      - run: npm run deploy  # Your deploy command
+      - run: npm run deploy
 ```
 
-## 🧪 Testing New Excel Files
-
-Before using a new Excel file in production, test it for compatibility:
-
-```bash
-# 1. Copy the Excel to temp/
-cp "path/to/new-election.xlsx" temp/new-election.xlsx
-
-# 2. Run the test script
-npm run test-excel -- temp/new-election.xlsx
-
-# 3. Check the output
-# - ✅ All mapped = ready to use
-# - ❌ Unmapped entries = need to update TERRITORY_MAP or MESA_MAP
-```
-
-If there are unmapped entries, update the maps in `scripts/fetch-data.js` before using the file.
-
-## 🐛 Troubleshooting
+## Troubleshooting
 
 ### Data Not Updating
-- Check `.env` file has correct `SHEET_URL`
+- Check `.env` has correct `SHEET_URL` (or use `--file` flag)
 - Verify Excel is publicly accessible
-- Check `temp/last_count.xlsx` cache isn't stale
+- Check `temp/last_count.xlsx` cache isn't stale (delete it to force re-download)
 
 ### Wrong Totals
 - Ensure Excel has "Total" row at the end
-- Check territory/mesa mappings in `fetch-data.js`
-- Verify column indices match expected structure
+- Check territory/mesa mappings in `config/territories.json`
+- Verify column headers match `excelNames` in `config/election.json`
 
 ### Build Errors
 - Delete `node_modules` and `package-lock.json`, then `npm install`
 - Ensure Node.js version is 18+ (check with `node --version`)
 
-## 🚫 Git Ignore
+### Header Shows Wrong Election Type
+- The header auto-detects from the Excel: >2 parties = first round, 2 parties = second round
+- Run `npm run fetch-data` to regenerate `data.json` with the correct election type
+- Refresh the page (the dev server serves `data.json` statically)
+
+## Git Ignore
 
 The following files are excluded from version control:
 
-- `node_modules/` - Dependencies (reinstall with `npm install`)
-- `dist/` - Build output (regenerate with `npm run build`)
-- `public/data.json` - Generated data (regenerate with `npm run fetch-data`)
-- `temp/last_count.xlsx` - Cached Excel file
-- `.env` - Environment variables (contains SHEET_URL)
-- `.DS_Store` - macOS metadata
-- `.vscode/`, `.idea/` - IDE settings
+- `node_modules/` — Dependencies
+- `dist/` — Build output
+- `public/data.json` — Generated data
+- `src/scss/_colors-auto.scss` — Auto-generated SCSS
+- `*.xlsx`, `*.xls` — Excel data files
+- `temp/` — Cache directory
+- `.env` — Environment variables
 
-## 📝 Legacy Notes
-
-⚠️ This codebase contains legacy elements from the 2017 version:
-- Some variable names use old party abbreviations
-- Project IDs (tdicai, tdicoll, caco, etc.) are historical
-- Color scheme maintained for consistency
-
-## 🤝 Contributing
+## Contributing
 
 1. Fork the repository
 2. Create a feature branch: `git checkout -b feature-name`
@@ -384,16 +284,12 @@ The following files are excluded from version control:
 4. Push to branch: `git push origin feature-name`
 5. Submit a pull request
 
-## 📄 License
+## License
 
-ISC License - See original repository for details.
+ISC License — See original repository for details.
 
-## 🙏 Acknowledgments
+## Acknowledgments
 
 - Original 2017 version by [@wachunei](https://github.com/wachunei)
 - FEUC student organizations
 - El PUClítico journalism team
-
----
-
-**Note**: This is a fork/modernization of the original 2017 codebase, updated for Node.js 20+, Vite build system, and the 2026 election cycle.

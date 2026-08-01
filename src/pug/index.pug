@@ -12,37 +12,29 @@ html
           )
             span#logo
               include logo-elp.svg
-          span Elecciones FEUC 2026
+          span #{election.name}
       #bar-graph-hero.hero-body
         .container
-          // Second Round: Traditional 2-bar display
+          // Second Round: Traditional 2-bar display (dynamic)
           .columns#bind-second-round
-            .column#bind-summary-lista
+            .column
               h2.title.is-4 Total Lista FEUC
               .bar-full-graph
-                .bar-item
-                  .legend NAU!
-                  .percentage {naupc}%
-                .bar-item
-                  .legend Amanecer
-                  .percentage {mgpc}%
+                .bar-item(rv-each-party="lista.parties")
+                  .legend {party.name}
+                  .percentage {party.pc}%
                 .bar-full-item
                   .bar-holder
-                    .bar.bar-nau(rv-width='naupc')
-                    .bar.bar-mg(rv-width='mgpc')
-            .column#bind-summary-sup
+                    .bar(rv-each-party="lista.parties", rv-style-background="party.color", rv-width="party.pc")
+            .column
               h2.title.is-4 Total Consejero Superior
               .bar-full-graph
-                .bar-item
-                  .legend NAU!
-                  .percentage {naupc}%
-                .bar-item
-                  .legend Amanecer
-                  .percentage {mgpc}%
+                .bar-item(rv-each-party="sup.parties")
+                  .legend {party.name}
+                  .percentage {party.pc}%
                 .bar-full-item
                   .bar-holder
-                    .bar.bar-nau(rv-width='naupc')
-                    .bar.bar-mg(rv-width='mgpc')
+                    .bar(rv-each-party="sup.parties", rv-style-background="party.color", rv-width="party.pc")
           // First Round: Ranked party display
           .columns#bind-header
             .column
@@ -65,19 +57,12 @@ html
                   .badge(rv-if="party.advances") Avanza
     section.section
       .container
-        // include refresh-notification
-        // include error-loading-notification
         h2.title.is-2 Detalle
-          = ' '
-          // span.tag.update-notif  Actualizando…
         include total
-        // include vote-message
         include mesas
         include territorios
-        // include territoriales
         include participativo
         .columns
           include escrutadas
           include participacion
     include footer
-    include analytics

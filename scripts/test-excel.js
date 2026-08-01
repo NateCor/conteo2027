@@ -7,113 +7,38 @@ import { fileURLToPath } from 'url';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
+const ROOT_DIR = path.join(__dirname, '..');
 
-// Import maps from fetch-data.js (we'll need to duplicate them here for standalone use)
-const TERRITORY_MAP = {
-  "Agronomía y Sistemas Naturales": "agro",
-  "Ciencias Biológicas": "csbio",
-  "Ciencias de la Salud": "salud",
-  "Ciencias Exactas": "astrofismat",
-  "College": "coll",
-  "Ing. Comercial": "comer",
-  "Comunicaciones": "com",
-  "Construcción Civil": "constru",
-  "Derecho": "der",
-  "Educación": "educa",
-  "Enfermería": "enf",
-  "Gobierno": "soc",
-  "Humanidades": "hum",
-  "Ingeniería": "ing",
-  "Lo Contador": "loconta",
-  "Medicina": "med",
-  "Odontología": "odonto",
-  "Oriente": "oriente",
-  "Psicología": "psi",
-  "Química": "quim",
-  "Sociales y Teología": "soc",
-  "Villarica": "vill"
-};
+// Import maps from config files (single source of truth)
+const ELECTION_CONFIG = JSON.parse(
+  fs.readFileSync(path.join(ROOT_DIR, 'config', 'election.json'), 'utf8')
+);
+const TERRITORIES_CONFIG = JSON.parse(
+  fs.readFileSync(path.join(ROOT_DIR, 'config', 'territories.json'), 'utf8')
+);
 
-const MESA_MAP = {
-  "Agronomía 1": "agro1",
-  "Agronomía 2": "agro2",
-  "Ing. en RRNN": "collnat",
-  "CCBB Casa Central 1": "csbiocc",
-  "CCBB San Joaquin 2": "csbiosj",
-  "Veterinaria": "csbiosj",
-  "Kinesiología": "saludsj",
-  "Fonoaudiología": "saludsj",
-  "Terapia Ocupacional": "saludsj",
-  "Nutrición": "saludcc",
-  "CCEE 1": "comer1",
-  "College 1": "collcc",
-  "College 2": "collsoc",
-  "College 3": "collnat",
-  "College 4": "colllc",
-  "College 5": "collo",
-  "Comercial 1": "comer1",
-  "Comercial 2": "comer2",
-  "Comercial 3": "comer2",
-  "Comercial 4": "comer2",
-  "Comercial 5": "comer2",
-  "Comunicaciones 1": "com",
-  "Construcción Civil 1": "constru",
-  "Construcción CIvil 2": "constru",
-  "Derecho 1": "der1",
-  "Derecho 2": "der2",
-  "Derecho 3": "der2",
-  "Educación 1": "educa1",
-  "Educación 2": "educa2",
-  "Educación 3": "educa2",
-  "Educación 4": "educa2",
-  "Educación 5": "educa2",
-  "Educación 6": "educa2",
-  "Enfermería San Joaquin": "enfsj",
-  "Enfermería Casa Central": "enfcc",
-  "Gobierno 1": "soc",
-  "CP, Geografía e Historia": "soc",
-  "Letras y Filosofía": "hum",
-  "Ingeniería 1": "ing1",
-  "Ingeniería 2": "ing2",
-  "Ingeniería 3": "ing3",
-  "Ingeniería 4": "ing4",
-  "Ingeniería 5": "ing5",
-  "Arquitectura": "arqui",
-  "Diseño": "dno",
-  "Medicina Casa Central 1": "med",
-  "Medicina Hosp. Sótero del Río": "sotero",
-  "Odontología San Joaquin 1": "odontosj",
-  "Oriente 1": "oriente",
-  "Oriente 2": "oriente",
-  "Psicología 1": "psi",
-  "Química 1": "quim",
-  "Sociales 1": "soc",
-  "Sociales 2": "soc",
-  "Sociales 3": "soc",
-  "Campus Villarica": "vill"
-};
+const TERRITORY_MAP = TERRITORIES_CONFIG.territories;
+const MESA_MAP = TERRITORIES_CONFIG.mesas;
 
-const PARTY_MAP = {
-  'NAU!': 'nau',
-  'Amanecer': 'mg',
-  'Solidaridad': 'sdd',
-  '1A': 'elp',
-  'Avanzar': 'proy',
-  'Blancos': 'b',
-  'Nulos': 'n'
-};
+// Build PARTY_MAP from election config (same logic as fetch-data.js)
+const PARTY_MAP = {};
+ELECTION_CONFIG.parties.lista.forEach(party => {
+  party.excelNames.forEach(name => {
+    PARTY_MAP[name.replace(/^>>/, '').trim()] = party.key;
+  });
+});
+PARTY_MAP['Blancos'] = 'b';
+PARTY_MAP['Nulos'] = 'n';
 
-const PROJECT_MAP = {
-  'Trabajos de Invierno CAi': 'tdicai',
-  'Estudiantes por la ESI': 'tdicoll',
-  'Animalia UC': 'ani',
-  'Escuela Popular Paulo Freire': 'caco',
-  'La Obra UC': 'spch',
-  'UCeanos': 'jsf',
-  'Trabajos de Verano Proyecta': 'clmun',
-  'Blancos': 'b',
-  'Nulos': 'n'
-};
+// Build PROJECT_MAP from election config
+const PROJECT_MAP = {};
+ELECTION_CONFIG.projects.forEach(project => {
+  project.excelNames.forEach(name => {
+    PROJECT_MAP[name.replace(/^>>/, '').trim()] = project.key;
+  });
+});
+PROJECT_MAP['Blancos'] = 'b';
+PROJECT_MAP['Nulos'] = 'n';
 
 // Get file path from command line argument
 const filePath = process.argv[2];
@@ -130,13 +55,13 @@ if (!fs.existsSync(filePath)) {
 }
 
 console.log('='.repeat(60));
-console.log('📊 Excel Test Runner');
+console.log('Excel Test Runner');
 console.log('='.repeat(60));
-console.log(`📁 File: ${filePath}\n`);
+console.log(`File: ${filePath}\n`);
 
 const workbook = xlsx.readFile(filePath);
 
-console.log(`📋 Sheets found: ${workbook.SheetNames.length}`);
+console.log(`Sheets found: ${workbook.SheetNames.length}`);
 workbook.SheetNames.forEach((name, i) => {
   console.log(`   ${i + 1}. ${name}`);
 });
@@ -153,34 +78,34 @@ const warnings = {
 // Test each sheet
 workbook.SheetNames.forEach((sheetName, sheetIndex) => {
   console.log(`\n${'─'.repeat(60)}`);
-  console.log(`📄 Sheet ${sheetIndex + 1}: ${sheetName}`);
+  console.log(`Sheet ${sheetIndex + 1}: ${sheetName}`);
   console.log(`${'─'.repeat(60)}`);
-  
+
   // Skip Territorial sheets
   if (sheetName.toLowerCase().includes('territorial')) {
-    console.log('   ⚠️  Skipping Territorial sheet (not supported)');
+    console.log('   Skipping Territorial sheet (not supported)');
     return;
   }
-  
+
   const sheet = workbook.Sheets[sheetName];
   const rows = xlsx.utils.sheet_to_json(sheet, { header: 1 });
-  
+
   if (rows.length < 2) {
-    console.log('   ⚠️  Sheet has insufficient data');
+    console.log('   Sheet has insufficient data');
     return;
   }
-  
+
   const headers = rows[0];
   const dayRow = rows[1];
-  
+
   console.log(`   Rows: ${rows.length - 2} data rows`);
   console.log(`   Columns: ${headers.length}`);
-  
+
   // Detect sheet type
   const isPpto = headers.some(h => h && h.includes('Trabajos de Invierno'));
   const sheetType = isPpto ? 'Presupuesto Participativo' : 'Lista/Sup';
   console.log(`   Type: ${sheetType}`);
-  
+
   // Show columns
   console.log('\n   Column mapping:');
   for (let j = 3; j < Math.min(headers.length, dayRow.length); j++) {
@@ -190,44 +115,44 @@ workbook.SheetNames.forEach((sheetName, sheetIndex) => {
       console.log(`     Col ${j}: ${header} (${day})`);
     }
   }
-  
+
   // Parse rows
   let processedRows = 0;
   let lastTerritory = null;
-  
+
   for (let i = 2; i < rows.length; i++) {
     const row = rows[i];
     const rawTerritory = row[1];
     const rawMesa = row[2];
-    
+
     // Skip total/summary rows
     if (row[0] === 'Total' || row[0] === '% de válidamente emitidas') {
       break;
     }
-    
+
     // Track territory
     if (rawTerritory) {
       lastTerritory = rawTerritory;
     }
-    
+
     const terrToCheck = rawTerritory || lastTerritory;
-    
+
     // Check mapping
     if (terrToCheck && !TERRITORY_MAP[terrToCheck]) {
       warnings.unmappedTerritories.add(terrToCheck);
     }
-    
+
     if (rawMesa && !MESA_MAP[rawMesa]) {
       warnings.unmappedMesas.add(rawMesa);
     }
-    
+
     // Check parties/projects in columns
     for (let j = 3; j < Math.min(headers.length, dayRow.length); j++) {
       const rawHeader = headers[j] || findPreviousHeader(headers, j);
       if (rawHeader) {
         // Strip >> prefix for comparison
         const header = rawHeader.replace(/^>>/, '').trim();
-        
+
         if (!isPpto && !PARTY_MAP[header]) {
           warnings.unmappedParties.add(rawHeader);
         }
@@ -236,13 +161,13 @@ workbook.SheetNames.forEach((sheetName, sheetIndex) => {
         }
       }
     }
-    
+
     if (row[0] || rawTerritory || rawMesa) {
       processedRows++;
     }
   }
-  
-  console.log(`\n   ✓ Processed ${processedRows} data rows`);
+
+  console.log(`\n   Processed ${processedRows} data rows`);
 });
 
 function findPreviousHeader(headers, index) {
@@ -254,78 +179,54 @@ function findPreviousHeader(headers, index) {
 
 // Summary
 console.log(`\n${'='.repeat(60)}`);
-console.log('📊 Test Summary');
+console.log('Test Summary');
 console.log(`${'='.repeat(60)}\n`);
 
 let hasIssues = false;
 
 if (warnings.unmappedTerritories.size > 0) {
   hasIssues = true;
-  console.log('❌ Unmapped Territories:');
-  warnings.unmappedTerritories.forEach(t => console.log(`   • ${t}`));
+  console.log('UNMAPPED Territories:');
+  warnings.unmappedTerritories.forEach(t => console.log(`   - ${t}`));
   console.log('');
 } else {
-  console.log('✅ All territories mapped\n');
+  console.log('OK - All territories mapped\n');
 }
 
 if (warnings.unmappedMesas.size > 0) {
   hasIssues = true;
-  console.log('❌ Unmapped Mesas:');
-  warnings.unmappedMesas.forEach(m => console.log(`   • ${m}`));
+  console.log('UNMAPPED Mesas:');
+  warnings.unmappedMesas.forEach(m => console.log(`   - ${m}`));
   console.log('');
 } else {
-  console.log('✅ All mesas mapped\n');
+  console.log('OK - All mesas mapped\n');
 }
 
 if (warnings.unmappedParties.size > 0) {
   hasIssues = true;
-  console.log('❌ Unmapped Parties:');
-  warnings.unmappedParties.forEach(p => console.log(`   • ${p}`));
+  console.log('UNMAPPED Parties:');
+  warnings.unmappedParties.forEach(p => console.log(`   - ${p}`));
   console.log('');
 } else {
-  console.log('✅ All parties mapped\n');
+  console.log('OK - All parties mapped\n');
 }
 
 if (warnings.unmappedProjects.size > 0) {
   hasIssues = true;
-  console.log('❌ Unmapped Projects:');
-  warnings.unmappedProjects.forEach(p => console.log(`   • ${p}`));
+  console.log('UNMAPPED Projects:');
+  warnings.unmappedProjects.forEach(p => console.log(`   - ${p}`));
   console.log('');
 } else {
-  console.log('✅ All projects mapped\n');
-}
-
-// Generate test output
-const testOutputPath = path.join(__dirname, '..', 'temp', 'test-output.json');
-console.log(`📁 Saving test output to: ${testOutputPath}`);
-
-try {
-  // Import and run the actual fetch script logic
-  const data = parseWorkbook(workbook);
-  fs.writeFileSync(testOutputPath, JSON.stringify(data, null, 2));
-  console.log('✅ Test output saved successfully\n');
-} catch (error) {
-  console.log('❌ Error generating test output:', error.message, '\n');
+  console.log('OK - All projects mapped\n');
 }
 
 // Final verdict
 if (hasIssues) {
-  console.log('⚠️  EXCEL HAS COMPATIBILITY ISSUES');
-  console.log('   Update TERRITORY_MAP, MESA_MAP, or PROJECT_MAP to resolve');
-  console.log('   See scripts/fetch-data.js for mapping locations\n');
+  console.log('EXCEL HAS COMPATIBILITY ISSUES');
+  console.log('   Update config/election.json or config/territories.json to resolve');
+  console.log('   Then run: npm run fetch-data -- --file <your-file.xlsx>\n');
 } else {
-  console.log('🎉 EXCEL IS FULLY COMPATIBLE');
-  console.log('   Ready for production use!\n');
-}
-
-// Placeholder parse function (simplified)
-function parseWorkbook(workbook) {
-  // This is a simplified version - you can import the full one from fetch-data.js
-  return {
-    sheets: workbook.SheetNames,
-    rows: workbook.SheetNames.map(name => {
-      const sheet = workbook.Sheets[name];
-      return xlsx.utils.sheet_to_json(sheet).length;
-    })
-  };
+  console.log('EXCEL IS FULLY COMPATIBLE');
+  console.log('   Ready for production use!');
+  console.log('   Run: npm run fetch-data -- --file <your-file.xlsx>\n');
 }

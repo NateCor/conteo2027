@@ -13,17 +13,7 @@ export default defineConfig({
         main: resolve(__dirname, 'index.html'),
       },
     },
-    // Copy public assets to root of dist
     copyPublicDir: true,
-  },
-  
-  resolve: {
-    alias: {
-      '@': resolve(__dirname, 'src'),
-      '@js': resolve(__dirname, 'src/js'),
-      '@scss': resolve(__dirname, 'src/scss'),
-      '@images': resolve(__dirname, 'src/images'),
-    },
   },
   
   server: {

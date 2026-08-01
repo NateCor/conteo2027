@@ -28,21 +28,21 @@
         "excelNames": ["Solidaridad"],
         "displayName": "Solidaridad",
         "color": "#E01E25",
-        "active": true
+        "active": false
       },
       {
         "key": "elp",
         "excelNames": ["1A", "Movimiento Gremial"],
         "displayName": "1A",
         "color": "#e9841d",
-        "active": true
+        "active": false
       },
       {
         "key": "proy",
         "excelNames": ["Avanzar"],
         "displayName": "Avanzar",
         "color": "#3EACDE",
-        "active": true
+        "active": false
       }
     ],
     "sup": [
@@ -65,21 +65,21 @@
         "excelNames": ["Solidaridad"],
         "displayName": "Solidaridad",
         "color": "#E01E25",
-        "active": true
+        "active": false
       },
       {
         "key": "elp",
         "excelNames": ["1A", "Movimiento Gremial"],
         "displayName": "1A",
         "color": "#e9841d",
-        "active": true
+        "active": false
       },
       {
         "key": "proy",
         "excelNames": ["Avanzar"],
         "displayName": "Avanzar",
         "color": "#3EACDE",
-        "active": true
+        "active": false
       }
     ]
   },

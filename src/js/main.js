@@ -1,10 +1,10 @@
 import $ from 'jquery';
 import Chart from 'chart.js';
-import { getData, getServerData, defaultObject } from './dataFetcher.js';
+import { getData, defaultObject } from './dataFetcher.js';
 import { defaultProjects } from './projectsArray.js';
 import rivets from 'rivets';
 import _ from 'underscore';
-import { PARTY_CONFIG, TOTAL_VOTERS, getActiveProjects, getActiveParties, getElectionType } from './config.js';
+import { getActiveProjects, getActiveParties, getElectionType, setRuntimeData } from './config.js';
 
 import {
   defaultChartsOptions,
@@ -17,67 +17,56 @@ import {
 Chart.defaults.global.elements.arc.borderWidth = 2;
 Chart.defaults.global.elements.arc.borderColor = '#ddd';
 
-const UPDATE_TIME = 60000;
-const NOTIF_DELAY = 8000;
-
 const getDefaults = (n) => Array(n).fill(100 / n);
 
 $(document).ready(() => {
 
-  $('.notification button').click(function (e) {
-    $(this).parents('.notification').fadeOut();
-  });
-
-  setTimeout(function () {$('#refresh-notification button').click();}, NOTIF_DELAY);
-
   let mainData;
 
-  let $ctxTotalLista = $('#total-lista');
-  let $ctxTotalSup = $('#total-sup');
-  let $ctxMesaLista = $('#mesa-lista');
-  let $ctxMesaSup = $('#mesa-sup');
-  let $ctxTerriLista = $('#terri-lista');
-  let $ctxTerriSup = $('#terri-sup');
-  let $ctxProjects = $('#ppto');
+  const $ctxTotalLista = $('#total-lista');
+  const $ctxTotalSup = $('#total-sup');
+  const $ctxMesaLista = $('#mesa-lista');
+  const $ctxMesaSup = $('#mesa-sup');
+  const $ctxTerriLista = $('#terri-lista');
+  const $ctxTerriSup = $('#terri-sup');
+  const $ctxProjects = $('#ppto');
 
-  let chartTotalLista = new Chart($ctxTotalLista, {
+  const chartTotalLista = new Chart($ctxTotalLista, {
       type: 'pie',
       data: listaDefaultData(),
       options: defaultChartsOptions,
     });
-  let chartTotalSup = new Chart($ctxTotalSup, {
+  const chartTotalSup = new Chart($ctxTotalSup, {
       type: 'pie',
       data: supDefaultData(),
       options: defaultChartsOptions,
     });
-  let chartMesaLista = new Chart($ctxMesaLista, {
+  const chartMesaLista = new Chart($ctxMesaLista, {
       type: 'pie',
       data: listaDefaultData(),
       options: defaultChartsOptions,
     });
-  let chartMesaSup = new Chart($ctxMesaSup, {
+  const chartMesaSup = new Chart($ctxMesaSup, {
       type: 'pie',
       data: supDefaultData(),
       options: defaultChartsOptions,
     });
-  let chartTerriLista = new Chart($ctxTerriLista, {
+  const chartTerriLista = new Chart($ctxTerriLista, {
       type: 'pie',
       data: listaDefaultData(),
       options: defaultChartsOptions,
     });
-  let chartTerriSup = new Chart($ctxTerriSup, {
+  const chartTerriSup = new Chart($ctxTerriSup, {
       type: 'pie',
       data: supDefaultData(),
       options: defaultChartsOptions,
     });
-  let chartProjects = new Chart($ctxProjects, {
+  const chartProjects = new Chart($ctxProjects, {
       type: 'pie',
       data: projectsDefaultData(),
       options: defaultChartsOptions,
     });
 
-  let summaryLista = _.extend({}, defaultObject);
-  let summarySup = _.extend({}, defaultObject);
   let totalLista = _.extend({}, defaultObject);
   let totalSup = _.extend({}, defaultObject);
   let mesaLista = _.extend({}, defaultObject);
@@ -86,15 +75,13 @@ $(document).ready(() => {
   let terriSup = _.extend({}, defaultObject);
   let projects = _.extend({ projects: defaultProjects }, defaultObject);
   let participacion = { terris: [] };
-  let mesasEscrutadas = { mesas: [], actual: 0, total: 81 };
+  let mesasEscrutadas = { mesas: [], actual: 0, total: 0 };
   let headerData = { 
     electionType: getElectionType(),
     isFirstRound: getElectionType() === 'firstRound',
     lista: { parties: [] },
     sup: { parties: [] }
   };
-  
-  console.log('Header data initialized:', headerData.electionType, 'isFirstRound:', headerData.isFirstRound);
 
   rivets.binders.width = function (el, value) {
     el.style.width = `${value}%`;
@@ -116,8 +103,6 @@ $(document).ready(() => {
     el.style.backgroundColor = value;
   };
 
-  rivets.bind($('#bind-summary-lista'), summaryLista);
-  rivets.bind($('#bind-summary-sup'), summarySup);
   rivets.bind($('#bind-total-lista'), totalLista);
   rivets.bind($('#bind-total-sup'), totalSup);
   rivets.bind($('#bind-mesa-lista'), mesaLista);
@@ -132,13 +117,17 @@ $(document).ready(() => {
 
   // Show/hide header sections based on election type
   const updateHeaderVisibility = () => {
-    const isFirstRound = headerData.isFirstRound;
-    $('#bind-header').toggle(isFirstRound);
-    $('#bind-second-round').toggle(!isFirstRound);
+    $('#bind-header').toggle(headerData.isFirstRound);
+    $('#bind-second-round').toggle(!headerData.isFirstRound);
   };
 
-  // Initial visibility update
+  // Show/hide PPTO section based on whether there are active projects
+  const updatePptoVisibility = () => {
+    $('#bind-ppto-section').toggle(getActiveProjects().length > 0);
+  };
+
   updateHeaderVisibility();
+  updatePptoVisibility();
 
   $(document).on(
     'change',
@@ -162,44 +151,19 @@ $(document).ready(() => {
     'input[name=ppto-dia], form[name=selected-ppto] select',
     () => { if (mainData) { updateMainDataElements('ppto'); } });
 
-  let $updateNotif = $('.update-notif');
-  let $errorNotif = $('#error-notification');
-
   function renderData() {
-    $updateNotif.text('Actualizando…');
     getData()
       .then((object) => {
-        $errorNotif.fadeOut();
-        let now = new Date();
-        $updateNotif.text(
-          `Actualizado a las ${
-            ('0' + now.getHours()).slice(-2)
-          }:${
-            ('0' + now.getMinutes()).slice(-2)
-          }`
-        );
+        setRuntimeData(object);
         mainData = object;
-        
-        // Diagnostic Logging
-        console.log('=== DATA LOADED ===');
-        console.table(mainData.total.lista.total);
-        console.log('Day 1:', mainData.dia1.lista.total.votos, 'votes');
-        console.log('Day 2:', mainData.dia2.lista.total.votos, 'votes');
-        
         updateMainDataElements('getData');
       })
       .catch((a) => {
-        $errorNotif.fadeIn();
-        $updateNotif.text(
-          `Error al actualizar`
-        );
         console.error(a);
       });
   };
 
   renderData();
-
-  // setInterval(renderData, UPDATE_TIME);
 
   const updateMainDataElements = (sender) => {
     let diaTotal = $('input[name=total-dia]:checked').val();
@@ -215,8 +179,41 @@ $(document).ready(() => {
     const supKeys = [...getActiveParties('sup').map(p => p.key + 'pc'), 'bpc', 'npc'];
 
     if (sender === 'getData') {
-      summaryLista = _.extendOwn(summaryLista, mainData.total.lista.total);
-      summarySup = _.extendOwn(summarySup, mainData.total.sup.total);
+      // Update election type from runtime data (may differ from config fallback)
+      headerData.electionType = getElectionType();
+      headerData.isFirstRound = headerData.electionType === 'firstRound';
+
+      // Update chart labels and colors from active parties (may differ from fallback)
+      const activeLista = getActiveParties('lista');
+      const activeSup = getActiveParties('sup');
+      const activeProjs = getActiveProjects();
+      const listaLabels = [...activeLista.map(p => p.name), 'Blancos', 'Nulos'];
+      const listaColors = [...activeLista.map(p => p.color), '#FFFFFF', '#000000'];
+      const supLabels = [...activeSup.map(p => p.name), 'Blancos', 'Nulos'];
+      const supColors = [...activeSup.map(p => p.color), '#FFFFFF', '#000000'];
+      const projLabels = [...activeProjs.map(p => p.name), 'Blancos', 'Nulos'];
+      const projColors = [...activeProjs.map(p => p.color), '#FFFFFF', '#000000'];
+
+      [chartTotalLista, chartMesaLista, chartTerriLista].forEach(c => {
+        c.data.labels = listaLabels;
+        c.data.datasets[0].backgroundColor = listaColors;
+      });
+      [chartTotalSup, chartMesaSup, chartTerriSup].forEach(c => {
+        c.data.labels = supLabels;
+        c.data.datasets[0].backgroundColor = supColors;
+      });
+      chartProjects.data.labels = projLabels;
+      chartProjects.data.datasets[0].backgroundColor = projColors;
+
+      // Rebuild projects array from active projects (may differ from config fallback)
+      projects.projects = activeProjs.map(p => ({
+        name: p.name,
+        id: p.key,
+        pc: 0
+      }));
+
+      // Hide PPTO section if no active projects
+      updatePptoVisibility();
 
       // Update header data with ranked parties
       const updateHeaderParties = (type) => {
@@ -226,34 +223,28 @@ $(document).ready(() => {
           key: p.key,
           name: p.name,
           color: p.color,
-          colorClass: `bar-${p.key}`,
           pc: total[`${p.key}pc`] || 0,
           votes: total[p.key] || 0,
-          advances: false // Will be updated below
+          advances: false
         })).sort((a, b) => b.pc - a.pc);
       };
 
-      // Mark top 2 as advancing in first round
+      // Mark top 2 as advancing in first round and add rank index
       const markAdvancing = (parties) => {
         if (headerData.electionType === 'firstRound') {
           parties[0].advances = true;
           parties[1].advances = true;
         }
-        // Add index for rank display
-        parties.forEach((p, i) => {
-          p.index = i + 1;
-        });
+        parties.forEach((p, i) => { p.index = i + 1; });
         return parties;
       };
 
-      headerData.lista.parties = markAdvancing(updateHeaderParties('lista'));
-      headerData.sup.parties = markAdvancing(updateHeaderParties('sup'));
-      
-      console.log('Header data updated:', headerData);
-      console.log('Lista parties:', headerData.lista.parties);
-      console.log('Sup parties:', headerData.sup.parties);
+      // Mutate arrays in-place so Rivets re-renders reliably
+      const newLista = markAdvancing(updateHeaderParties('lista'));
+      headerData.lista.parties.splice(0, headerData.lista.parties.length, ...newLista);
+      const newSup = markAdvancing(updateHeaderParties('sup'));
+      headerData.sup.parties.splice(0, headerData.sup.parties.length, ...newSup);
 
-      // Update header visibility based on election type
       updateHeaderVisibility();
 
       let escrutadasActual = 0;

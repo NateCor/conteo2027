@@ -27,10 +27,18 @@ const OUTPUT_FILE = path.join(ROOT_DIR, 'public', 'data.json');
 const args = process.argv.slice(2);
 const fileArgIndex = args.indexOf('--file');
 const LOCAL_FILE = fileArgIndex !== -1 ? args[fileArgIndex + 1] : null;
+const votersArgIndex = args.indexOf('--total-voters');
+const CLI_TOTAL_VOTERS = votersArgIndex !== -1 ? parseInt(args[votersArgIndex + 1], 10) : null;
 
 // Build maps from configuration
 const TERRITORY_MAP = TERRITORIES_CONFIG.territories;
 const MESA_MAP = TERRITORIES_CONFIG.mesas;
+
+// Effective total voters: CLI flag takes precedence, then config
+const TOTAL_VOTERS = CLI_TOTAL_VOTERS || ELECTION_CONFIG.election.totalVoters;
+
+// Detected active parties/projects from Excel (populated during validation)
+const detectedActive = { lista: [], sup: [], projects: [] };
 
 // Build party maps from election config
 function buildPartyMap() {
@@ -65,7 +73,10 @@ function buildProjectMap() {
 
 const PARTY_MAP = buildPartyMap();
 const PROJECT_MAP = buildProjectMap();
-const TOTAL_VOTERS = ELECTION_CONFIG.election.totalVoters;
+
+// Derive key arrays from config (single source of truth)
+const PARTY_KEYS = [...ELECTION_CONFIG.parties.lista.map(p => p.key), 'b', 'n'];
+const PROJECT_KEYS = [...ELECTION_CONFIG.projects.map(p => p.key), 'b', 'n'];
 
 // Ensure directories exist
 if (!fs.existsSync(path.join(ROOT_DIR, 'temp'))) fs.mkdirSync(path.join(ROOT_DIR, 'temp'));
@@ -137,6 +148,11 @@ async function fetchData() {
   const data = transformWorkbook(workbook);
   fs.writeFileSync(OUTPUT_FILE, JSON.stringify(data, null, 2));
   console.log('\n✓ Data transformed and saved to', OUTPUT_FILE);
+  console.log(`  Election type: ${data.electionType}`);
+  console.log(`  Active lista parties: ${data.activeParties.lista.join(', ')}`);
+  console.log(`  Active sup parties: ${data.activeParties.sup.join(', ')}`);
+  console.log(`  Active projects: ${data.activeParties.projects.join(', ')}`);
+  console.log(`  Total voters: ${data.totalVoters}`);
 }
 
 function validateExcel(workbook) {
@@ -184,20 +200,18 @@ function validateExcel(workbook) {
     
     console.log(`\nValidating ${sheetMap[type]}...`);
     
-    // Check which configured parties are active
-    const activeParties = ELECTION_CONFIG.parties[type].filter(p => p.active);
-    
-    activeParties.forEach(party => {
+    // Detect which parties are present in the Excel (auto-detection)
+    ELECTION_CONFIG.parties[type].forEach(party => {
       const found = party.excelNames.some(name => {
         const cleanName = name.replace(/^>>/, '').trim();
         return headers.includes(cleanName);
       });
       
       if (found) {
+        detectedActive[type].push(party.key);
         console.log(`  ✓ ${party.displayName} (${party.key})`);
       } else {
-        validationWarnings.push(`Party "${party.displayName}" (${party.key}) not found in ${sheetMap[type]}`);
-        console.log(`  ⚠ ${party.displayName} (${party.key}) - not found`);
+        console.log(`  - ${party.displayName} (${party.key}) not in Excel (inactive for this round)`);
       }
     });
     
@@ -229,19 +243,17 @@ function validateExcel(workbook) {
     
     console.log(`\nValidating ${sheetMap.ppto}...`);
     
-    const activeProjects = ELECTION_CONFIG.projects.filter(p => p.active);
-    
-    activeProjects.forEach(project => {
+    ELECTION_CONFIG.projects.forEach(project => {
       const found = project.excelNames.some(name => {
         const cleanName = name.replace(/^>>/, '').trim();
         return headers.includes(cleanName);
       });
       
       if (found) {
+        detectedActive.projects.push(project.key);
         console.log(`  ✓ ${project.displayName} (${project.key})`);
       } else {
-        validationWarnings.push(`Project "${project.displayName}" (${project.key}) not found in ${sheetMap.ppto}`);
-        console.log(`  ⚠ ${project.displayName} (${project.key}) - not found`);
+        console.log(`  - ${project.displayName} (${project.key}) not in Excel (inactive for this round)`);
       }
     });
   }
@@ -276,7 +288,7 @@ function transformWorkbook(workbook) {
   // Find sheet names (ignore Territorial sheets)
   let listaSheetName = sheetNames[0];
   let supSheetName = sheetNames[1];
-  let pptoSheetName = sheetNames[2];
+  let pptoSheetName = null;
   
   sheetNames.forEach(name => {
     const lower = name.toLowerCase();
@@ -299,13 +311,21 @@ function transformWorkbook(workbook) {
   console.log('Processing sheets:');
   console.log(`  Lista: ${listaSheetName}`);
   console.log(`  Sup: ${supSheetName}`);
-  console.log(`  PPTO: ${pptoSheetName}`);
+  console.log(`  PPTO: ${pptoSheetName || '(not found)'}`);
 
   parseMainSheet(workbook.Sheets[listaSheetName], converted, 'lista');
   parseMainSheet(workbook.Sheets[supSheetName], converted, 'sup');
-  parsePptoSheet(workbook.Sheets[pptoSheetName], converted);
+  if (pptoSheetName) {
+    parsePptoSheet(workbook.Sheets[pptoSheetName], converted);
+  }
 
   calculateAggregates(converted);
+
+  // Add election metadata for the frontend
+  converted.activeParties = detectedActive;
+  converted.electionType = detectedActive.lista.length > 2 ? 'firstRound' : 'secondRound';
+  converted.totalVoters = TOTAL_VOTERS;
+
   return converted;
 }
 
@@ -455,15 +475,28 @@ function findPreviousHeader(headers, index) {
   return null;
 }
 
-function createDefaultObject(id, name) {
-  return {
+// Build default object dynamically from config (single source of truth)
+function buildDefaultObject(id, name) {
+  const obj = {
     id, name,
-    mg: 0, mgpc: 0, nau: 0, naupc: 0, sdd: 0, sddpc: 0, b: 0, bpc: 0, n: 0, npc: 0,
+    b: 0, bpc: 0, n: 0, npc: 0,
     votosve: 0, votos: 0, escrutada: false, participacion: 0,
-    mapau: 0, mapaupc: 0, ani: 0, anipc: 0, tdicoll: 0, tdicollpc: 0,
-    elp: 0, elppc: 0, tdicai: 0, tdicaipc: 0, caco: 0, cacopc: 0,
-    spch: 0, spchpc: 0, jsf: 0, jsfpc: 0, clmun: 0, clmunpc: 0, proy: 0, proypc: 0,
   };
+  // Add all party keys
+  ELECTION_CONFIG.parties.lista.forEach(p => {
+    obj[p.key] = 0;
+    obj[p.key + 'pc'] = 0;
+  });
+  // Add all project keys
+  ELECTION_CONFIG.projects.forEach(p => {
+    obj[p.key] = 0;
+    obj[p.key + 'pc'] = 0;
+  });
+  return obj;
+}
+
+function createDefaultObject(id, name) {
+  return buildDefaultObject(id, name);
 }
 
 function calculateAggregates(converted) {
@@ -481,7 +514,7 @@ function calculateAggregates(converted) {
           dayData.terri[tId] = createDefaultObject(tId, rawName);
         }
         
-        const keys = ['mg', 'nau', 'sdd', 'elp', 'proy', 'b', 'n'];
+        const keys = PARTY_KEYS;
         keys.forEach(k => {
           dayData.terri[tId][k] += mesa[k];
           totalObj[k] += mesa[k];
@@ -511,7 +544,7 @@ function calculateAggregates(converted) {
       const mTotal = totalData.mesa[mId] = createDefaultObject(mId, m1.name || m2.name);
       mTotal.territoryId = m1.territoryId || m2.territoryId;
       
-      const keys = ['mg', 'nau', 'sdd', 'elp', 'proy', 'b', 'n'];
+      const keys = PARTY_KEYS;
       keys.forEach(k => {
         mTotal[k] = m1[k] + m2[k];
         totalData.total[k] += mTotal[k];
@@ -531,7 +564,7 @@ function calculateAggregates(converted) {
       const t2 = converted.dia2[tipo].terri[tId] || createDefaultObject(tId, tId);
       const tTotal = totalData.terri[tId] = createDefaultObject(tId, t1.name || t2.name);
       
-      const keys = ['mg', 'nau', 'sdd', 'elp', 'proy', 'b', 'n'];
+      const keys = PARTY_KEYS;
       keys.forEach(k => {
         tTotal[k] = t1[k] + t2[k];
       });
@@ -543,19 +576,19 @@ function calculateAggregates(converted) {
     calculatePercentages(totalData.total);
     totalData.total.participacion = Math.round((totalData.total.votos / TOTAL_VOTERS) * 100);
     
-    console.log(`  ✓ ${tipo} total: ${totalData.total.nau} NAU!, ${totalData.total.mg} Amanecer`);
+    console.log(`  ✓ ${tipo} total: ${totalData.total.votos} votes`);
   });
 
   // PPTO Total aggregation
   const pDataTotal = converted.total.ppto;
-  const keys = ['tdicai', 'tdicoll', 'ani', 'caco', 'spch', 'jsf', 'clmun', 'b', 'n'];
+  const pptoKeys = PROJECT_KEYS;
 
   // First calculate dia1 and dia2 percentages
   ['dia1', 'dia2'].forEach(dia => {
     Object.values(converted[dia].ppto.terri).forEach(t => calculatePercentages(t, true));
     converted[dia].ppto.total = createDefaultObject('total', 'Total');
     Object.values(converted[dia].ppto.terri).forEach(terri => {
-      keys.forEach(k => {
+      pptoKeys.forEach(k => {
         converted[dia].ppto.total[k] += terri[k];
       });
     });
@@ -573,7 +606,7 @@ function calculateAggregates(converted) {
     const t2 = converted.dia2.ppto.terri[tId] || createDefaultObject(tId, tId);
     const tTotal = pDataTotal.terri[tId] = createDefaultObject(tId, t1.name || t2.name);
     
-    keys.forEach(k => {
+    pptoKeys.forEach(k => {
       tTotal[k] = t1[k] + t2[k];
     });
     calculatePercentages(tTotal, true);
@@ -581,7 +614,7 @@ function calculateAggregates(converted) {
 
   pDataTotal.total = createDefaultObject('total', 'Total');
   Object.values(pDataTotal.terri).forEach(terri => {
-    keys.forEach(k => {
+    pptoKeys.forEach(k => {
       pDataTotal.total[k] += terri[k];
     });
   });
@@ -591,9 +624,7 @@ function calculateAggregates(converted) {
 }
 
 function calculatePercentages(obj, isPpto = false) {
-  const keys = isPpto ? 
-    ['tdicai', 'tdicoll', 'ani', 'caco', 'spch', 'jsf', 'clmun', 'b', 'n'] :
-    ['mg', 'nau', 'sdd', 'elp', 'proy', 'b', 'n'];
+  const keys = isPpto ? PROJECT_KEYS : PARTY_KEYS;
   
   const total = keys.reduce((sum, k) => sum + obj[k], 0);
   obj.votos = total;
