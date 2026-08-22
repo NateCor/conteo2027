@@ -126,6 +126,21 @@ $(document).ready(() => {
     $('#bind-ppto-section').toggle(getActiveProjects().length > 0);
   };
 
+  // Shared chart update: pick the *pc keys, parse, fall back to equal slices
+  // when every value is 0 (e.g. before data loads or for an unescrutada view).
+  const updateChartData = (chart, dataObj, pcKeys) => {
+    const newData = _.chain(dataObj)
+      .pick(pcKeys)
+      .map(parseFloat).value();
+    if (_.any(newData, (n) => n > 0)) {
+      chart.data.datasets[0].data = newData;
+    } else {
+      chart.data.datasets[0].data = getDefaults(pcKeys.length);
+    }
+    chart.update();
+  };
+
+
   updateHeaderVisibility();
   updatePptoVisibility();
 
@@ -160,8 +175,16 @@ $(document).ready(() => {
       })
       .catch((a) => {
         console.error(a);
+        // Visible failure notice: a broken/missing data.json previously left
+        // blank charts with no explanation.
+        $('#header').after(
+          '<div class="container"><div class="notification is-danger">' +
+          'No se pudo cargar data.json — verifica que corriste ' +
+          '<code>npm run fetch-data</code>. Revisa la consola para detalles.' +
+          '</div></div>'
+        );
       });
-  };
+  }
 
   renderData();
 
@@ -294,25 +317,8 @@ $(document).ready(() => {
       totalLista = _.extendOwn(totalLista, mainData[diaTotal].lista.total);
       totalSup = _.extendOwn(totalSup, mainData[diaTotal].sup.total);
 
-      let newTotalListaData = _.chain(totalLista)
-        .pick(listaKeys)
-        .map(parseFloat).value();
-      if (_.any(newTotalListaData, (n) => n > 0)) {
-        chartTotalLista.data.datasets[0].data = newTotalListaData;
-      } else {
-        chartTotalLista.data.datasets[0].data = getDefaults(listaKeys.length);
-      }
-      chartTotalLista.update();
-
-      let newTotalSupData = _.chain(totalSup)
-        .pick(supKeys)
-        .map(parseFloat).value();
-      if (_.any(newTotalSupData, (n) => n > 0)) {
-        chartTotalSup.data.datasets[0].data = newTotalSupData;
-      } else {
-        chartTotalSup.data.datasets[0].data = getDefaults(supKeys.length);
-      }
-      chartTotalSup.update();
+      updateChartData(chartTotalLista, totalLista, listaKeys);
+      updateChartData(chartTotalSup, totalSup, supKeys);
     }
 
     if (sender !== 'total' && sender !== 'terri' && sender !== 'ppto') {
@@ -326,25 +332,8 @@ $(document).ready(() => {
         mainData[diaMesa].sup.mesa[selectedMesa]
       );
 
-      let newMesaListaData = _.chain(mesaLista)
-        .pick(listaKeys)
-        .map(parseFloat).value();
-      if (_.any(newMesaListaData, (n) => n > 0)) {
-        chartMesaLista.data.datasets[0].data = newMesaListaData;
-      } else {
-        chartMesaLista.data.datasets[0].data = getDefaults(listaKeys.length);
-      }
-      chartMesaLista.update();
-
-      let newMesaSupData = _.chain(mesaSup)
-        .pick(supKeys)
-        .map(parseFloat).value();
-      if (_.any(newMesaSupData, (n) => n > 0)) {
-        chartMesaSup.data.datasets[0].data = newMesaSupData;
-      } else {
-        chartMesaSup.data.datasets[0].data = getDefaults(supKeys.length);
-      }
-      chartMesaSup.update();
+      updateChartData(chartMesaLista, mesaLista, listaKeys);
+      updateChartData(chartMesaSup, mesaSup, supKeys);
     }
 
     if (sender !== 'total' && sender !== 'mesa' && sender !== 'ppto') {
@@ -358,25 +347,8 @@ $(document).ready(() => {
         mainData[diaTerri].sup.terri[selectedTerri]
       );
 
-      let newTerriListaData = _.chain(terriLista)
-        .pick(listaKeys)
-        .map(parseFloat).value();
-      if (_.any(newTerriListaData, (n) => n > 0)) {
-        chartTerriLista.data.datasets[0].data = newTerriListaData;
-      } else {
-        chartTerriLista.data.datasets[0].data = getDefaults(listaKeys.length);
-      }
-      chartTerriLista.update();
-
-      let newTerriSupData = _.chain(terriSup)
-        .pick(supKeys)
-        .map(parseFloat).value();
-      if (_.any(newTerriSupData, (n) => n > 0)) {
-        chartTerriSup.data.datasets[0].data = newTerriSupData;
-      } else {
-        chartTerriSup.data.datasets[0].data = getDefaults(supKeys.length);
-      }
-      chartTerriSup.update();
+      updateChartData(chartTerriLista, terriLista, listaKeys);
+      updateChartData(chartTerriSup, terriSup, supKeys);
     }
 
     if (sender !== 'total' && sender !== 'mesa' && sender !== 'terri') {
@@ -393,15 +365,7 @@ $(document).ready(() => {
       });
 
       const projectsKeys = [...getActiveProjects().map(p => p.key + 'pc'), 'bpc', 'npc'];
-      let newProjectsData = _.chain(extendObj)
-        .pick(projectsKeys)
-        .map(parseFloat).value();
-      if (_.any(newProjectsData, (n) => n > 0)) {
-        chartProjects.data.datasets[0].data = newProjectsData;
-      } else {
-        chartProjects.data.datasets[0].data = getDefaults(projectsKeys.length);
-      }
-      chartProjects.update();
+      updateChartData(chartProjects, extendObj, projectsKeys);
 
       projects.projects.sort((a, b) => b.pc - a.pc);
     };

@@ -88,6 +88,10 @@ export function getElectionType() {
   if (runtimeData && runtimeData.electionType) {
     return runtimeData.electionType;
   }
+  // Explicit maintainer setting in config (controls display until Excel data loads)
+  const configuredRound = (electionConfig.election.round || '').toLowerCase();
+  if (configuredRound.includes('primera')) return 'firstRound';
+  if (configuredRound.includes('segunda') || configuredRound.includes('ballotage')) return 'secondRound';
   const activeParties = electionConfig.parties.lista.filter(p => p.active);
   return activeParties.length > 2 ? 'firstRound' : 'secondRound';
 }

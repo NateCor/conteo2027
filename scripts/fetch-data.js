@@ -372,11 +372,11 @@ function parseMainSheet(sheet, converted, tipo) {
     const mesaId = MESA_MAP[rawMesa] || rawMesa;
 
     if (!converted.dia1[tipo].mesa[mesaId]) {
-      converted.dia1[tipo].mesa[mesaId] = createDefaultObject(mesaId, rawMesa);
+      converted.dia1[tipo].mesa[mesaId] = buildDefaultObject(mesaId, rawMesa);
       converted.dia1[tipo].mesa[mesaId].territoryId = territoryId;
     }
     if (!converted.dia2[tipo].mesa[mesaId]) {
-      converted.dia2[tipo].mesa[mesaId] = createDefaultObject(mesaId, rawMesa);
+      converted.dia2[tipo].mesa[mesaId] = buildDefaultObject(mesaId, rawMesa);
       converted.dia2[tipo].mesa[mesaId].territoryId = territoryId;
     }
 
@@ -441,10 +441,10 @@ function parsePptoSheet(sheet, converted) {
     const territoryId = TERRITORY_MAP[rawTerritory] || rawTerritory;
 
     if (!converted.dia1.ppto.terri[territoryId]) {
-      converted.dia1.ppto.terri[territoryId] = createDefaultObject(territoryId, rawTerritory);
+      converted.dia1.ppto.terri[territoryId] = buildDefaultObject(territoryId, rawTerritory);
     }
     if (!converted.dia2.ppto.terri[territoryId]) {
-      converted.dia2.ppto.terri[territoryId] = createDefaultObject(territoryId, rawTerritory);
+      converted.dia2.ppto.terri[territoryId] = buildDefaultObject(territoryId, rawTerritory);
     }
 
     // Use dayRow.length instead of headers.length to include all data columns
@@ -495,23 +495,19 @@ function buildDefaultObject(id, name) {
   return obj;
 }
 
-function createDefaultObject(id, name) {
-  return buildDefaultObject(id, name);
-}
-
 function calculateAggregates(converted) {
   ['lista', 'sup'].forEach(tipo => {
     // Process each day
     ['dia1', 'dia2'].forEach(dia => {
       const dayData = converted[dia][tipo];
-      const totalObj = dayData.total = createDefaultObject('total', 'Total');
+      const totalObj = dayData.total = buildDefaultObject('total', 'Total');
       
       // Aggregate territories from mesas
       Object.values(dayData.mesa).forEach(mesa => {
         const tId = mesa.territoryId;
         if (!dayData.terri[tId]) {
           const rawName = Object.keys(TERRITORY_MAP).find(k => TERRITORY_MAP[k] === tId) || tId;
-          dayData.terri[tId] = createDefaultObject(tId, rawName);
+          dayData.terri[tId] = buildDefaultObject(tId, rawName);
         }
         
         const keys = PARTY_KEYS;
@@ -526,11 +522,12 @@ function calculateAggregates(converted) {
 
       Object.values(dayData.terri).forEach(t => calculatePercentages(t));
       calculatePercentages(totalObj);
+      totalObj.escrutada = totalObj.votos > 0;
     });
 
     // Phase 2: Calculate combined totals (dia1 + dia2)
     const totalData = converted.total[tipo];
-    totalData.total = createDefaultObject('total', 'Total');
+    totalData.total = buildDefaultObject('total', 'Total');
     
     // First, copy all mesas and sum dia1 + dia2
     const allMesaIds = new Set([
@@ -539,9 +536,9 @@ function calculateAggregates(converted) {
     ]);
     
     allMesaIds.forEach(mId => {
-      const m1 = converted.dia1[tipo].mesa[mId] || createDefaultObject(mId, mId);
-      const m2 = converted.dia2[tipo].mesa[mId] || createDefaultObject(mId, mId);
-      const mTotal = totalData.mesa[mId] = createDefaultObject(mId, m1.name || m2.name);
+      const m1 = converted.dia1[tipo].mesa[mId] || buildDefaultObject(mId, mId);
+      const m2 = converted.dia2[tipo].mesa[mId] || buildDefaultObject(mId, mId);
+      const mTotal = totalData.mesa[mId] = buildDefaultObject(mId, m1.name || m2.name);
       mTotal.territoryId = m1.territoryId || m2.territoryId;
       
       const keys = PARTY_KEYS;
@@ -560,9 +557,9 @@ function calculateAggregates(converted) {
     ]);
     
     allTerriIds.forEach(tId => {
-      const t1 = converted.dia1[tipo].terri[tId] || createDefaultObject(tId, tId);
-      const t2 = converted.dia2[tipo].terri[tId] || createDefaultObject(tId, tId);
-      const tTotal = totalData.terri[tId] = createDefaultObject(tId, t1.name || t2.name);
+      const t1 = converted.dia1[tipo].terri[tId] || buildDefaultObject(tId, tId);
+      const t2 = converted.dia2[tipo].terri[tId] || buildDefaultObject(tId, tId);
+      const tTotal = totalData.terri[tId] = buildDefaultObject(tId, t1.name || t2.name);
       
       const keys = PARTY_KEYS;
       keys.forEach(k => {
@@ -575,6 +572,7 @@ function calculateAggregates(converted) {
     
     calculatePercentages(totalData.total);
     totalData.total.participacion = Math.round((totalData.total.votos / TOTAL_VOTERS) * 100);
+    totalData.total.escrutada = totalData.total.votos > 0;
     
     console.log(`  ✓ ${tipo} total: ${totalData.total.votos} votes`);
   });
@@ -586,13 +584,14 @@ function calculateAggregates(converted) {
   // First calculate dia1 and dia2 percentages
   ['dia1', 'dia2'].forEach(dia => {
     Object.values(converted[dia].ppto.terri).forEach(t => calculatePercentages(t, true));
-    converted[dia].ppto.total = createDefaultObject('total', 'Total');
+    converted[dia].ppto.total = buildDefaultObject('total', 'Total');
     Object.values(converted[dia].ppto.terri).forEach(terri => {
       pptoKeys.forEach(k => {
         converted[dia].ppto.total[k] += terri[k];
       });
     });
     calculatePercentages(converted[dia].ppto.total, true);
+    converted[dia].ppto.total.escrutada = converted[dia].ppto.total.votos > 0;
   });
 
   // Then calculate combined
@@ -602,9 +601,9 @@ function calculateAggregates(converted) {
   ]);
   
   allPptoTerriIds.forEach(tId => {
-    const t1 = converted.dia1.ppto.terri[tId] || createDefaultObject(tId, tId);
-    const t2 = converted.dia2.ppto.terri[tId] || createDefaultObject(tId, tId);
-    const tTotal = pDataTotal.terri[tId] = createDefaultObject(tId, t1.name || t2.name);
+    const t1 = converted.dia1.ppto.terri[tId] || buildDefaultObject(tId, tId);
+    const t2 = converted.dia2.ppto.terri[tId] || buildDefaultObject(tId, tId);
+    const tTotal = pDataTotal.terri[tId] = buildDefaultObject(tId, t1.name || t2.name);
     
     pptoKeys.forEach(k => {
       tTotal[k] = t1[k] + t2[k];
@@ -612,13 +611,14 @@ function calculateAggregates(converted) {
     calculatePercentages(tTotal, true);
   });
 
-  pDataTotal.total = createDefaultObject('total', 'Total');
+  pDataTotal.total = buildDefaultObject('total', 'Total');
   Object.values(pDataTotal.terri).forEach(terri => {
     pptoKeys.forEach(k => {
       pDataTotal.total[k] += terri[k];
     });
   });
   calculatePercentages(pDataTotal.total, true);
+  pDataTotal.total.escrutada = pDataTotal.total.votos > 0;
   
   console.log(`  ✓ PPTO total: ${pDataTotal.total.votos} votes`);
 }

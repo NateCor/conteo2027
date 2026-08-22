@@ -17,10 +17,11 @@ export const defaultChartsOptions = {
   },
 };
 
-export function listaDefaultData() {
-  const activeParties = getActiveParties('lista');
-  const labels = [...activeParties.map(p => p.name), 'Blancos', 'Nulos'];
-  const colors = [...activeParties.map(p => p.color), '#FFFFFF', '#000000'];
+// Build placeholder pie data (equal slices) from an active party/project list.
+// Real values replace these once data.json loads.
+function defaultDataFor(activeItems) {
+  const labels = [...activeItems.map(p => p.name), 'Blancos', 'Nulos'];
+  const colors = [...activeItems.map(p => p.color), '#FFFFFF', '#000000'];
   const data = labels.map(() => 100 / labels.length);
   return {
     labels: labels,
@@ -31,37 +32,10 @@ export function listaDefaultData() {
       },
     ],
   };
-};
+}
 
-export function supDefaultData() {
-  const activeParties = getActiveParties('sup');
-  const labels = [...activeParties.map(p => p.name), 'Blancos', 'Nulos'];
-  const colors = [...activeParties.map(p => p.color), '#FFFFFF', '#000000'];
-  const data = labels.map(() => 100 / labels.length);
-  return {
-    labels: labels,
-    datasets: [
-      {
-        data: data,
-        backgroundColor: colors,
-      },
-    ],
-  };
-};
+export const listaDefaultData = () => defaultDataFor(getActiveParties('lista'));
 
-export function projectsDefaultData() {
-  const activeProjects = getActiveProjects();
-  const labels = [...activeProjects.map(p => p.name), 'Blancos', 'Nulos'];
-  const colors = [...activeProjects.map(p => p.color), '#FFFFFF', '#000000'];
-  const data = labels.map(() => 100 / labels.length);
-  
-  return {
-    labels: labels,
-    datasets: [
-      {
-        data: data,
-        backgroundColor: colors,
-      },
-    ],
-  };
-};
+export const supDefaultData = () => defaultDataFor(getActiveParties('sup'));
+
+export const projectsDefaultData = () => defaultDataFor(getActiveProjects());
