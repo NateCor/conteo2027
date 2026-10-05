@@ -103,7 +103,6 @@ $(document).ready(() => {
     votos: 0,
     votosve: 0,
     escrutada: false,
-    votosLabel: '',
   };
   let headerData = { 
     electionType: getElectionType(),

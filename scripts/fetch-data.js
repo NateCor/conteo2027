@@ -167,14 +167,9 @@ async function fetchData() {
   }
 
   const data = transformWorkbook(workbook);
-  fs.writeFileSync(OUTPUT_FILE, JSON.stringify(data, null, 2));
-  console.log('\n✓ Data transformed and saved to', OUTPUT_FILE);
-  console.log(`  Election type: ${data.electionType}`);
-  console.log(`  Active lista parties: ${data.activeParties.lista.join(', ')}`);
-  console.log(`  Active sup parties: ${data.activeParties.sup.join(', ')}`);
-  console.log(`  Active projects: ${data.activeParties.projects.join(', ')}`);
-  console.log(`  Total voters: ${data.totalVoters}`);
-  // CT parsing runs after validateExcel — surface its errors/warnings now
+
+  // CT parsing runs inside transformWorkbook — surface its errors BEFORE
+  // writing, so a rejected Excel never publishes a broken data.json.
   if (validationWarnings.length > 0) {
     console.log('\n[WARNINGS]:');
     validationWarnings.forEach(w => console.log(`  ⚠ ${w}`));
@@ -184,6 +179,14 @@ async function fetchData() {
     validationErrors.forEach(e => console.log(`  ✗ ${e}`));
     process.exit(1);
   }
+
+  fs.writeFileSync(OUTPUT_FILE, JSON.stringify(data, null, 2));
+  console.log('\n✓ Data transformed and saved to', OUTPUT_FILE);
+  console.log(`  Election type: ${data.electionType}`);
+  console.log(`  Active lista parties: ${data.activeParties.lista.join(', ')}`);
+  console.log(`  Active sup parties: ${data.activeParties.sup.join(', ')}`);
+  console.log(`  Active projects: ${data.activeParties.projects.join(', ')}`);
+  console.log(`  Total voters: ${data.totalVoters}`);
 }
 
 function validateExcel(workbook) {
