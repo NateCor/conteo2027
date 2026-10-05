@@ -22,10 +22,13 @@ function generateScss() {
   const seenKeys = new Set();
   const entries = [];
 
-  for (const party of ELECTION_CONFIG.parties.lista) {
-    if (!seenKeys.has(party.key)) {
-      entries.push({ key: party.key, color: party.color, name: party.displayName });
-      seenKeys.add(party.key);
+  // All party groups (lista, sup, ct) — sup-only and CT lists included
+  for (const group of ['lista', 'sup', 'ct']) {
+    for (const party of (ELECTION_CONFIG.parties[group] || [])) {
+      if (!seenKeys.has(party.key)) {
+        entries.push({ key: party.key, color: party.color, name: party.displayName });
+        seenKeys.add(party.key);
+      }
     }
   }
 

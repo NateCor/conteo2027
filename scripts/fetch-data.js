@@ -18,6 +18,13 @@ const ELECTION_CONFIG = JSON.parse(
 const TERRITORIES_CONFIG = JSON.parse(
   fs.readFileSync(path.join(ROOT_DIR, 'config', 'territories.json'), 'utf8')
 );
+// Per-territory padrón (Tricel). Optional: falls back to 0 participation
+// per territory when the file doesn't exist yet.
+const PADRON_PATH = path.join(ROOT_DIR, 'config', 'padron.json');
+const PADRON = fs.existsSync(PADRON_PATH)
+  ? JSON.parse(fs.readFileSync(PADRON_PATH, 'utf8'))
+  : null;
+const PADRON_TERRI = (PADRON && PADRON.totalPorTerritorio) || {};
 
 const SHEET_URL = process.env.SHEET_URL;
 const CACHE_FILE = path.join(ROOT_DIR, 'temp', 'last_count.xlsx');
@@ -566,8 +573,11 @@ function calculateAggregates(converted) {
         tTotal[k] = t1[k] + t2[k];
       });
       calculatePercentages(tTotal);
-      // No per-territory participation (no eligible voter data available)
-      tTotal.participacion = 0;
+      // Participation per territory from the Tricel padrón (config/padron.json)
+      const terriPadron = PADRON_TERRI[tId] || 0;
+      tTotal.participacion = terriPadron > 0
+        ? Math.round((tTotal.votos / terriPadron) * 100)
+        : 0;
     });
     
     calculatePercentages(totalData.total);

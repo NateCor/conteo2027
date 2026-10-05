@@ -1,11 +1,11 @@
 {
   "election": {
-    "name": "Elecciones FEUC 2026",
-    "year": 2026,
+    "name": "Elecciones FEUC 2027",
+    "year": 2027,
     "round": "Primera Vuelta",
-    "totalVoters": 26501,
-    "lastUpdated": "2026-04-25",
-    "notes": "First round election - all parties participate"
+    "totalVoters": 30845,
+    "lastUpdated": "2026-10-04",
+    "notes": "Padrón Tricel oct 2026: 30.845 estudiantes matriculados, todos habilitados para votar."
   },
   "parties": {
     "lista": [
@@ -41,7 +41,7 @@
         "key": "proy",
         "excelNames": ["Avanzar"],
         "displayName": "Avanzar",
-        "color": "#3EACDE",
+        "color": "#002060",
         "active": false
       }
     ],
@@ -78,9 +78,27 @@
         "key": "proy",
         "excelNames": ["Avanzar"],
         "displayName": "Avanzar",
-        "color": "#3EACDE",
+        "color": "#002060",
+        "active": false
+      },
+      {
+        "key": "cero",
+        "excelNames": ["0%"],
+        "displayName": "0%",
+        "color": "#FFD700",
         "active": false
       }
+    ],
+    "ct": [
+      { "key": "elp", "excelNames": ["1A"], "displayName": "1A", "color": "#e9841d", "active": true },
+      { "key": "sdd", "excelNames": ["Solidaridad"], "displayName": "Solidaridad", "color": "#E01E25", "active": true },
+      { "key": "proy", "excelNames": ["Avanzar"], "displayName": "Avanzar", "color": "#002060", "active": true },
+      { "key": "lib", "excelNames": ["Liberales"], "displayName": "Liberales", "color": "#3EACDE", "active": true },
+      { "key": "nau", "excelNames": ["NAU"], "displayName": "NAU", "color": "#6fd528", "active": true },
+      { "key": "bus", "excelNames": ["BUS"], "displayName": "BUS", "color": "#B7413E", "active": true },
+      { "key": "surg", "excelNames": ["Surgencia"], "displayName": "Surgencia", "color": "#8E44AD", "active": true },
+      { "key": "mg", "excelNames": ["Amanecer"], "displayName": "Amanecer", "color": "#FFC0CB", "active": true },
+      { "key": "ind", "excelNames": ["Independientes"], "displayName": "Independientes", "color": "#808080", "active": true }
     ]
   },
   "projects": [
@@ -141,7 +159,7 @@
       "active": false
     },
     {
-      "key": "proy",
+      "key": "pry",
       "excelNames": ["Proyecta"],
       "displayName": "Proyecta",
       "color": "#3EACDE",
