@@ -30,6 +30,18 @@ const SHEET_URL = process.env.SHEET_URL;
 const CACHE_FILE = path.join(ROOT_DIR, 'temp', 'last_count.xlsx');
 const OUTPUT_FILE = path.join(ROOT_DIR, 'public', 'data.json');
 
+// SharePoint ":x:/g/personal/<user>/<id>" share links open the Excel Online
+// viewer (HTML), not the file. Rewrite them to the raw-download endpoint so
+// SHEET_URL works with the links the team actually has. Pass-through for
+// anything else (already-download URLs, other hosts).
+function normalizeSharePointUrl(url) {
+  const m = url.match(/^(https?:\/\/[^/]+)\/:x:\/g\/personal\/([^/]+)\/([^?/]+)/);
+  if (m) {
+    return `${m[1]}/personal/${m[2]}/_layouts/15/download.aspx?share=${m[3]}`;
+  }
+  return url;
+}
+
 // Parse command line arguments
 const args = process.argv.slice(2);
 const fileArgIndex = args.indexOf('--file');
@@ -128,12 +140,19 @@ async function fetchData() {
   else if (SHEET_URL) {
     try {
       console.log('Downloading Excel from:', SHEET_URL);
-      const response = await axios.get(SHEET_URL, { 
+      const response = await axios.get(normalizeSharePointUrl(SHEET_URL), {
         responseType: 'arraybuffer', 
         maxRedirects: 5,
-        timeout: 30000 
+        timeout: 30000,
+        // SharePoint rejects non-browser user agents with 403
+        headers: { 'User-Agent': 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0 Safari/537.36' }
       });
       buffer = response.data;
+      if (!buffer || buffer.length < 4 || buffer[0] !== 0x50 || buffer[1] !== 0x4b) {
+        console.error('[ERROR] The download is not a .xlsx workbook (got an HTML page).');
+        console.error('  → For SharePoint: use the ":x:/g/personal/..." share link (auto-converted) or a direct-download URL.');
+        process.exit(1);
+      }
       fs.writeFileSync(CACHE_FILE, Buffer.from(buffer));
       console.log('Downloaded and cached successfully.');
     } catch (error) {
@@ -156,6 +175,15 @@ async function fetchData() {
     console.error('[ERROR] No file source available.');
     console.error('  → Either provide SHEET_URL in .env or use --file flag');
     console.error('  → Example: npm run fetch-data -- --file temp/test.xlsx');
+    process.exit(1);
+  }
+
+  // Guard: anything that isn't a real xlsx (an HTML viewer page, a login
+  // screen, a truncated download) would otherwise crash deep inside the
+  // xlsx parser with a confusing message.
+  if (!buffer || buffer.length < 4 || buffer[0] !== 0x50 || buffer[1] !== 0x4b) {
+    console.error('[ERROR] The file is not a valid .xlsx workbook.');
+    console.error('  If using SHEET_URL: the link must be a direct download or a SharePoint share link.');
     process.exit(1);
   }
 
