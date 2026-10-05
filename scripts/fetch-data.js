@@ -266,7 +266,8 @@ function validateExcel(workbook) {
     knownColumns.add('Mesa');
     
     headers.forEach(header => {
-      if (header && !knownColumns.has(header)) {
+      // "Mesas Escrutadas"/"Mesas Escrutada" carry per-day count checkboxes
+      if (header && !knownColumns.has(header) && !String(header).startsWith('Mesas Escrutada')) {
         validationErrors.push(`Unknown column "${header}" in ${sheetMap[type]}. Add it to config/election.json first!`);
       }
     });
@@ -385,6 +386,25 @@ function parseMainSheet(sheet, converted, tipo) {
   const dayRow = rows[1];
   let lastTerritory = null;
 
+  // "Mesas Escrutadas" / "Mesas Escrutada": per-day count flags (checkboxes).
+  // Directiva writes real booleans, Consejería Superior writes ☐/☑ marks.
+  let escrutadaD1 = -1;
+  for (let c = 3; c < headers.length; c++) {
+    const h = headers[c];
+    if (typeof h === 'string' && h.startsWith('Mesas Escrutada')) {
+      escrutadaD1 = c;
+      break;
+    }
+  }
+  const toBool = (v) => {
+    if (v === true || v === 1) return true;
+    if (typeof v === 'string') {
+      const s = v.trim().toLowerCase();
+      return s === '☑' || s === 'x' || s === 'true' || s === 'si' || s === 'sí';
+    }
+    return false;
+  };
+
   for (let i = 2; i < rows.length; i++) {
     const row = rows[i];
     let rawTerritory = row[1];
@@ -421,6 +441,12 @@ function parseMainSheet(sheet, converted, tipo) {
     if (!converted.dia2[tipo].mesa[mesaId]) {
       converted.dia2[tipo].mesa[mesaId] = buildDefaultObject(mesaId, rawMesa);
       converted.dia2[tipo].mesa[mesaId].territoryId = territoryId;
+    }
+
+    // Real per-day count flags from the sheet (when the columns exist)
+    if (escrutadaD1 !== -1) {
+      converted.dia1[tipo].mesa[mesaId].escrutadaRaw = toBool(row[escrutadaD1]);
+      converted.dia2[tipo].mesa[mesaId].escrutadaRaw = toBool(row[escrutadaD1 + 1]);
     }
 
     // Use dayRow.length instead of headers.length to include all data columns
@@ -735,7 +761,11 @@ function calculateAggregates(converted) {
         });
         
         calculatePercentages(mesa, keys);
-        mesa.escrutada = mesa.votos > 0;
+        // Real count flag from the sheet when present, else votes>0 heuristic
+        mesa.escrutada = Object.prototype.hasOwnProperty.call(mesa, 'escrutadaRaw')
+          ? mesa.escrutadaRaw
+          : mesa.votos > 0;
+        delete mesa.escrutadaRaw;
       });
 
       Object.values(dayData.terri).forEach(t => calculatePercentages(t, keys));

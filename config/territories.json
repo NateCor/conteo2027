@@ -2,7 +2,7 @@
   "metadata": {
     "description": "Territory and Mesa mappings - update when university structure changes",
     "lastUpdated": "2026-04-25",
-    "notes": "Territories rarely change. Mesas may change if university creates/closes departments. Note: 'Gobierno' and 'Sociales y Teología' both map to 'soc' (intentional — they are aggregated into the same territory on the dashboard)."
+    "notes": "Territories rarely change. Mesas may change if university creates/closes departments. Gobierno (official name: Administración Pública) is its own territory as of the Tricel 2027 list — no longer aggregated into 'soc'."
   },
   "territories": {
     "Agronomía y Sistemas Naturales": "agro",
@@ -16,7 +16,9 @@
     "Derecho": "der",
     "Educación": "educa",
     "Enfermería": "enf",
-    "Gobierno": "soc",
+    "Gobierno": "gob",
+    "Administración Pública": "gob",
+    "Administracion Publica": "gob",
     "Humanidades": "hum",
     "Ingeniería": "ing",
     "Lo Contador": "loconta",
@@ -84,7 +86,7 @@
     "Sociales 1": "soc1",
     "Sociales 2": "soc2",
     "Sociales 3": "soc3",
-    "Sociología 1": "soc1",
+    "Sociología 1": "socio1",
     "Campus Villarica": "vill"
   }
 }

@@ -3,9 +3,9 @@
     "name": "Elecciones FEUC 2027",
     "year": 2027,
     "round": "Primera Vuelta",
-    "totalVoters": 30845,
-    "lastUpdated": "2026-10-04",
-    "notes": "Padrón Tricel oct 2026: 30.845 estudiantes matriculados, todos habilitados para votar."
+    "totalVoters": 30668,
+    "lastUpdated": "2026-10-05",
+    "notes": "Padrón Tricel oct 2026: 30.845 matriculados, menos 177 de bachillerato (no votan) = 30.668 habilitados."
   },
   "parties": {
     "lista": [
@@ -83,7 +83,7 @@
       },
       {
         "key": "cero",
-        "excelNames": ["0%"],
+        "excelNames": ["Trinidad y Amanda", "0%"],
         "displayName": "0%",
         "color": "#FFD700",
         "active": false

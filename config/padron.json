@@ -1,647 +1,710 @@
 {
   "metadata": {
-    "source": "Tricel — Consolidado Elecciones FEUC 2027, por carrera.xlsx (oct 2026)",
-    "generated": "2026-10-04",
-    "status": "BORRADOR con supuestos — pendiente mapeo oficial Carreras→Territorios",
-    "totalVoters": 30845,
-    "assumptions": [
-      "Artes (Actuación, Música, Intérprete, Arte, Estética) → 'oriente' — SUPUESTO BAJA, confirmar",
-      "Planificación Urbana → 'loconta' — SUPUESTO BAJA, confirmar",
-      "Administración Pública → 'soc' (mesa Gobierno agregada al sitio) — confirmar",
-      "Gobierno se agrega a 'soc' en el sitio (igual que el ciclo pasado)"
+    "source": "Tricel — Consolidado Elecciones FEUC 2027, por carrera.xlsx + lista oficial de territorios (oct 2026)",
+    "generated": "2026-10-05",
+    "status": "OFICIAL — mapeo Carreras→Territorios según Tricel; 3 filas marcadas 'media' para confirmar",
+    "totalMatriculados": 30845,
+    "totalHabilitados": 30668,
+    "excluidos": "Bachilleratos no votan ('bachillerato no cuenta en el conteo'): 5500/5502/5501/5503/3803 = 177 estudiantes",
+    "notes": [
+      "Gobierno (Excel) = Administración Pública (lista oficial) — territorio propio, ya no agregado a 'soc'",
+      "Ciencia de Datos (2300), Cs. de la Computación (0420) y Estadística (0620) → Ciencias Exactas según lista oficial, NO Ingeniería",
+      "Oriente = Actuación, Arte, Estética y Música (confirmado)",
+      "Lo Contador incluye Planificación Urbana (confirmado)",
+      "2104 'Pedagogía para Profesionales': padrón la marca Villa, lista oficial no la incluye en Villarrica → asignada a Educación (PFP); confirmar",
+      "6410/6413 (Lic Let/Lit): códigos hermanos de 6417/6418 → Humanidades; confirmar"
     ]
   },
   "totalPorTerritorio": {
+    "gob": 349,
     "agro": 1348,
-    "csbio": 744,
-    "salud": 2181,
-    "astrofismat": 727,
-    "soc": 1502,
-    "coll": 2946,
-    "comer": 2320,
-    "com": 671,
-    "constru": 984,
-    "der": 1831,
-    "educa": 2516,
-    "enf": 637,
-    "hum": 1262,
-    "ing": 5352,
     "loconta": 1988,
-    "med": 735,
-    "odonto": 432,
     "oriente": 860,
+    "csbio": 744,
+    "comer": 2320,
     "psi": 834,
+    "soc": 1150,
+    "coll": 2780,
+    "com": 671,
+    "der": 1831,
+    "educa": 2531,
+    "hum": 1262,
+    "astrofismat": 1385,
+    "ing": 4694,
+    "constru": 984,
+    "med": 735,
+    "salud": 2181,
+    "enf": 637,
+    "odonto": 432,
     "quim": 680,
-    "vill": 295
+    "vill": 272
   },
   "carreras": [
     {
+      "cod": "1901",
+      "nombre": "Administracion Publica",
+      "est": 349,
+      "territorio": "gob",
+      "territorioOficial": "Administración Pública",
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
       "cod": "1100",
       "nombre": "Agronomía e Ing Forestal",
-      "estudiantes": 1029,
+      "est": 1029,
       "territorio": "agro",
+      "territorioOficial": "Agronomía",
       "confianza": "alta",
       "nota": ""
     },
     {
       "cod": "1140",
       "nombre": "Ing en Recursos Naturales",
-      "estudiantes": 319,
+      "est": 319,
       "territorio": "agro",
-      "confianza": "alta",
-      "nota": "mesa 'Recursos'"
-    },
-    {
-      "cod": "1214",
-      "nombre": "Biologia Marina",
-      "estudiantes": 170,
-      "territorio": "csbio",
-      "confianza": "alta",
-      "nota": ""
-    },
-    {
-      "cod": "1203",
-      "nombre": "Bioquímica, Lic",
-      "estudiantes": 261,
-      "territorio": "csbio",
-      "confianza": "media",
-      "nota": ""
-    },
-    {
-      "cod": "1201",
-      "nombre": "Ciencias Biologicas",
-      "estudiantes": 205,
-      "territorio": "csbio",
-      "confianza": "alta",
-      "nota": ""
-    },
-    {
-      "cod": "1202",
-      "nombre": "Ciencias Biológicas",
-      "estudiantes": 108,
-      "territorio": "csbio",
-      "confianza": "alta",
-      "nota": ""
-    },
-    {
-      "cod": "1602",
-      "nombre": "Fonoaudiología",
-      "estudiantes": 325,
-      "territorio": "salud",
-      "confianza": "alta",
-      "nota": "mesa Fono-Nutri"
-    },
-    {
-      "cod": "1601",
-      "nombre": "Kinesiología",
-      "estudiantes": 471,
-      "territorio": "salud",
-      "confianza": "alta",
-      "nota": "mesa Kine"
-    },
-    {
-      "cod": "2400",
-      "nombre": "Medicina Veterinaria",
-      "estudiantes": 610,
-      "territorio": "salud",
-      "confianza": "alta",
-      "nota": "mesa Med. Vet. (cambió de csbio a salud este año)"
-    },
-    {
-      "cod": "1600",
-      "nombre": "Nutr y Diet",
-      "estudiantes": 366,
-      "territorio": "salud",
-      "confianza": "alta",
-      "nota": "mesa Fono-Nutri"
-    },
-    {
-      "cod": "1603",
-      "nombre": "Terapia Ocupacional",
-      "estudiantes": 409,
-      "territorio": "salud",
-      "confianza": "alta",
-      "nota": "mesa TO"
-    },
-    {
-      "cod": "0620",
-      "nombre": "Estadística",
-      "estudiantes": 212,
-      "territorio": "astrofismat",
-      "confianza": "alta",
-      "nota": ""
-    },
-    {
-      "cod": "0201",
-      "nombre": "Lic en Astronomia",
-      "estudiantes": 176,
-      "territorio": "astrofismat",
-      "confianza": "alta",
-      "nota": ""
-    },
-    {
-      "cod": "0600",
-      "nombre": "Lic en Matemática y Estadístic",
-      "estudiantes": 2,
-      "territorio": "astrofismat",
-      "confianza": "alta",
-      "nota": ""
-    },
-    {
-      "cod": "0300",
-      "nombre": "Licenciatura en Física",
-      "estudiantes": 175,
-      "territorio": "astrofismat",
-      "confianza": "alta",
-      "nota": ""
-    },
-    {
-      "cod": "0610",
-      "nombre": "Matemática",
-      "estudiantes": 162,
-      "territorio": "astrofismat",
-      "confianza": "alta",
-      "nota": ""
-    },
-    {
-      "cod": "9201",
-      "nombre": "Antropologia",
-      "estudiantes": 3,
-      "territorio": "soc",
-      "confianza": "alta",
-      "nota": "mesa Antropo-Arqueo-TS"
-    },
-    {
-      "cod": "9204",
-      "nombre": "Antropologia-Arqueologia",
-      "estudiantes": 374,
-      "territorio": "soc",
-      "confianza": "alta",
-      "nota": ""
-    },
-    {
-      "cod": "3803",
-      "nombre": "Bach en Teologia",
-      "estudiantes": 3,
-      "territorio": "soc",
-      "confianza": "alta",
-      "nota": "mesa Teología"
-    },
-    {
-      "cod": "3830",
-      "nombre": "Licenciatura en Teología",
-      "estudiantes": 99,
-      "territorio": "soc",
-      "confianza": "alta",
-      "nota": ""
-    },
-    {
-      "cod": "9100",
-      "nombre": "Sociologia",
-      "estudiantes": 328,
-      "territorio": "soc",
-      "confianza": "alta",
-      "nota": "mesa Sociología"
-    },
-    {
-      "cod": "3000",
-      "nombre": "Trabajo Social",
-      "estudiantes": 346,
-      "territorio": "soc",
-      "confianza": "alta",
-      "nota": "mesa Antropo-Arqueo-TS"
-    },
-    {
-      "cod": "1901",
-      "nombre": "Administracion Publica",
-      "estudiantes": 349,
-      "territorio": "soc",
-      "confianza": "media",
-      "nota": "mesa Gobierno agregada a soc en el sitio"
-    },
-    {
-      "cod": "5500",
-      "nombre": "Bach Ciencias Sociales",
-      "estudiantes": 46,
-      "territorio": "coll",
-      "confianza": "alta",
-      "nota": "College"
-    },
-    {
-      "cod": "5502",
-      "nombre": "Bach Ciencias Sociales",
-      "estudiantes": 8,
-      "territorio": "coll",
-      "confianza": "alta",
-      "nota": "College"
-    },
-    {
-      "cod": "5501",
-      "nombre": "Bach Cs Nat y Mat",
-      "estudiantes": 112,
-      "territorio": "coll",
-      "confianza": "alta",
-      "nota": "College, mesa C. Naturales SJ"
-    },
-    {
-      "cod": "0902",
-      "nombre": "Lic Arte y Humanid",
-      "estudiantes": 198,
-      "territorio": "coll",
-      "confianza": "alta",
-      "nota": "Licenciatura College"
-    },
-    {
-      "cod": "0900",
-      "nombre": "Lic Ccnn y Matematic",
-      "estudiantes": 1224,
-      "territorio": "coll",
-      "confianza": "alta",
-      "nota": "Licenciatura College"
-    },
-    {
-      "cod": "0901",
-      "nombre": "Lic Cs. Sociales",
-      "estudiantes": 1358,
-      "territorio": "coll",
-      "confianza": "alta",
-      "nota": "Licenciatura College, mesa Sociales-Arte SJ"
-    },
-    {
-      "cod": "0500",
-      "nombre": "Ingenieria Comercial",
-      "estudiantes": 2320,
-      "territorio": "comer",
-      "confianza": "alta",
-      "nota": ""
-    },
-    {
-      "cod": "2800",
-      "nombre": "Comunicaciones",
-      "estudiantes": 671,
-      "territorio": "com",
-      "confianza": "alta",
-      "nota": ""
-    },
-    {
-      "cod": "0100",
-      "nombre": "Construcción Civil",
-      "estudiantes": 984,
-      "territorio": "constru",
-      "confianza": "alta",
-      "nota": ""
-    },
-    {
-      "cod": "1700",
-      "nombre": "Derecho",
-      "estudiantes": 1831,
-      "territorio": "der",
-      "confianza": "alta",
-      "nota": ""
-    },
-    {
-      "cod": "2015",
-      "nombre": "Ed de Parvulos",
-      "estudiantes": 212,
-      "territorio": "educa",
-      "confianza": "alta",
-      "nota": "mesa Párvulo"
-    },
-    {
-      "cod": "2001",
-      "nombre": "P General Basica",
-      "estudiantes": 716,
-      "territorio": "educa",
-      "confianza": "alta",
-      "nota": "mesa Básica"
-    },
-    {
-      "cod": "2075",
-      "nombre": "Ped Ed Fis y Sal - Bas y Med",
-      "estudiantes": 372,
-      "territorio": "educa",
-      "confianza": "alta",
-      "nota": "mesa EFI"
-    },
-    {
-      "cod": "2070",
-      "nombre": "Ped Edu Media Ccnn",
-      "estudiantes": 94,
-      "territorio": "educa",
-      "confianza": "alta",
-      "nota": "mesa PEM"
-    },
-    {
-      "cod": "2071",
-      "nombre": "Ped Edu Media Fisica",
-      "estudiantes": 34,
-      "territorio": "educa",
-      "confianza": "alta",
-      "nota": "mesa PEM"
-    },
-    {
-      "cod": "2072",
-      "nombre": "Ped Edu Media Mate",
-      "estudiantes": 153,
-      "territorio": "educa",
-      "confianza": "alta",
-      "nota": "mesa PEM"
-    },
-    {
-      "cod": "2073",
-      "nombre": "Ped Edu Media Quimi",
-      "estudiantes": 74,
-      "territorio": "educa",
-      "confianza": "alta",
-      "nota": "mesa PEM"
-    },
-    {
-      "cod": "2078",
-      "nombre": "Ped Educ Parvularia",
-      "estudiantes": 201,
-      "territorio": "educa",
-      "confianza": "alta",
-      "nota": "mesa Párvulo"
-    },
-    {
-      "cod": "2074",
-      "nombre": "Ped Ingles Educ Bas y Med",
-      "estudiantes": 277,
-      "territorio": "educa",
-      "confianza": "alta",
-      "nota": "mesa PEI"
-    },
-    {
-      "cod": "2076",
-      "nombre": "Ped Rel Cat - Ed Bas y Med",
-      "estudiantes": 3,
-      "territorio": "educa",
-      "confianza": "alta",
-      "nota": ""
-    },
-    {
-      "cod": "2077",
-      "nombre": "Ped. Educacion Especial",
-      "estudiantes": 195,
-      "territorio": "educa",
-      "confianza": "alta",
-      "nota": "mesa Especial"
-    },
-    {
-      "cod": "2050",
-      "nombre": "Prog Formación Pedagógica",
-      "estudiantes": 185,
-      "territorio": "educa",
-      "confianza": "media",
-      "nota": ""
-    },
-    {
-      "cod": "1300",
-      "nombre": "Enfermería",
-      "estudiantes": 637,
-      "territorio": "enf",
-      "confianza": "alta",
-      "nota": ""
-    },
-    {
-      "cod": "4500",
-      "nombre": "Ciencia Política",
-      "estudiantes": 221,
-      "territorio": "hum",
-      "confianza": "alta",
-      "nota": "mesa 'Geo, Cipol, Historia'"
-    },
-    {
-      "cod": "5700",
-      "nombre": "Geografia",
-      "estudiantes": 238,
-      "territorio": "hum",
-      "confianza": "alta",
-      "nota": ""
-    },
-    {
-      "cod": "5600",
-      "nombre": "Historia",
-      "estudiantes": 266,
-      "territorio": "hum",
-      "confianza": "alta",
-      "nota": ""
-    },
-    {
-      "cod": "6410",
-      "nombre": "Lic en Let/Lit Hisp",
-      "estudiantes": 9,
-      "territorio": "hum",
-      "confianza": "alta",
-      "nota": "mesa Letras-Filosofía"
-    },
-    {
-      "cod": "6413",
-      "nombre": "Lic en Let/Lit Ingl",
-      "estudiantes": 5,
-      "territorio": "hum",
-      "confianza": "alta",
-      "nota": ""
-    },
-    {
-      "cod": "6702",
-      "nombre": "Licenciatura en Filosofía",
-      "estudiantes": 117,
-      "territorio": "hum",
-      "confianza": "alta",
-      "nota": ""
-    },
-    {
-      "cod": "6417",
-      "nombre": "Licenciatura Letras Hispanicas",
-      "estudiantes": 255,
-      "territorio": "hum",
-      "confianza": "alta",
-      "nota": ""
-    },
-    {
-      "cod": "6418",
-      "nombre": "Licenciatura Letras Inglesas",
-      "estudiantes": 151,
-      "territorio": "hum",
-      "confianza": "alta",
-      "nota": ""
-    },
-    {
-      "cod": "0400",
-      "nombre": "Ingenieria",
-      "estudiantes": 4694,
-      "territorio": "ing",
-      "confianza": "alta",
-      "nota": ""
-    },
-    {
-      "cod": "2300",
-      "nombre": "Lic en Ing Cs de Datos",
-      "estudiantes": 315,
-      "territorio": "ing",
-      "confianza": "alta",
-      "nota": ""
-    },
-    {
-      "cod": "0420",
-      "nombre": "Lic en Ing en Ciencia de Comp",
-      "estudiantes": 343,
-      "territorio": "ing",
+      "territorioOficial": "Agronomía",
       "confianza": "alta",
       "nota": ""
     },
     {
       "cod": "9400",
       "nombre": "Arquitectura",
-      "estudiantes": 916,
+      "est": 916,
       "territorio": "loconta",
+      "territorioOficial": "Lo Contador",
       "confianza": "alta",
-      "nota": "mesa Arq"
+      "nota": ""
     },
     {
       "cod": "5900",
       "nombre": "Diseño",
-      "estudiantes": 1063,
+      "est": 1063,
       "territorio": "loconta",
+      "territorioOficial": "Lo Contador",
       "confianza": "alta",
-      "nota": "mesa Diseño"
+      "nota": ""
     },
     {
       "cod": "9520",
       "nombre": "Planificación Urbana",
-      "estudiantes": 9,
+      "est": 9,
       "territorio": "loconta",
-      "confianza": "baja",
-      "nota": "Instituto de Estudios Urbanos está en Lo Contador; confirmar"
+      "territorioOficial": "Lo Contador",
+      "confianza": "alta",
+      "nota": "lista oficial: 'Planificación Urbana y Estudios Urbanos'"
+    },
+    {
+      "cod": "3400",
+      "nombre": "Actuacion",
+      "est": 199,
+      "territorio": "oriente",
+      "territorioOficial": "Oriente",
+      "confianza": "alta",
+      "nota": "lista oficial: Actuación, Arte, Estética y Música"
+    },
+    {
+      "cod": "3300",
+      "nombre": "Licenciatura en Arte",
+      "est": 364,
+      "territorio": "oriente",
+      "territorioOficial": "Oriente",
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "cod": "5101",
+      "nombre": "Licenciatura en Estética",
+      "est": 26,
+      "territorio": "oriente",
+      "territorioOficial": "Oriente",
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "cod": "7002",
+      "nombre": "Lic en Musica",
+      "est": 79,
+      "territorio": "oriente",
+      "territorioOficial": "Oriente",
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "cod": "7003",
+      "nombre": "Interprete Musical",
+      "est": 192,
+      "territorio": "oriente",
+      "territorioOficial": "Oriente",
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "cod": "1201",
+      "nombre": "Ciencias Biologicas",
+      "est": 205,
+      "territorio": "csbio",
+      "territorioOficial": "Ciencias Biológicas",
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "cod": "1202",
+      "nombre": "Ciencias Biológicas",
+      "est": 108,
+      "territorio": "csbio",
+      "territorioOficial": "Ciencias Biológicas",
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "cod": "1214",
+      "nombre": "Biologia Marina",
+      "est": 170,
+      "territorio": "csbio",
+      "territorioOficial": "Ciencias Biológicas",
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "cod": "1203",
+      "nombre": "Bioquímica, Lic",
+      "est": 261,
+      "territorio": "csbio",
+      "territorioOficial": "Ciencias Biológicas",
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "cod": "0500",
+      "nombre": "Ingenieria Comercial",
+      "est": 2320,
+      "territorio": "comer",
+      "territorioOficial": "Ingeniería Comercial",
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "cod": "2900",
+      "nombre": "Psicologia",
+      "est": 834,
+      "territorio": "psi",
+      "territorioOficial": "Psicología",
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "cod": "9100",
+      "nombre": "Sociologia",
+      "est": 328,
+      "territorio": "soc",
+      "territorioOficial": "Ciencias Sociales y Teología",
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "cod": "3000",
+      "nombre": "Trabajo Social",
+      "est": 346,
+      "territorio": "soc",
+      "territorioOficial": "Ciencias Sociales y Teología",
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "cod": "9201",
+      "nombre": "Antropologia",
+      "est": 3,
+      "territorio": "soc",
+      "territorioOficial": "Ciencias Sociales y Teología",
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "cod": "9204",
+      "nombre": "Antropologia-Arqueologia",
+      "est": 374,
+      "territorio": "soc",
+      "territorioOficial": "Ciencias Sociales y Teología",
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "cod": "3830",
+      "nombre": "Licenciatura en Teología",
+      "est": 99,
+      "territorio": "soc",
+      "territorioOficial": "Ciencias Sociales y Teología",
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "cod": "0902",
+      "nombre": "Lic Arte y Humanid",
+      "est": 198,
+      "territorio": "coll",
+      "territorioOficial": "College",
+      "confianza": "alta",
+      "nota": "lista oficial: 'Artes y Humanidades'"
+    },
+    {
+      "cod": "0901",
+      "nombre": "Lic Cs. Sociales",
+      "est": 1358,
+      "territorio": "coll",
+      "territorioOficial": "College",
+      "confianza": "alta",
+      "nota": "lista oficial: 'Ciencias Sociales'"
+    },
+    {
+      "cod": "0900",
+      "nombre": "Lic Ccnn y Matematic",
+      "est": 1224,
+      "territorio": "coll",
+      "territorioOficial": "College",
+      "confianza": "alta",
+      "nota": "lista oficial: 'Ciencias Naturales y Matemáticas'"
+    },
+    {
+      "cod": "2800",
+      "nombre": "Comunicaciones",
+      "est": 671,
+      "territorio": "com",
+      "territorioOficial": "Comunicaciones",
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "cod": "1700",
+      "nombre": "Derecho",
+      "est": 1831,
+      "territorio": "der",
+      "territorioOficial": "Derecho",
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "cod": "2001",
+      "nombre": "P General Basica",
+      "est": 716,
+      "territorio": "educa",
+      "territorioOficial": "Educación",
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "cod": "2015",
+      "nombre": "Ed de Parvulos",
+      "est": 212,
+      "territorio": "educa",
+      "territorioOficial": "Educación",
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "cod": "2050",
+      "nombre": "Prog Formación Pedagógica",
+      "est": 185,
+      "territorio": "educa",
+      "territorioOficial": "Educación",
+      "confianza": "alta",
+      "nota": "'Plan de Formación Pedagógica para Licenciados'"
+    },
+    {
+      "cod": "2070",
+      "nombre": "Ped Edu Media Ccnn",
+      "est": 94,
+      "territorio": "educa",
+      "territorioOficial": "Educación",
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "cod": "2071",
+      "nombre": "Ped Edu Media Fisica",
+      "est": 34,
+      "territorio": "educa",
+      "territorioOficial": "Educación",
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "cod": "2072",
+      "nombre": "Ped Edu Media Mate",
+      "est": 153,
+      "territorio": "educa",
+      "territorioOficial": "Educación",
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "cod": "2073",
+      "nombre": "Ped Edu Media Quimi",
+      "est": 74,
+      "territorio": "educa",
+      "territorioOficial": "Educación",
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "cod": "2074",
+      "nombre": "Ped Ingles Educ Bas y Med",
+      "est": 277,
+      "territorio": "educa",
+      "territorioOficial": "Educación",
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "cod": "2075",
+      "nombre": "Ped Ed Fis y Sal - Bas y Med",
+      "est": 372,
+      "territorio": "educa",
+      "territorioOficial": "Educación",
+      "confianza": "alta",
+      "nota": "'Pedagogía en Educación Física'"
+    },
+    {
+      "cod": "2076",
+      "nombre": "Ped Rel Cat - Ed Bas y Med",
+      "est": 3,
+      "territorio": "educa",
+      "territorioOficial": "Educación",
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "cod": "2077",
+      "nombre": "Ped. Educacion Especial",
+      "est": 195,
+      "territorio": "educa",
+      "territorioOficial": "Educación",
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "cod": "2078",
+      "nombre": "Ped Educ Parvularia",
+      "est": 201,
+      "territorio": "educa",
+      "territorioOficial": "Educación",
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "cod": "2104",
+      "nombre": "Pedagogía para Profesionales",
+      "est": 15,
+      "territorio": "educa",
+      "territorioOficial": "Educación",
+      "confianza": "media",
+      "nota": "padrón la marca 'Villa'; la lista oficial de Villarrica solo incluye Parvularia y PGB, y Educación incluye el Plan de Formación Pedagógica — confirmar"
+    },
+    {
+      "cod": "4500",
+      "nombre": "Ciencia Política",
+      "est": 221,
+      "territorio": "hum",
+      "territorioOficial": "Humanidades",
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "cod": "5600",
+      "nombre": "Historia",
+      "est": 266,
+      "territorio": "hum",
+      "territorioOficial": "Humanidades",
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "cod": "6702",
+      "nombre": "Licenciatura en Filosofía",
+      "est": 117,
+      "territorio": "hum",
+      "territorioOficial": "Humanidades",
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "cod": "5700",
+      "nombre": "Geografia",
+      "est": 238,
+      "territorio": "hum",
+      "territorioOficial": "Humanidades",
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "cod": "6417",
+      "nombre": "Licenciatura Letras Hispanicas",
+      "est": 255,
+      "territorio": "hum",
+      "territorioOficial": "Humanidades",
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "cod": "6418",
+      "nombre": "Licenciatura Letras Inglesas",
+      "est": 151,
+      "territorio": "hum",
+      "territorioOficial": "Humanidades",
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "cod": "6410",
+      "nombre": "Lic en Let/Lit Hisp",
+      "est": 9,
+      "territorio": "hum",
+      "territorioOficial": "Humanidades",
+      "confianza": "media",
+      "nota": "código hermano de 6417; confirmar"
+    },
+    {
+      "cod": "6413",
+      "nombre": "Lic en Let/Lit Ingl",
+      "est": 5,
+      "territorio": "hum",
+      "territorioOficial": "Humanidades",
+      "confianza": "media",
+      "nota": "código hermano de 6418; confirmar"
+    },
+    {
+      "cod": "0201",
+      "nombre": "Lic en Astronomia",
+      "est": 176,
+      "territorio": "astrofismat",
+      "territorioOficial": "Ciencias Exactas",
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "cod": "0300",
+      "nombre": "Licenciatura en Física",
+      "est": 175,
+      "territorio": "astrofismat",
+      "territorioOficial": "Ciencias Exactas",
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "cod": "0610",
+      "nombre": "Matemática",
+      "est": 162,
+      "territorio": "astrofismat",
+      "territorioOficial": "Ciencias Exactas",
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "cod": "0600",
+      "nombre": "Lic en Matemática y Estadístic",
+      "est": 2,
+      "territorio": "astrofismat",
+      "territorioOficial": "Ciencias Exactas",
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "cod": "2300",
+      "nombre": "Lic en Ing Cs de Datos",
+      "est": 315,
+      "territorio": "astrofismat",
+      "territorioOficial": "Ciencias Exactas",
+      "confianza": "alta",
+      "nota": "Ciencia de Datos → Exactas según lista oficial (no Ingeniería)"
+    },
+    {
+      "cod": "0420",
+      "nombre": "Lic en Ing en Ciencia de Comp",
+      "est": 343,
+      "territorio": "astrofismat",
+      "territorioOficial": "Ciencias Exactas",
+      "confianza": "alta",
+      "nota": "Cs. de la Computación → Exactas según lista oficial"
+    },
+    {
+      "cod": "0620",
+      "nombre": "Estadística",
+      "est": 212,
+      "territorio": "astrofismat",
+      "territorioOficial": "Ciencias Exactas",
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "cod": "0400",
+      "nombre": "Ingenieria",
+      "est": 4694,
+      "territorio": "ing",
+      "territorioOficial": "Ingeniería",
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "cod": "0100",
+      "nombre": "Construcción Civil",
+      "est": 984,
+      "territorio": "constru",
+      "territorioOficial": "Construcción Civil",
+      "confianza": "alta",
+      "nota": ""
     },
     {
       "cod": "1400",
       "nombre": "Medicina",
-      "estudiantes": 735,
+      "est": 735,
       "territorio": "med",
+      "territorioOficial": "Medicina",
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "cod": "1602",
+      "nombre": "Fonoaudiología",
+      "est": 325,
+      "territorio": "salud",
+      "territorioOficial": "Ciencias de la Salud",
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "cod": "1601",
+      "nombre": "Kinesiología",
+      "est": 471,
+      "territorio": "salud",
+      "territorioOficial": "Ciencias de la Salud",
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "cod": "2400",
+      "nombre": "Medicina Veterinaria",
+      "est": 610,
+      "territorio": "salud",
+      "territorioOficial": "Ciencias de la Salud",
+      "confianza": "alta",
+      "nota": "lista oficial confirma Vet en Salud"
+    },
+    {
+      "cod": "1600",
+      "nombre": "Nutr y Diet",
+      "est": 366,
+      "territorio": "salud",
+      "territorioOficial": "Ciencias de la Salud",
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "cod": "1603",
+      "nombre": "Terapia Ocupacional",
+      "est": 409,
+      "territorio": "salud",
+      "territorioOficial": "Ciencias de la Salud",
+      "confianza": "alta",
+      "nota": ""
+    },
+    {
+      "cod": "1300",
+      "nombre": "Enfermería",
+      "est": 637,
+      "territorio": "enf",
+      "territorioOficial": "Enfermería",
       "confianza": "alta",
       "nota": ""
     },
     {
       "cod": "1500",
       "nombre": "Odontología",
-      "estudiantes": 432,
+      "est": 432,
       "territorio": "odonto",
-      "confianza": "alta",
-      "nota": ""
-    },
-    {
-      "cod": "3400",
-      "nombre": "Actuacion",
-      "estudiantes": 199,
-      "territorio": "oriente",
-      "confianza": "baja",
-      "nota": "Facultad de Artes: territorio asumido 'Oriente'; confirmar"
-    },
-    {
-      "cod": "7003",
-      "nombre": "Interprete Musical",
-      "estudiantes": 192,
-      "territorio": "oriente",
-      "confianza": "baja",
-      "nota": "Facultad de Artes: territorio asumido 'Oriente'; confirmar"
-    },
-    {
-      "cod": "7002",
-      "nombre": "Lic en Musica",
-      "estudiantes": 79,
-      "territorio": "oriente",
-      "confianza": "baja",
-      "nota": "Facultad de Artes: territorio asumido 'Oriente'; confirmar"
-    },
-    {
-      "cod": "3300",
-      "nombre": "Licenciatura en Arte",
-      "estudiantes": 364,
-      "territorio": "oriente",
-      "confianza": "baja",
-      "nota": "Facultad de Artes: territorio asumido 'Oriente'; confirmar"
-    },
-    {
-      "cod": "5101",
-      "nombre": "Licenciatura en Estética",
-      "estudiantes": 26,
-      "territorio": "oriente",
-      "confianza": "baja",
-      "nota": "Facultad de Artes: territorio asumido 'Oriente'; confirmar"
-    },
-    {
-      "cod": "2900",
-      "nombre": "Psicologia",
-      "estudiantes": 834,
-      "territorio": "psi",
+      "territorioOficial": "Odontología",
       "confianza": "alta",
       "nota": ""
     },
     {
       "cod": "1000",
       "nombre": "Quimica",
-      "estudiantes": 171,
+      "est": 171,
       "territorio": "quim",
+      "territorioOficial": "Química",
       "confianza": "alta",
       "nota": ""
     },
     {
       "cod": "1001",
       "nombre": "Quimica y Farmacia",
-      "estudiantes": 8,
+      "est": 8,
       "territorio": "quim",
-      "confianza": "alta",
-      "nota": "código duplicado con 0800 según padrón"
-    },
-    {
-      "cod": "0800",
-      "nombre": "Química y Farmacia",
-      "estudiantes": 501,
-      "territorio": "quim",
+      "territorioOficial": "Química",
       "confianza": "alta",
       "nota": ""
     },
     {
-      "cod": "5503",
-      "nombre": "Bach Cs Nat y Mat Vill",
-      "estudiantes": 8,
-      "territorio": "vill",
+      "cod": "0800",
+      "nombre": "Química y Farmacia",
+      "est": 501,
+      "territorio": "quim",
+      "territorioOficial": "Química",
       "confianza": "alta",
-      "nota": "fila marcada Villa"
+      "nota": ""
     },
     {
       "cod": "2102",
       "nombre": "Educ Parvularia",
-      "estudiantes": 59,
+      "est": 59,
       "territorio": "vill",
+      "territorioOficial": "Villarrica",
       "confianza": "alta",
       "nota": "fila marcada Villa"
     },
     {
       "cod": "2103",
       "nombre": "Educ Parvularia",
-      "estudiantes": 48,
+      "est": 48,
       "territorio": "vill",
+      "territorioOficial": "Villarrica",
       "confianza": "alta",
       "nota": "fila marcada Villa"
     },
     {
       "cod": "2101",
       "nombre": "Pedagogía General Básica",
-      "estudiantes": 165,
+      "est": 165,
       "territorio": "vill",
+      "territorioOficial": "Villarrica",
       "confianza": "alta",
       "nota": "fila marcada Villa"
+    }
+  ],
+  "excluidasBachillerato": [
+    {
+      "cod": "5500",
+      "nombre": "Bach Ciencias Sociales",
+      "est": 46
     },
     {
-      "cod": "2104",
-      "nombre": "Pedagogía para Profesionales",
-      "estudiantes": 15,
-      "territorio": "vill",
-      "confianza": "alta",
-      "nota": "fila marcada Villa"
+      "cod": "5502",
+      "nombre": "Bach Ciencias Sociales",
+      "est": 8
+    },
+    {
+      "cod": "5501",
+      "nombre": "Bach Cs Nat y Mat",
+      "est": 112
+    },
+    {
+      "cod": "5503",
+      "nombre": "Bach Cs Nat y Mat Vill",
+      "est": 8
+    },
+    {
+      "cod": "3803",
+      "nombre": "Bach en Teologia",
+      "est": 3
     }
   ]
 }
