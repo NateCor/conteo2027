@@ -77,10 +77,26 @@ $(document).ready(() => {
   let participacion = { terris: [] };
   let mesasEscrutadas = { mesas: [], actual: 0, total: 0 };
   // CT: per-territory candidates (day-aware display values)
+  // CT pie holds raw votes (unlike the other pies which hold percentages),
+  // so it needs its own tooltip: "Nombre: 382 votos (25.4%)".
   const chartCt = new Chart($('#ct'), {
     type: 'pie',
     data: listaDefaultData(),
-    options: defaultChartsOptions,
+    options: {
+      ...defaultChartsOptions,
+      tooltips: {
+        callbacks: {
+          label: function (tooltipItem, data) {
+            const vals = data.datasets[tooltipItem.datasetIndex].data;
+            const total = vals.reduce((s, v) => s + (v || 0), 0);
+            const val = vals[tooltipItem.index];
+            const lab = data.labels[tooltipItem.index];
+            const pct = total > 0 ? ((val / total) * 100).toFixed(1) : 0;
+            return `${lab}: ${val} votos (${pct}%)`;
+          },
+        },
+      },
+    },
   });
   let ctView = {
     candidates: [],
