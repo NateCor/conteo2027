@@ -20,11 +20,15 @@ const TERRITORIES_CONFIG = JSON.parse(
 const TERRITORY_MAP = TERRITORIES_CONFIG.territories;
 const MESA_MAP = TERRITORIES_CONFIG.mesas;
 
-// Build PARTY_MAP from election config (same logic as fetch-data.js)
+// Build PARTY_MAP from election config (same logic as fetch-data.js).
+// lista + sup: the CS contest can carry lists FEUC lacks (e.g. the
+// CS-only satirical list, whose sheet column is "Trinidad y Amanda").
 const PARTY_MAP = {};
-ELECTION_CONFIG.parties.lista.forEach(party => {
-  party.excelNames.forEach(name => {
-    PARTY_MAP[name.replace(/^>>/, '').trim()] = party.key;
+['lista', 'sup'].forEach(group => {
+  ELECTION_CONFIG.parties[group].forEach(party => {
+    party.excelNames.forEach(name => {
+      PARTY_MAP[name.replace(/^>>/, '').trim()] = party.key;
+    });
   });
 });
 PARTY_MAP['Blancos'] = 'b';
@@ -81,9 +85,29 @@ workbook.SheetNames.forEach((sheetName, sheetIndex) => {
   console.log(`Sheet ${sheetIndex + 1}: ${sheetName}`);
   console.log(`${'─'.repeat(60)}`);
 
-  // Skip Territorial sheets
+  // CT sheet: validate the "Candidaturas X" blocks against the CT registry
   if (sheetName.toLowerCase().includes('territorial')) {
-    console.log('   Skipping Territorial sheet (not supported)');
+    const sheet = workbook.Sheets[sheetName];
+    const rows = xlsx.utils.sheet_to_json(sheet, { header: 1 });
+    const headers = rows[0] || [];
+    const ctMap = {};
+    (ELECTION_CONFIG.parties.ct || []).forEach(party => {
+      party.excelNames.forEach(name => {
+        ctMap[name.replace(/^>>/, '').trim()] = party.key;
+      });
+    });
+    let blocks = 0;
+    headers.forEach(h => {
+      if (typeof h === 'string' && /^Candidaturas\s+/i.test(h)) {
+        const clean = h.replace(/^Candidaturas\s+/i, '').replace(/^>>/, '').trim();
+        if (ctMap[clean]) {
+          blocks++;
+        } else {
+          warnings.unmappedParties.add(h);
+        }
+      }
+    });
+    console.log(`   CT sheet: ${blocks} Candidaturas blocks validated`);
     return;
   }
 
@@ -153,7 +177,11 @@ workbook.SheetNames.forEach((sheetName, sheetIndex) => {
         // Strip >> prefix for comparison
         const header = rawHeader.replace(/^>>/, '').trim();
 
-        if (!isPpto && !PARTY_MAP[header]) {
+        // "Mesas Escrutadas"/"Mesas Escrutada" hold per-day count checkboxes,
+        // not party columns
+        const isEscrutadaCol = String(header).startsWith('Mesas Escrutada');
+
+        if (!isPpto && !isEscrutadaCol && !PARTY_MAP[header]) {
           warnings.unmappedParties.add(rawHeader);
         }
         if (isPpto && !PROJECT_MAP[header]) {
