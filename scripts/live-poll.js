@@ -52,13 +52,18 @@ setInterval(() => {
     cwd: ROOT_DIR,
     env: process.env,
     encoding: 'utf8',
-    timeout: (intervalSeconds - 1) * 1000 || 30000,
+    timeout: 30000,
   });
 
   if (res.status !== 0) {
     // Validation rejected the sheet (mid-edit) or download failed —
     // data.json is untouched, site keeps the last good data.
-    console.log(`[${stamp()}] poll ${polls}: fetch FAILED (exit ${res.status}) — data.json untouched`);
+    const why = res.signal ? `signal ${res.signal}` : `exit ${res.status}`;
+    console.log(`[${stamp()}] poll ${polls}: fetch FAILED (${why}) — data.json untouched`);
+    // Surface the reason: without this, a string of failures on the night
+    // is undiagnosable (network stall vs validation reject look identical).
+    const detail = String(res.stderr || res.stdout || '').trim().split('\n').slice(-3).join(' | ');
+    if (detail) console.log(`  ${detail.slice(0, 300)}`);
     return;
   }
 
