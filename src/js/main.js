@@ -4,7 +4,7 @@ import { getData, defaultObject } from './dataFetcher.js';
 import { defaultProjects } from './projectsArray.js';
 import rivets from 'rivets';
 import _ from 'underscore';
-import { getActiveProjects, getActiveParties, getElectionType, setRuntimeData, colorFor } from './config.js';
+import { getActiveProjects, getActiveParties, getAllParties, getElectionType, setRuntimeData, colorFor } from './config.js';
 
 import {
   defaultChartsOptions,
@@ -169,6 +169,18 @@ $(document).ready(() => {
     chart.update();
   };
 
+  // Party list for first-round displays: the FULL configured list per contest
+  // (every list that can run), merged with whatever the data detected, so the
+  // headers always reflect the full party list. Second round shows only the
+  // parties actually in the runoff.
+  const displayParties = (type) => {
+    const detected = getActiveParties(type);
+    if (!headerData.isFirstRound) return detected;
+    const byKey = {};
+    getAllParties(type).forEach(p => { byKey[p.key] = p; });
+    detected.forEach(p => { byKey[p.key] = p; });
+    return Object.values(byKey);
+  };
 
   updateHeaderVisibility();
   updatePptoVisibility();
@@ -305,17 +317,14 @@ $(document).ready(() => {
     let selectedTerri = $('form[name=selected-terri] select').val();
     let selectedPpto = $('form[name=selected-ppto] select').val();
 
-    const listaKeys = [...getActiveParties('lista').map(p => p.key + 'pc'), 'bpc', 'npc'];
-    const supKeys = [...getActiveParties('sup').map(p => p.key + 'pc'), 'bpc', 'npc'];
-
     if (sender === 'getData') {
       // Update election type from runtime data (may differ from config fallback)
       headerData.electionType = getElectionType();
       headerData.isFirstRound = headerData.electionType === 'firstRound';
 
       // Update chart labels and colors from active parties (may differ from fallback)
-      const activeLista = getActiveParties('lista');
-      const activeSup = getActiveParties('sup');
+      const activeLista = displayParties('lista');
+      const activeSup = displayParties('sup');
       const activeProjs = getActiveProjects();
       const listaLabels = [...activeLista.map(p => p.name), 'Blancos', 'Nulos'];
       const listaColors = [...activeLista.map(p => p.color), '#FFFFFF', '#000000'];
@@ -347,7 +356,7 @@ $(document).ready(() => {
 
       // Update header data with ranked parties
       const updateHeaderParties = (type) => {
-        const parties = getActiveParties(type);
+        const parties = displayParties(type);
         const total = mainData.total[type].total;
         return parties.map(p => ({
           key: p.key,
@@ -419,6 +428,12 @@ $(document).ready(() => {
 
       participacion.terris.sort((a, b) => b.pc - a.pc);
     }
+
+    // Computed AFTER the getData block refreshes isFirstRound, so these picks
+    // always match the chart labels set above (runoff data must not inherit
+    // the first-round full list).
+    const listaKeys = [...displayParties('lista').map(p => p.key + 'pc'), 'bpc', 'npc'];
+    const supKeys = [...displayParties('sup').map(p => p.key + 'pc'), 'bpc', 'npc'];
 
     if (sender !== 'mesa' && sender !== 'terri' && sender !== 'ppto') {
       totalLista = _.extendOwn(totalLista, mainData[diaTotal].lista.total);

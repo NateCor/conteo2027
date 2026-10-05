@@ -72,6 +72,16 @@ export function getActiveParties(type) {
     .filter(Boolean);
 }
 
+// Full configured party list for a contest type (every list that can run),
+// regardless of what the current data detected.
+export function getAllParties(type) {
+  return (electionConfig.parties[type] || []).map(p => ({
+    key: p.key,
+    name: p.displayName,
+    color: p.color
+  }));
+}
+
 // Export active projects for dynamic chart generation
 export function getActiveProjects() {
   if (runtimeData && runtimeData.activeParties && runtimeData.activeParties.projects) {

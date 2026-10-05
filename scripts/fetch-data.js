@@ -95,8 +95,11 @@ function buildCtListMap() {
 }
 const CT_LIST_MAP = buildCtListMap();
 
-// Derive key arrays from config (single source of truth)
-const PARTY_KEYS = [...ELECTION_CONFIG.parties.lista.map(p => p.key), 'b', 'n'];
+// Derive key arrays from config (single source of truth). Per contest type:
+// sup can carry keys lista lacks (e.g. the 2027 CS-only "0%" list), so the
+// aggregation must sum each contest with its own keys or those votes vanish.
+const LISTA_KEYS = [...ELECTION_CONFIG.parties.lista.map(p => p.key), 'b', 'n'];
+const SUP_KEYS = [...ELECTION_CONFIG.parties.sup.map(p => p.key), 'b', 'n'];
 const PROJECT_KEYS = [...ELECTION_CONFIG.projects.map(p => p.key), 'b', 'n'];
 
 // Ensure directories exist
@@ -691,10 +694,16 @@ function buildDefaultObject(id, name) {
     b: 0, bpc: 0, n: 0, npc: 0,
     votosve: 0, votos: 0, escrutada: false, participacion: 0,
   };
-  // Add all party keys
-  ELECTION_CONFIG.parties.lista.forEach(p => {
-    obj[p.key] = 0;
-    obj[p.key + 'pc'] = 0;
+  // Add all party keys (union of lista and sup — sup-only keys must exist on
+  // the object or parsing drops their votes to NaN)
+  const seen = new Set();
+  ['lista', 'sup'].forEach(group => {
+    ELECTION_CONFIG.parties[group].forEach(p => {
+      if (seen.has(p.key)) return;
+      seen.add(p.key);
+      obj[p.key] = 0;
+      obj[p.key + 'pc'] = 0;
+    });
   });
   // Add all project keys
   ELECTION_CONFIG.projects.forEach(p => {
@@ -706,6 +715,7 @@ function buildDefaultObject(id, name) {
 
 function calculateAggregates(converted) {
   ['lista', 'sup'].forEach(tipo => {
+    const keys = tipo === 'lista' ? LISTA_KEYS : SUP_KEYS;
     // Process each day
     ['dia1', 'dia2'].forEach(dia => {
       const dayData = converted[dia][tipo];
@@ -719,18 +729,17 @@ function calculateAggregates(converted) {
           dayData.terri[tId] = buildDefaultObject(tId, rawName);
         }
         
-        const keys = PARTY_KEYS;
         keys.forEach(k => {
           dayData.terri[tId][k] += mesa[k];
           totalObj[k] += mesa[k];
         });
         
-        calculatePercentages(mesa);
+        calculatePercentages(mesa, keys);
         mesa.escrutada = mesa.votos > 0;
       });
 
-      Object.values(dayData.terri).forEach(t => calculatePercentages(t));
-      calculatePercentages(totalObj);
+      Object.values(dayData.terri).forEach(t => calculatePercentages(t, keys));
+      calculatePercentages(totalObj, keys);
       totalObj.escrutada = totalObj.votos > 0;
     });
 
@@ -750,12 +759,11 @@ function calculateAggregates(converted) {
       const mTotal = totalData.mesa[mId] = buildDefaultObject(mId, m1.name || m2.name);
       mTotal.territoryId = m1.territoryId || m2.territoryId;
       
-      const keys = PARTY_KEYS;
       keys.forEach(k => {
         mTotal[k] = m1[k] + m2[k];
         totalData.total[k] += mTotal[k];
       });
-      calculatePercentages(mTotal);
+      calculatePercentages(mTotal, keys);
       mTotal.escrutada = m1.escrutada || m2.escrutada;
     });
 
@@ -770,11 +778,10 @@ function calculateAggregates(converted) {
       const t2 = converted.dia2[tipo].terri[tId] || buildDefaultObject(tId, tId);
       const tTotal = totalData.terri[tId] = buildDefaultObject(tId, t1.name || t2.name);
       
-      const keys = PARTY_KEYS;
       keys.forEach(k => {
         tTotal[k] = t1[k] + t2[k];
       });
-      calculatePercentages(tTotal);
+      calculatePercentages(tTotal, keys);
       // Participation per territory from the Tricel padrón (config/padron.json)
       const terriPadron = PADRON_TERRI[tId] || 0;
       tTotal.participacion = terriPadron > 0
@@ -782,7 +789,7 @@ function calculateAggregates(converted) {
         : 0;
     });
     
-    calculatePercentages(totalData.total);
+    calculatePercentages(totalData.total, keys);
     totalData.total.participacion = Math.round((totalData.total.votos / TOTAL_VOTERS) * 100);
     totalData.total.escrutada = totalData.total.votos > 0;
     
@@ -795,14 +802,14 @@ function calculateAggregates(converted) {
 
   // First calculate dia1 and dia2 percentages
   ['dia1', 'dia2'].forEach(dia => {
-    Object.values(converted[dia].ppto.terri).forEach(t => calculatePercentages(t, true));
+    Object.values(converted[dia].ppto.terri).forEach(t => calculatePercentages(t, PROJECT_KEYS));
     converted[dia].ppto.total = buildDefaultObject('total', 'Total');
     Object.values(converted[dia].ppto.terri).forEach(terri => {
       pptoKeys.forEach(k => {
         converted[dia].ppto.total[k] += terri[k];
       });
     });
-    calculatePercentages(converted[dia].ppto.total, true);
+    calculatePercentages(converted[dia].ppto.total, PROJECT_KEYS);
     converted[dia].ppto.total.escrutada = converted[dia].ppto.total.votos > 0;
   });
 
@@ -820,7 +827,7 @@ function calculateAggregates(converted) {
     pptoKeys.forEach(k => {
       tTotal[k] = t1[k] + t2[k];
     });
-    calculatePercentages(tTotal, true);
+    calculatePercentages(tTotal, PROJECT_KEYS);
   });
 
   pDataTotal.total = buildDefaultObject('total', 'Total');
@@ -829,15 +836,13 @@ function calculateAggregates(converted) {
       pDataTotal.total[k] += terri[k];
     });
   });
-  calculatePercentages(pDataTotal.total, true);
+  calculatePercentages(pDataTotal.total, PROJECT_KEYS);
   pDataTotal.total.escrutada = pDataTotal.total.votos > 0;
   
   console.log(`  ✓ PPTO total: ${pDataTotal.total.votos} votes`);
 }
 
-function calculatePercentages(obj, isPpto = false) {
-  const keys = isPpto ? PROJECT_KEYS : PARTY_KEYS;
-  
+function calculatePercentages(obj, keys) {
   const total = keys.reduce((sum, k) => sum + obj[k], 0);
   obj.votos = total;
   obj.votosve = total - (obj.b || 0) - (obj.n || 0);
