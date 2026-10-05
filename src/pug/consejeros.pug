@@ -1,0 +1,22 @@
+.box#ct-section
+  .title.is-3 Consejerías Territoriales
+  form(name='selected-ct')
+    p.control
+      select.input.is-large
+  +day-selector('ct-dia')
+  .columns#bind-ct
+    .column
+      .bar-graph.panel-graph
+        .bar-item(
+          rv-each-cand='candidates'
+          rv-addclass='cand.key'
+          class='project-bar-item'
+        )
+          .legend {cand.name}
+          .bar-holder
+            .bar(rv-width='cand.pc')
+          .percentage.is-wide {cand.votos} ({cand.pc}%)
+    .column
+      +canvas('ct')
+      +vote-counter
+        | escrutada

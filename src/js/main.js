@@ -4,7 +4,7 @@ import { getData, defaultObject } from './dataFetcher.js';
 import { defaultProjects } from './projectsArray.js';
 import rivets from 'rivets';
 import _ from 'underscore';
-import { getActiveProjects, getActiveParties, getElectionType, setRuntimeData } from './config.js';
+import { getActiveProjects, getActiveParties, getElectionType, setRuntimeData, colorFor } from './config.js';
 
 import {
   defaultChartsOptions,
@@ -76,6 +76,19 @@ $(document).ready(() => {
   let projects = _.extend({ projects: defaultProjects }, defaultObject);
   let participacion = { terris: [] };
   let mesasEscrutadas = { mesas: [], actual: 0, total: 0 };
+  // CT: per-territory candidates (day-aware display values)
+  const chartCt = new Chart($('#ct'), {
+    type: 'pie',
+    data: listaDefaultData(),
+    options: defaultChartsOptions,
+  });
+  let ctView = {
+    candidates: [],
+    votos: 0,
+    votosve: 0,
+    escrutada: false,
+    votosLabel: '',
+  };
   let headerData = { 
     electionType: getElectionType(),
     isFirstRound: getElectionType() === 'firstRound',
@@ -112,6 +125,7 @@ $(document).ready(() => {
   rivets.bind($('#bind-projects'), projects);
   rivets.bind($('#bind-mesas'), mesasEscrutadas);
   rivets.bind($('#bind-participacion'), participacion);
+  rivets.bind($('#bind-ct'), ctView);
   rivets.bind($('#bind-header'), headerData);
   rivets.bind($('#bind-second-round'), headerData);
 
@@ -166,12 +180,22 @@ $(document).ready(() => {
     'input[name=ppto-dia], form[name=selected-ppto] select',
     () => { if (mainData) { updateMainDataElements('ppto'); } });
 
+  $(document).on(
+    'change',
+    'input[name=ct-dia], form[name=selected-ct] select',
+    () => { if (mainData && mainData.ct) { updateCtElements(); } });
+
   function renderData() {
     getData()
       .then((object) => {
         setRuntimeData(object);
         mainData = object;
         updateMainDataElements('getData');
+        if (object.ct && object.ct.terriList && object.ct.terriList.length) {
+          populateCtSelector();
+          updateCtElements();
+        }
+        updateCtVisibility();
       })
       .catch((a) => {
         console.error(a);
@@ -187,6 +211,74 @@ $(document).ready(() => {
   }
 
   renderData();
+
+  // CT: fill the territory selector from the Excel's own territory names
+  const populateCtSelector = () => {
+    const $sel = $('form[name=selected-ct] select');
+    $sel.empty();
+    $sel.append('<option value="total">Total Universidad</option>');
+    mainData.ct.terriList.forEach((t) => {
+      $sel.append(`<option value="${t.id}">${t.name}</option>`);
+    });
+  };
+
+  const updateCtVisibility = () => {
+    const hasCt = !!(mainData && mainData.ct && mainData.ct.terriList && mainData.ct.terriList.length);
+    $('#ct-section').toggle(hasCt);
+  };
+
+  // CT: render candidates for the selected territory/day
+  const updateCtElements = () => {
+    const dia = $('input[name=ct-dia]:checked').val() || 'total';
+    const sel = $('form[name=selected-ct] select').val() || 'total';
+    const ct = mainData.ct;
+    const diaKey = dia === 'total' ? 'votos' : dia;
+
+    // Aggregate the selected scope: one territory or the whole university
+    const scope = sel === 'total' ? Object.values(ct.terri) : [ct.terri[sel]].filter(Boolean);
+    const byCandidate = {};
+    scope.forEach((t) => {
+      t.candidates.forEach((c) => {
+        const uid = `${t.id}|${c.id}`;
+        if (!byCandidate[uid]) {
+          byCandidate[uid] = {
+            name: sel === 'total' ? `${c.name} (${t.name})` : c.name,
+            key: c.key,
+            votes: 0,
+          };
+        }
+        byCandidate[uid].votes += c[diaKey] || 0;
+      });
+    });
+
+    const list = Object.values(byCandidate).sort((a, b) => b.votes - a.votes);
+    const validVotes = list.reduce((s, c) => s + c.votes, 0);
+    list.forEach((c) => {
+      c.pc = validVotes > 0 ? Math.round((c.votes / validVotes) * 100 * 100) / 100 : 0;
+      c.votos = c.votes;
+    });
+    ctView.candidates.splice(0, ctView.candidates.length, ...list);
+
+    let b = 0; let n = 0;
+    scope.forEach((t) => {
+      b += (dia === 'total' ? t.b.votos : t.b[dia]) || 0;
+      n += (dia === 'total' ? t.n.votos : t.n[dia]) || 0;
+    });
+    ctView.votos = validVotes + b + n;
+    ctView.votosve = validVotes;
+    ctView.escrutada = ctView.votos > 0;
+
+    // Pie: one slice per candidate, colored by their list
+    const labels = [...list.map((c) => c.name)];
+    const colors = [...list.map((c) => colorFor(c.key))];
+    const data = [...list.map((c) => c.votes)];
+    if (labels.length) {
+      chartCt.data.labels = labels;
+      chartCt.data.datasets[0].backgroundColor = colors;
+      chartCt.data.datasets[0].data = data.some((v) => v > 0) ? data : getDefaults(labels.length);
+      chartCt.update();
+    }
+  };
 
   const updateMainDataElements = (sender) => {
     let diaTotal = $('input[name=total-dia]:checked').val();

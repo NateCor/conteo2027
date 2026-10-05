@@ -81,6 +81,20 @@ function buildProjectMap() {
 const PARTY_MAP = buildPartyMap();
 const PROJECT_MAP = buildProjectMap();
 
+// CT lists share keys with lista where the list is the same; CT-only lists
+// (Liberales, BUS, Surgencia, Independientes) live in parties.ct.
+function buildCtListMap() {
+  const map = {};
+  (ELECTION_CONFIG.parties.ct || []).forEach(party => {
+    party.excelNames.forEach(name => {
+      const cleanName = name.replace(/^>>/, '').trim();
+      map[cleanName] = party.key;
+    });
+  });
+  return map;
+}
+const CT_LIST_MAP = buildCtListMap();
+
 // Derive key arrays from config (single source of truth)
 const PARTY_KEYS = [...ELECTION_CONFIG.parties.lista.map(p => p.key), 'b', 'n'];
 const PROJECT_KEYS = [...ELECTION_CONFIG.projects.map(p => p.key), 'b', 'n'];
@@ -160,6 +174,16 @@ async function fetchData() {
   console.log(`  Active sup parties: ${data.activeParties.sup.join(', ')}`);
   console.log(`  Active projects: ${data.activeParties.projects.join(', ')}`);
   console.log(`  Total voters: ${data.totalVoters}`);
+  // CT parsing runs after validateExcel — surface its errors/warnings now
+  if (validationWarnings.length > 0) {
+    console.log('\n[WARNINGS]:');
+    validationWarnings.forEach(w => console.log(`  ⚠ ${w}`));
+  }
+  if (validationErrors.length > 0) {
+    console.log('\n[ERRORS]:');
+    validationErrors.forEach(e => console.log(`  ✗ ${e}`));
+    process.exit(1);
+  }
 }
 
 function validateExcel(workbook) {
@@ -288,6 +312,7 @@ function transformWorkbook(workbook) {
     dia1: { lista: { mesa: {}, terri: {}, total: {} }, sup: { mesa: {}, terri: {}, total: {} }, ppto: { terri: {}, total: {} } },
     dia2: { lista: { mesa: {}, terri: {}, total: {} }, sup: { mesa: {}, terri: {}, total: {} }, ppto: { terri: {}, total: {} } },
     total: { lista: { mesa: {}, terri: {}, total: {} }, sup: { mesa: {}, terri: {}, total: {} }, ppto: { terri: {}, total: {} } },
+    ct: { terri: {}, total: { parties: [], b: { dia1: 0, dia2: 0, votos: 0 }, n: { dia1: 0, dia2: 0, votos: 0 }, votos: 0, votosve: 0, escrutada: false }, terriList: [] },
   };
 
   const sheetNames = workbook.SheetNames;
@@ -296,13 +321,14 @@ function transformWorkbook(workbook) {
   let listaSheetName = sheetNames[0];
   let supSheetName = sheetNames[1];
   let pptoSheetName = null;
+  let ctSheetName = null;
   
   sheetNames.forEach(name => {
     const lower = name.toLowerCase();
     
-    // Skip Territorial sheets (they contain "Candidaturas" prefixed names)
+    // CT sheet: per-territory candidates ("Candidaturas X" blocks)
     if (lower.includes('territorial')) {
-      console.log(`  Skipping sheet: ${name} (Territorial - not supported)`);
+      ctSheetName = name;
       return;
     }
     
@@ -319,11 +345,15 @@ function transformWorkbook(workbook) {
   console.log(`  Lista: ${listaSheetName}`);
   console.log(`  Sup: ${supSheetName}`);
   console.log(`  PPTO: ${pptoSheetName || '(not found)'}`);
+  console.log(`  CT: ${ctSheetName || '(not found)'}`);
 
   parseMainSheet(workbook.Sheets[listaSheetName], converted, 'lista');
   parseMainSheet(workbook.Sheets[supSheetName], converted, 'sup');
   if (pptoSheetName) {
     parsePptoSheet(workbook.Sheets[pptoSheetName], converted);
+  }
+  if (ctSheetName) {
+    parseCtSheet(workbook.Sheets[ctSheetName], converted);
   }
 
   calculateAggregates(converted);
@@ -480,6 +510,175 @@ function findPreviousHeader(headers, index) {
     if (headers[i]) return headers[i];
   }
   return null;
+}
+
+// ---------------------------------------------------------------------------
+// Consejerías Territoriales (CT) sheet parser
+//
+// Layout (verified against FEUC 2025 and 2026 Puclítico workbooks):
+//   Row 0: Campus | Territorio | Mesa | "Candidaturas <lista>" ×N | Blancos | Nulos
+//   Row 1: per block: Nombre | Dia 1 | Dia 2 | Total | Total Global
+//          (Blancos/Nulos blocks carry only Dia 1 | Dia 2)
+//   Data rows are grouped by territory (col 1 set on the territory's first row).
+//   Within a territory, each list block runs "candidate layers": the first
+//   layer shares rows with the mesas; extra candidates for the same list get
+//   their own rows below (mesa cols empty). A candidate's name appears on the
+//   FIRST row of their run and their votes continue on the rows below until
+//   the next name in the same block. "Total Global" (block+4) on the name row
+//   equals the sum of the run's Dia1+Dia2 (used as a cross-check).
+// ---------------------------------------------------------------------------
+function parseCtSheet(sheet, converted) {
+  if (!sheet) return;
+  const rows = xlsx.utils.sheet_to_json(sheet, { header: 1 });
+  if (rows.length < 3) return;
+
+  const headers = rows[0];
+
+  // Discover list blocks from "Candidaturas X" headers
+  const blocks = [];
+  for (let c = 3; c < headers.length; c++) {
+    const h = headers[c];
+    if (typeof h !== 'string') continue;
+    const cleanName = h.replace(/^Candidaturas\s+/i, '').replace(/^>>/, '').trim();
+    if (/^Candidaturas\s+/i.test(h)) {
+      const key = CT_LIST_MAP[cleanName];
+      if (!key) {
+        validationErrors.push(`CT: lista desconocida "${h}" en Consejerías Territoriales. Agregarla a config/election.json (parties.ct)`);
+        continue;
+      }
+      blocks.push({ key, name: cleanName, col: c });
+    }
+  }
+
+  // Blancos / Nulos day columns (Dia 1 | Dia 2)
+  let bCol = null;
+  let nCol = null;
+  for (let c = 3; c < headers.length; c++) {
+    if (headers[c] === 'Blancos') bCol = c;
+    if (headers[c] === 'Nulos') nCol = c;
+  }
+
+  if (blocks.length === 0) {
+    console.log('  ⚠ CT sheet has no "Candidaturas" blocks — skipped');
+    return;
+  }
+
+  // Group rows into territories
+  let current = null;
+  const territories = [];
+  for (let r = 2; r < rows.length; r++) {
+    const row = rows[r];
+    const rawTerri = row[1];
+    if (rawTerri != null && String(rawTerri).trim()) {
+      const name = String(rawTerri).trim();
+      current = {
+        // Key by the Excel's own territory name: CT contests are per-territory,
+        // so "Gobierno" must NOT merge into "Sociales y Teología" like the
+        // main-site map does for mesa totals.
+        id: name,
+        name,
+        candidates: [],
+        b: { dia1: 0, dia2: 0, votos: 0 },
+        n: { dia1: 0, dia2: 0, votos: 0 },
+        votos: 0,
+        votosve: 0,
+        escrutada: false,
+      };
+      territories.push(current);
+    }
+    if (!current) continue;
+
+    // Per-block candidate runs
+    blocks.forEach(blk => {
+      const nameVal = row[blk.col];
+      const d1 = parseInt(row[blk.col + 1]) || 0;
+      const d2 = parseInt(row[blk.col + 2]) || 0;
+      if (nameVal != null && String(nameVal).trim()) {
+        blk.nextId = (blk.nextId || 0) + 1;
+        const cand = {
+          id: `${blk.key}-${blk.nextId}`,
+          name: String(nameVal).trim(),
+          key: blk.key,
+          dia1: 0,
+          dia2: 0,
+          votos: 0,
+          pc: 0,
+          totalGlobalCell: parseInt(row[blk.col + 4]) || 0,
+        };
+        current.candidates.push(cand);
+      }
+      // Only accumulate into the run that belongs to THIS block
+      const run = [...current.candidates].reverse().find(c => c.key === blk.key);
+      if (run && (d1 || d2 || nameVal)) {
+        run.dia1 += d1;
+        run.dia2 += d2;
+      } else if (d1 || d2) {
+        validationWarnings.push(`CT fila ${r + 1}: votos sin candidato en la lista "${blk.name}"`);
+      }
+    });
+
+    // Blancos / Nulos (any row can carry them; layer rows usually empty)
+    if (bCol != null) {
+      current.b.dia1 += parseInt(row[bCol]) || 0;
+      current.b.dia2 += parseInt(row[bCol + 1]) || 0;
+    }
+    if (nCol != null) {
+      current.n.dia1 += parseInt(row[nCol]) || 0;
+      current.n.dia2 += parseInt(row[nCol + 1]) || 0;
+    }
+  }
+
+  // Finalize territories
+  territories.forEach(t => {
+    t.candidates.forEach(c => {
+      c.votos = c.dia1 + c.dia2;
+      if (c.totalGlobalCell && c.totalGlobalCell !== c.votos) {
+        validationWarnings.push(
+          `CT ${t.name} / ${c.name}: Total Global del Excel (${c.totalGlobalCell}) ≠ suma de días (${c.votos})`
+        );
+      }
+      delete c.totalGlobalCell;
+    });
+    t.b.votos = t.b.dia1 + t.b.dia2;
+    t.n.votos = t.n.dia1 + t.n.dia2;
+    t.votosve = t.candidates.reduce((s, c) => s + c.votos, 0);
+    t.votos = t.votosve + t.b.votos + t.n.votos;
+    t.escrutada = t.votos > 0;
+    // Percentages over valid votes (candidate share of the territory's valid votes)
+    t.candidates.forEach(c => {
+      c.pc = t.votosve > 0 ? Math.round((c.votos / t.votosve) * 100 * 100) / 100 : 0;
+    });
+    t.candidates.sort((a, b2) => b2.votos - a.votos);
+  });
+
+  // University-wide CT totals: aggregated per LIST (candidates differ per territory)
+  const byKey = {};
+  territories.forEach(t => {
+    t.candidates.forEach(c => {
+      if (!byKey[c.key]) byKey[c.key] = { key: c.key, dia1: 0, dia2: 0, votos: 0, pc: 0 };
+      byKey[c.key].dia1 += c.dia1;
+      byKey[c.key].dia2 += c.dia2;
+    });
+    converted.ct.total.b.dia1 += t.b.dia1;
+    converted.ct.total.b.dia2 += t.b.dia2;
+    converted.ct.total.n.dia1 += t.n.dia1;
+    converted.ct.total.n.dia2 += t.n.dia2;
+    converted.ct.terri[t.id] = t;
+    converted.ct.terriList.push({ id: t.id, name: t.name });
+  });
+  const totalVotosve = Object.values(byKey).reduce((s, p) => s + p.dia1 + p.dia2, 0);
+  Object.values(byKey).forEach(p => {
+    p.votos = p.dia1 + p.dia2;
+    p.pc = totalVotosve > 0 ? Math.round((p.votos / totalVotosve) * 100 * 100) / 100 : 0;
+  });
+  converted.ct.total.parties = Object.values(byKey).sort((a, b2) => b2.votos - a.votos);
+  converted.ct.total.b.votos = converted.ct.total.b.dia1 + converted.ct.total.b.dia2;
+  converted.ct.total.n.votos = converted.ct.total.n.dia1 + converted.ct.total.n.dia2;
+  converted.ct.total.votosve = totalVotosve;
+  converted.ct.total.votos = totalVotosve + converted.ct.total.b.votos + converted.ct.total.n.votos;
+  converted.ct.total.escrutada = converted.ct.total.votos > 0;
+
+  console.log(`  ✓ CT: ${territories.length} territories, ${Object.keys(byKey).length} lists, ${converted.ct.total.votos} votes`);
 }
 
 // Build default object dynamically from config (single source of truth)

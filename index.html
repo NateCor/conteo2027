@@ -527,6 +527,42 @@
             </div>
           </div>
         </div>
+        <div class="box" id="ct-section">
+          <div class="title is-3">Consejerías Territoriales</div>
+          <form name="selected-ct">
+            <p class="control">
+              <select class="input is-large"></select>
+            </p>
+          </form>
+          <div class="day-selector">
+            <input type="radio" name="ct-dia" value="dia1" id="ct-dia-dia1">
+            <label for="ct-dia-dia1"><span class="icon">📅</span>Día 1</label>
+            <input type="radio" name="ct-dia" value="dia2" id="ct-dia-dia2">
+            <label for="ct-dia-dia2"><span class="icon">📆</span>Día 2</label>
+            <input type="radio" name="ct-dia" value="total" id="ct-dia-total" checked>
+            <label for="ct-dia-total"><span class="icon">🗓</span>Ambos días</label>
+          </div>
+          <div class="columns" id="bind-ct">
+            <div class="column">
+              <div class="bar-graph panel-graph">
+                <div class="bar-item project-bar-item" rv-each-cand="candidates" rv-addclass="cand.key">
+                  <div class="legend">{cand.name}</div>
+                  <div class="bar-holder">
+                    <div class="bar" rv-width="cand.pc"></div>
+                  </div>
+                  <div class="percentage is-wide">{cand.votos} ({cand.pc}%)</div>
+                </div>
+              </div>
+            </div>
+            <div class="column">
+              <div class="chartgraph">
+                <canvas id="ct"></canvas>
+              </div>
+              <div class="vote-counter">votos: {votos} - válidos: {votosve} <span rv-if="escrutada"><span class="tag is-small is-info">escrutada</span></span><span rv-unless="escrutada"><span class="tag is-small">no escrutada</span></span>
+              </div>
+            </div>
+          </div>
+        </div>
         <div class="box" id="bind-ppto-section">
           <div class="title is-3">Presupuesto Participativo</div>
           <form name="selected-ppto">

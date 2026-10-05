@@ -48,6 +48,10 @@
       align-self: center;
     }
 
+    .percentage.is-wide {
+      flex: 0 0 110px;
+    }
+
     .bar-holder {
       flex: 1;
       height: 25px;

@@ -13,6 +13,14 @@ export const PARTY_CONFIG = {
 // Build project configuration from election config
 export const PROJECT_CONFIG = buildProjectMap(electionConfig.projects);
 
+// Global key → color map across all party groups and projects
+const COLOR_BY_KEY = {};
+['lista', 'sup', 'ct'].forEach(group => {
+  (electionConfig.parties[group] || []).forEach(p => { COLOR_BY_KEY[p.key] = p.color; });
+});
+electionConfig.projects.forEach(p => { COLOR_BY_KEY[p.key] = p.color; });
+export const colorFor = (key) => COLOR_BY_KEY[key] || '#888';
+
 // Runtime data from data.json (null until loaded)
 let runtimeData = null;
 
