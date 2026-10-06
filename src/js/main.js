@@ -14,13 +14,37 @@ import {
   projectsDefaultData,
 } from './chartVars.js';
 
-// Chart.js global configuration
+// Chart.js global configuration. Slice borders follow the theme: light grey
+// on light, a lighter grey on dark so navy/black slices keep their outline.
+const ARC_BORDER = { light: '#ddd', dark: '#8b8f9c' };
+const isDark = () => document.documentElement.classList.contains('dark');
 Chart.defaults.global.elements.arc.borderWidth = 2;
-Chart.defaults.global.elements.arc.borderColor = '#ddd';
+Chart.defaults.global.elements.arc.borderColor = isDark() ? ARC_BORDER.dark : ARC_BORDER.light;
 
 const getDefaults = (n) => Array(n).fill(100 / n);
 
 $(document).ready(() => {
+
+  // Theme switch: light by default for everyone; the viewer's choice is
+  // saved and restored. The OS dark setting is deliberately ignored.
+  const applyTheme = (dark) => {
+    document.documentElement.classList.toggle('dark', dark);
+    // Switch shows its state (on = dark); the label always names the mode
+    // it controls, so it reads the same in both themes.
+    $('#theme-toggle').attr('aria-checked', dark ? 'true' : 'false');
+    const border = dark ? ARC_BORDER.dark : ARC_BORDER.light;
+    Chart.defaults.global.elements.arc.borderColor = border;
+    Object.values(Chart.instances).forEach((c) => {
+      c.options.elements.arc.borderColor = border;
+      c.update(0);
+    });
+  };
+  applyTheme(isDark());
+  $('#theme-toggle').on('click', () => {
+    const dark = !isDark();
+    try { localStorage.setItem('theme', dark ? 'dark' : 'light'); } catch (e) {}
+    applyTheme(dark);
+  });
 
   let mainData;
 

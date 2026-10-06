@@ -1,0 +1,173 @@
+// Dark theme. Activated by `html.dark` (set before first paint by the
+// inline script in head.pug: saved choice, else the OS preference).
+//
+// Rules:
+// - Party colors never change. Where a color sinks into the dark background
+//   (Avanzar navy #002060 ≈ 1.2:1, Nulos black), a thin light outline keeps
+//   the shape visible instead of recoloring it.
+// - The hero stays brand cyan with white text in both themes.
+// - Neutral surfaces use El PUClítico's own near-black (#0f0e17), so dark
+//   mode reads as their site, not a generic dark theme.
+
+$dk-bg: #0f0e17;          // elpuclitico.cl near-black
+$dk-surface: #1a1924;     // boxes, inputs
+$dk-surface-2: #252431;   // pills, tags, day buttons
+$dk-surface-3: #302f3d;   // hover
+$dk-border: #4a4958;
+$dk-text: #d9dbe2;
+$dk-text-strong: #f3f4f7;
+$dk-text-muted: #b4b8c4;
+$dk-outline: rgba(255, 255, 255, 0.4);
+
+html.dark {
+  color-scheme: dark; // native selects + scrollbars follow
+  background-color: $dk-bg;
+
+  body {
+    background-color: $dk-bg;
+    color: $dk-text;
+  }
+
+  strong { color: inherit; }
+
+  // Bulma 0.2 paints .section white
+  .section { background-color: $dk-bg; }
+
+  .section .title,
+  .box .title,
+  .footer .title { color: $dk-text-strong; }
+
+  .section .subtitle,
+  .box .subtitle { color: $dk-text-muted; }
+
+  .box {
+    background-color: $dk-surface;
+    color: $dk-text;
+    box-shadow: 0 2px 3px rgba(0, 0, 0, 0.5), 0 0 0 1px $dk-border;
+  }
+
+  // Selects
+  .input {
+    background-color: $dk-surface-2;
+    border-color: $dk-border;
+    color: $dk-text;
+    box-shadow: none;
+
+    &:hover { border-color: $dk-text-muted; }
+    &:focus { border-color: $primary; }
+  }
+
+  // Mesas escrutadas table
+  .table {
+    background-color: transparent;
+    color: $dk-text;
+
+    td, th { border-color: $dk-border; color: $dk-text; }
+    thead td, thead th { color: $dk-text-strong; }
+    tr:hover { background-color: $dk-surface-2; }
+  }
+
+  // Default (grey) tags: "No"
+  .tag:not(.is-success):not(.is-info):not(.is-danger):not(.is-primary) {
+    background-color: $dk-surface-3;
+    color: $dk-text;
+    box-shadow: inset 0 0 0 1px #55546a;
+  }
+
+  // Day selector
+  .day-selector label {
+    background: $dk-surface-2;
+    color: $dk-text;
+
+    &:hover { background: $dk-surface-3; color: $dk-text-strong; }
+  }
+  .day-selector input:checked + label { color: white; }
+
+  // Vote pills: party colors unchanged; neutral pills (Blancos/Nulos) go dark.
+  // Light ring so a navy pill keeps its edge on the dark box.
+  .votes .vote {
+    background-color: $dk-surface-2;
+    color: $dk-text;
+    box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.12), 0 3px 1px rgba(0, 0, 0, 0.4);
+
+    .units { background: rgba(0, 0, 0, 0.25); }
+  }
+  @each $mov, $color in $party-colors {
+    .votes .vote.vote-#{$mov} { background-color: $color; }
+  }
+
+  .vote-counter { color: $dk-text-muted; }
+
+  // Bar graphs (CT, participation, PPTO)
+  .bar-graph.panel-graph .bar-item {
+    &:not(:last-of-type) { border-bottom-color: $dk-border; }
+    .bar-holder { border-color: #5c5b6b; background: rgba(255, 255, 255, 0.07); }
+  }
+  .bar-graph .bar-holder .bar,
+  .bar-full-graph .bar {
+    box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.28);
+  }
+
+  // Footer
+  .footer {
+    background-color: #0a0910;
+    color: $dk-text-muted;
+
+    .content, .content p, small { color: $dk-text-muted; }
+
+    a:not(.button) { color: $primary; }
+  }
+
+  // Header color dots sit on cyan; a ring keeps navy/black dots crisp there too
+  .party-ranked-list .color-dot { box-shadow: 0 0 0 1.5px rgba(255, 255, 255, 0.55); }
+}
+
+// Theme switch: labeled, always visible in the top bar (both themes)
+#theme-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  margin-left: 10px;
+  padding: 4px 12px 4px 6px;
+  border: 1px solid rgba(255, 255, 255, 0.55);
+  border-radius: 16px;
+  font-size: 13px;
+  font-weight: 600;
+  line-height: 1.4;
+  vertical-align: middle;
+  background: rgba(0, 0, 0, 0.22);
+  color: white;
+  cursor: pointer;
+  white-space: nowrap;
+
+  .track {
+    position: relative;
+    width: 34px;
+    height: 18px;
+    border-radius: 9px;
+    background: rgba(255, 255, 255, 0.35);
+    transition: background 0.2s;
+    flex-shrink: 0;
+  }
+  .knob {
+    position: absolute;
+    top: 2px;
+    left: 2px;
+    width: 14px;
+    height: 14px;
+    border-radius: 50%;
+    background: white;
+    transition: transform 0.2s;
+  }
+  &[aria-checked='true'] {
+    .track { background: #0f0e17; }
+    .knob { transform: translateX(16px); }
+  }
+
+  &:hover { background: rgba(0, 0, 0, 0.34); }
+  &:focus-visible { outline: 2px solid white; outline-offset: 2px; }
+}
+
+@media screen and (max-width: 768px) {
+  #theme-toggle { margin: 6px 0 0 12px; }
+}

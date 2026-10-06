@@ -14,6 +14,10 @@ html
               include logo-elp.svg
           span #{election.name}
           span#live-status.is-stale ● Conectando…
+          button#theme-toggle(type='button', role='switch', aria-checked='false', aria-label='Modo oscuro')
+            span.track
+              span.knob
+            span.theme-label 🌙 Modo oscuro
       #bar-graph-hero.hero-body
         .container
           p#bind-progress.count-progress

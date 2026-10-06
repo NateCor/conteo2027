@@ -20,5 +20,13 @@ head
   meta(name='twitter:card', content='summary_large_image')
   meta(name='theme-color', content='#00ACCD')
   link(rel='icon', type='image/png', href='/src/images/favicon.png')
+  //- Theme before first paint (no flash). Light is the default for everyone
+  //- (El PUClitico's usual colors); dark only after the viewer picks it.
+  script.
+    (function () {
+      try {
+        if (localStorage.getItem('theme') === 'dark') document.documentElement.classList.add('dark');
+      } catch (e) {}
+    })();
   link(rel='stylesheet', type='text/css', href='/src/scss/style.scss')
   script(type='module', src='/src/js/main.js')
