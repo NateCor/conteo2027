@@ -203,9 +203,15 @@ $vote-units-bg: rgba(0, 0, 0, 0.15);
   justify-content: center;
   margin: 10px 0;
 
+  align-items: stretch;
+
   .vote {
     flex: 1;
-    max-width: 60px;
+    max-width: 72px;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    align-items: center;
     text-align: center;
     background: #eee;
     padding: 5px;
@@ -218,11 +224,11 @@ $vote-units-bg: rgba(0, 0, 0, 0.15);
       &.vote-#{$mov} {
         background-color: $color;
         // Light backgrounds need dark text
-        @if $mov == mg or $mov == tdicai or $mov == clmun { color: black; }
+        @if $mov == mg or $mov == tdicai or $mov == clmun or $mov == cero { color: black; }
         @else { color: white; }
 
         .label {
-          @if $mov == mg or $mov == tdicai or $mov == clmun { color: #444; }
+          @if $mov == mg or $mov == tdicai or $mov == clmun or $mov == cero { color: #444; }
           @else { color: white; }
           opacity: 1;
         }
@@ -256,10 +262,13 @@ $vote-units-bg: rgba(0, 0, 0, 0.15);
     }
 
     .label {
-      white-space: nowrap;
+      // Multi-word names ("Trinidad y Amanda") wrap onto two lines instead
+      // of being cut to "TRINIDAD Y…"; single words still ellipsize.
+      white-space: normal;
+      line-height: 1.15;
       text-transform: uppercase;
       font-size: 9px;
-      margin: 0;
+      margin: 0 0 2px;
       padding: 0;
       opacity: 0.7;
       overflow: hidden;
@@ -400,6 +409,21 @@ $vote-units-bg: rgba(0, 0, 0, 0.15);
       margin-left: 12px;
     }
   }
+}
+
+/* Live-refresh status pill (top bar) */
+#live-status {
+  display: inline-block;
+  margin-left: 12px;
+  padding: 2px 10px;
+  border-radius: 12px;
+  font-size: 12px;
+  vertical-align: middle;
+  background: rgba(0, 0, 0, 0.2);
+  white-space: nowrap;
+
+  &.is-live { color: #b8f5b0; }
+  &.is-stale { color: #ffd27a; }
 }
 
 /* Bar color classes are auto-generated in _colors-auto.scss */

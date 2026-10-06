@@ -108,7 +108,7 @@ function buildCtListMap() {
 const CT_LIST_MAP = buildCtListMap();
 
 // Derive key arrays from config (single source of truth). Per contest type:
-// sup can carry keys lista lacks (e.g. the 2027 CS-only "0%" list), so the
+// sup can carry keys lista lacks (e.g. the 2027 CS-only "Trinidad y Amanda" list), so the
 // aggregation must sum each contest with its own keys or those votes vanish.
 const LISTA_KEYS = [...ELECTION_CONFIG.parties.lista.map(p => p.key), 'b', 'n'];
 const SUP_KEYS = [...ELECTION_CONFIG.parties.sup.map(p => p.key), 'b', 'n'];
@@ -211,7 +211,11 @@ async function fetchData() {
     process.exit(1);
   }
 
-  fs.writeFileSync(OUTPUT_FILE, JSON.stringify(data, null, 2));
+  // Atomic publish: write a temp file, then rename over data.json. Browsers
+  // poll this file every few seconds; a plain write could be read half-done.
+  const tmpFile = `${OUTPUT_FILE}.tmp`;
+  fs.writeFileSync(tmpFile, JSON.stringify(data, null, 2));
+  fs.renameSync(tmpFile, OUTPUT_FILE);
   console.log('\n✓ Data transformed and saved to', OUTPUT_FILE);
   console.log(`  Election type: ${data.electionType}`);
   console.log(`  Active lista parties: ${data.activeParties.lista.join(', ')}`);

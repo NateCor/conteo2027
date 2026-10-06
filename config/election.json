@@ -4,6 +4,7 @@
     "year": 2027,
     "round": "Primera Vuelta",
     "totalVoters": 30668,
+    "refreshSeconds": 15,
     "lastUpdated": "2026-10-05",
     "notes": "Padrón Tricel oct 2026: 30.845 matriculados, menos 177 de bachillerato (no votan) = 30.668 habilitados."
   },
@@ -84,7 +85,7 @@
       {
         "key": "cero",
         "excelNames": ["Trinidad y Amanda", "0%"],
-        "displayName": "0%",
+        "displayName": "Trinidad y Amanda",
         "color": "#FFD700",
         "active": false
       }

@@ -42,3 +42,4 @@ npm-debug.log*
 # OS
 Thumbs.db
 desktop.ini
+public/data.json.tmp

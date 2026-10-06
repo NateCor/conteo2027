@@ -1,6 +1,7 @@
 import $ from 'jquery';
 import Chart from 'chart.js';
-import { getData, defaultObject } from './dataFetcher.js';
+import { defaultObject } from './dataFetcher.js';
+import { startLiveRefresh } from './liveRefresh.js';
 import { defaultProjects } from './projectsArray.js';
 import rivets from 'rivets';
 import _ from 'underscore';
@@ -212,41 +213,66 @@ $(document).ready(() => {
     'input[name=ct-dia], form[name=selected-ct] select',
     () => { if (mainData && mainData.ct) { updateCtElements(); } });
 
-  function renderData() {
-    getData()
-      .then((object) => {
-        setRuntimeData(object);
-        mainData = object;
-        updateMainDataElements('getData');
-        if (object.ct && object.ct.terriList && object.ct.terriList.length) {
-          populateCtSelector();
-          updateCtElements();
-        }
-        updateCtVisibility();
-      })
-      .catch((a) => {
-        console.error(a);
-        // Visible failure notice: a broken/missing data.json previously left
-        // blank charts with no explanation.
-        $('#header').after(
-          '<div class="container"><div class="notification is-danger">' +
-          'No se pudo cargar data.json — verifica que corriste ' +
-          '<code>npm run fetch-data</code>. Revisa la consola para detalles.' +
-          '</div></div>'
-        );
-      });
-  }
+  // Live mode: data.json is re-checked on an interval and the page re-renders
+  // in place when it changes. Selections (day, mesa, territory, CT) are read
+  // from the DOM on every render, so a refresh never resets what the viewer
+  // is looking at.
+  const applyData = (object) => {
+    setRuntimeData(object);
+    mainData = object;
+    updateMainDataElements('getData');
+    if (object.ct && object.ct.terriList && object.ct.terriList.length) {
+      populateCtSelector();
+      updateCtElements();
+    }
+    updateCtVisibility();
+  };
 
-  renderData();
+  const $liveStatus = $('#live-status');
+  const hhmmss = (d) => d.toLocaleTimeString('es-CL', { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false });
+  let lastUpdatedAt = null;
+  const showLoadError = (visible) => {
+    let $banner = $('#data-error');
+    if (visible && !$banner.length) {
+      // Visible failure notice: a broken/missing data.json previously left
+      // blank charts with no explanation.
+      $('#header').after(
+        '<div class="container" id="data-error"><div class="notification is-danger">' +
+        'No se pudo cargar data.json — verifica que corriste ' +
+        '<code>npm run fetch-data</code>. Revisa la consola para detalles.' +
+        '</div></div>'
+      );
+    } else if (!visible) {
+      $banner.remove();
+    }
+  };
+
+  startLiveRefresh({
+    onData: applyData,
+    onStatus: ({ state, checkedAt, hasData }) => {
+      if (checkedAt) lastUpdatedAt = checkedAt;
+      if (state === 'live') {
+        showLoadError(false);
+        $liveStatus.removeClass('is-stale').addClass('is-live')
+          .text(`● En vivo · actualizado ${lastUpdatedAt ? hhmmss(lastUpdatedAt) : ''}`);
+      } else {
+        if (!hasData) showLoadError(true);
+        $liveStatus.removeClass('is-live').addClass('is-stale')
+          .text(`● Reconectando… · datos de ${lastUpdatedAt ? hhmmss(lastUpdatedAt) : '—'}`);
+      }
+    },
+  });
 
   // CT: fill the territory selector from the Excel's own territory names
   const populateCtSelector = () => {
     const $sel = $('form[name=selected-ct] select');
+    const keep = $sel.val(); // live refresh must not reset the viewer's pick
     $sel.empty();
     $sel.append('<option value="total">Total Universidad</option>');
     mainData.ct.terriList.forEach((t) => {
       $sel.append(`<option value="${t.id}">${t.name}</option>`);
     });
+    if (keep && $sel.find(`option[value="${keep}"]`).length) $sel.val(keep);
   };
 
   const updateCtVisibility = () => {
@@ -371,8 +397,9 @@ $(document).ready(() => {
       // Mark top 2 as advancing in first round and add rank index
       const markAdvancing = (parties) => {
         if (headerData.electionType === 'firstRound') {
-          parties[0].advances = true;
-          parties[1].advances = true;
+          // Only lists with votes can advance: on an empty or partial
+          // count a 0% list must not wear the badge.
+          parties.slice(0, 2).forEach((p) => { p.advances = p.votes > 0; });
         }
         parties.forEach((p, i) => { p.index = i + 1; });
         return parties;

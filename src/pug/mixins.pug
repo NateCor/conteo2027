@@ -38,7 +38,7 @@ mixin canvas(id)
     canvas(id=`${id}`)
 
 mixin vote(classname, units, percentage, label)
-  .vote(class=(classname ? `vote-${classname}`: ''))
+  .vote(class=(classname ? `vote-${classname}`: ''), title=label)
     if label
       .label= label
     .units

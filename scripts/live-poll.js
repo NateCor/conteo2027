@@ -12,8 +12,8 @@
 //     are rewritten to the raw-download endpoint by fetch-data.js).
 //   - A sheet that fails validation is REJECTED without touching data.json,
 //     so the site keeps serving the last good data mid-edit.
-//   - The site picks up the new data.json on reload (auto-refresh is the
-//     next step of the live-mode work).
+//   - Open pages pick up the new data.json by themselves within
+//     election.refreshSeconds (src/js/liveRefresh.js); nobody reloads.
 
 import { spawnSync } from 'child_process';
 import crypto from 'crypto';
