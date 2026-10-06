@@ -1,295 +1,171 @@
-# Conteo FEUC - Election Dashboard
+# Conteo FEUC 2027
 
-A modernized static dashboard for visualizing vote counting in FEUC (Federación de Estudiantes de la Universidad Católica) elections. Originally built for 2017, completely modernized for the 2026 election cycle.
+Página de resultados en vivo de las elecciones FEUC (Federación de Estudiantes de la Pontificia Universidad Católica de Chile), hecha para El PUClítico. Lee la planilla online donde se cuentan los votos y muestra los resultados mesa a mesa, por territorio y en total, sin que nadie tenga que recargar la página.
 
-## Tech Stack
+Basada en el [conteo2017](https://github.com/wachunei/conteo2017) original de Pedro Pablo Aste Kompen, modernizada para 2027 por Nathan Cortez.
 
-- **Build Tool**: [Vite](https://vitejs.dev/) (replaced legacy Gulp 3)
-- **Template Engine**: [Pug](https://pugjs.org/)
-- **Styling**: [Sass](https://sass-lang.com/) + [Bulma CSS](https://bulma.io/)
-- **Data Visualization**: [Chart.js](https://www.chartjs.org/)
-- **Data Binding**: [Rivets.js](http://rivetsjs.com/)
-- **Data Source**: Microsoft Excel (SharePoint) via automated pipeline
+---
 
-## Features
+## Guía rápida (sin conocimientos técnicos)
 
-- **Real-time Vote Visualization**: Pie charts and bar graphs for Lista FEUC, Consejero Superior, and Presupuesto Participativo
-- **Dynamic Header**: Automatically adapts between first-round (ranked party list) and second-round (2-party bar) display
-- **Territory Breakdown**: View results by campus territory
-- **Day-by-Day Analysis**: Toggle between Day 1, Day 2, or combined totals
-- **Mesa-Level Detail**: Drill down to individual voting tables
-- **Participation Tracking**: Monitor voter turnout by territory
-- **Auto-Detection**: Active parties are automatically detected from the Excel file — no manual config editing needed to switch election rounds
-- **Automated Color Generation**: SCSS color classes are generated from `config/election.json` at build time
+### Qué hace la página
 
-## Installation
+- **Arriba:** el ranking de listas para Directiva FEUC y Consejería Superior, y cuántas mesas van escrutadas ("Mesas escrutadas: 37 de 114").
+- **Insignias:** mientras se cuenta, las dos primeras listas muestran "Va 1°" y "Va 2°". Solo cuando todas las mesas de esa votación están escrutadas cambian a "Avanza". Si hay empate en el segundo lugar, las listas empatadas muestran "Empate". No existe una insignia "Gana", a propósito.
+- **Detalle:** resultados por día (Día 1, Día 2, ambos), por mesa, por territorio, Consejerías Territoriales, participación por territorio y Presupuesto Participativo (esta última sección se oculta sola si la planilla no la trae).
+- **En vivo:** la página revisa si hay datos nuevos cada 15 segundos y se actualiza sola. La píldora junto al título dice "● En vivo · actualizado HH:MM:SS". Si dice "Reconectando…", la página sigue mostrando los últimos números buenos mientras vuelve la conexión.
+- **Modo oscuro:** el interruptor "Modo oscuro" de arriba cambia los colores. Todos parten en modo claro; la elección queda guardada en ese dispositivo.
 
-```bash
-# Clone the repository
-git clone https://github.com/wachunei/conteo2017.git
-cd conteo2017-master
+### De dónde salen los números
 
-# Install dependencies
-npm install
+1. El equipo anota los votos en la planilla online (Excel en SharePoint/OneDrive).
+2. Un programa revisa esa planilla cada 20 segundos y, si cambió, genera un archivo nuevo con los resultados (`public/data.json`).
+3. La página de cada persona lee ese archivo cada 15 segundos.
 
-# Set up environment
-cp .env.example .env
-# Edit .env to add your SharePoint URL (optional — can use --file flag instead)
-```
+En total, un cambio en la planilla aparece en pantalla en menos de un minuto. Si la planilla queda a medio editar o con un error, el programa la rechaza y la página sigue mostrando los últimos datos válidos.
 
-## Running Locally
+### Cambios comunes
 
-### Development Mode
-```bash
-npm run dev
-```
-Starts Vite dev server with hot reload at `http://localhost:3000`.
+Casi todo se cambia en **un solo archivo: `config/election.json`**. Ábrelo con cualquier editor de texto (en GitHub: abre el archivo y presiona el lápiz ✏️).
 
-### Fetch Latest Data
-```bash
-# From SharePoint (requires SHEET_URL in .env)
-npm run fetch-data
+| Quiero cambiar... | Dónde |
+|---|---|
+| El nombre visible de una lista | `config/election.json` → la lista → `displayName` |
+| El color de una lista | `config/election.json` → la lista → `color` (formato `#RRGGBB`) |
+| El título de la página ("Elecciones FEUC 2027") | `config/election.json` → `election` → `name` |
+| La cantidad de personas habilitadas para votar | `config/election.json` → `election` → `totalVoters` |
+| Cada cuánto se actualiza la página | `config/election.json` → `election` → `refreshSeconds` |
+| La dirección final del sitio (para la vista previa en WhatsApp) | `config/election.json` → `election` → `siteUrl` |
+| Los textos "En vivo", "Avanza", "Va", "Empate" | `src/js/main.js`, bloque `TEXTOS` al inicio |
+| Títulos de secciones ("Total Universidad", "Mesas", etc.) | `src/pug/`, un archivo por sección (marcados con ✏️) |
+| Créditos y enlaces del pie de página | `src/pug/footer.pug` |
+| Texto de la vista previa al compartir el link | `src/pug/head.pug` (línea marcada con ✏️) |
+| Imagen de la vista previa al compartir el link | Reemplaza `public/og-image.png` (1200×630 px) |
+| Color de marca (encabezado celeste) | `src/scss/style.scss`, primera línea |
+| Colores del modo oscuro | `src/scss/_dark.scss` (bloque marcado con ✏️) |
+| El link de la planilla online | Archivo `.env` (copia `.env.example`) |
 
-# From a local Excel file
-npm run fetch-data -- --file temp/your-excel-file.xlsx
+Todos los lugares pensados para editar a mano están marcados en el código con **✏️ EDITABLE**.
 
-# With a custom total voter count (overrides config/election.json)
-npm run fetch-data -- --file temp/your-excel-file.xlsx --total-voters 26501
-```
-Downloads/parses the Excel, auto-detects active parties, and generates `public/data.json`.
+**Ejemplo: renombrar una lista.** En `config/election.json`, una lista se ve así:
 
-### Build for Production
-```bash
-npm run build
-```
-Fetches data, generates SCSS colors, compiles Pug templates, and builds optimized static files in `dist/`.
-
-### Preview Production Build
-```bash
-npm run preview
-```
-
-### Test Excel Compatibility
-```bash
-npm run test-excel -- temp/your-excel-file.xlsx
-```
-Validates an Excel file against config maps. Reports any unmapped territories, mesas, parties, or projects.
-
-## Project Structure
-
-```
-conteo2017-master/
-├── config/
-│   ├── election.json             # Election metadata, parties, projects, colors
-│   └── territories.json          # Territory & mesa mappings (rarely changes)
-├── public/
-│   └── data.json                 # Generated vote data (auto-created)
-├── scripts/
-│   ├── fetch-data.js             # Excel download, validation, parser
-│   ├── build-html.js             # Pug compiler (injects config data)
-│   ├── generate-scss-colors.js   # Generates _colors-auto.scss from config
-│   └── test-excel.js             # Excel compatibility tester
-├── src/
-│   ├── js/
-│   │   ├── main.js               # Main application logic
-│   │   ├── dataFetcher.js        # JSON data loader
-│   │   ├── chartVars.js          # Chart.js configuration
-│   │   ├── config.js             # Reads config + runtime data
-│   │   └── projectsArray.js      # Project definitions
-│   ├── pug/
-│   │   ├── index.pug             # Main page template
-│   │   ├── vote-pills-*.pug      # Vote display pills (generated from config)
-│   │   └── [other templates]     # Territories, mesas, etc.
-│   ├── scss/
-│   │   ├── style.scss            # Main stylesheet entry
-│   │   ├── _colors-auto.scss     # Auto-generated colors (do not edit)
-│   │   └── custom.scss           # Custom Bulma overrides
-│   └── images/
-│       └── favicon.png
-├── temp/
-│   └── last_count.xlsx           # Cached Excel file (gitignored)
-├── .env.example                  # Environment variable template
-├── .env                          # Environment variables (gitignored)
-├── package.json
-├── vite.config.js
-└── README.md
-```
-
-## Updating for New Elections
-
-### Simplified Workflow (No Code Changes Needed)
-
-The system now **auto-detects** which parties are active from the Excel file itself. Switching between election rounds requires **no JSON editing**:
-
-1. Place the new Excel file in `temp/` (or update `SHEET_URL` in `.env`)
-2. Run `npm run fetch-data -- --file temp/new-file.xlsx --total-voters 26501`
-3. Run `npm run build`
-
-That's it. The script reads the Excel headers, detects which parties are present, and writes the active party list to `data.json`. The frontend reads this at runtime.
-
-### When You Need to Edit Config
-
-You only need to edit `config/election.json` when:
-
-- **Adding a new party** that doesn't exist in the config yet (new party appearing in the Excel)
-- **Changing party colors or display names**
-- **Adding a new project** for Presupuesto Participativo
-- **Changing `totalVoters`** (or use `--total-voters` CLI flag to avoid editing)
-
-### Config File Reference
-
-| File | Purpose | Update Frequency |
-|------|---------|------------------|
-| `config/election.json` | Parties, projects, colors, election metadata | Only when parties change |
-| `config/territories.json` | Territory and mesa mappings | Rarely (university structure changes) |
-| `.env` | SharePoint URL | Per election (or use `--file` flag) |
-
-### How Auto-Detection Works
-
-1. `fetch-data.js` reads the Excel header row
-2. For each party in `config/election.json`, it checks if any of the party's `excelNames` appear as a column header
-3. Parties found in the Excel are marked as active; missing parties are inactive
-4. The detected active party keys are written to `data.json` as `activeParties`
-5. The election type (`firstRound` or `secondRound`) is derived: >2 active parties = first round
-6. At runtime, `src/js/config.js` reads `activeParties` from the fetched data instead of the `active` flags
-
-This means the `active` field in `election.json` is now a **fallback only** (used before data loads). You generally don't need to change it.
-
-### Excel Structure Requirements
-
-The parser expects:
-- Sheets named "Directiva FEUC", "Consejería Superior", and optionally "Presupuestos Participativos"
-- Paired columns for each party (Day 1, Day 2)
-- Column headers matching `excelNames` in `config/election.json`
-- Columns: Campus, Territorio, Mesa, then party columns, then Blancos, Nulos
-
-### Validation Rules
-
-- **Hard Fail**: Unknown Excel column found → Add it to `config/election.json` first
-- **Info**: Config party not in Excel → Party simply not active for this round (no action needed)
-- **Skip**: Territorial sheets are automatically skipped
-
-## Environment Variables
-
-Create a `.env` file (see `.env.example`):
-
-```env
-SHEET_URL=https://your-sharepoint-site.com/path/to/excel.xlsx?download=1
-```
-
-Leave `SHEET_URL` empty to use `--file` flag instead.
-
-## Data Pipeline
-
-1. **Configuration**: `config/election.json` defines all parties, projects, colors, and Excel column mappings
-2. **Color Generation**: `scripts/generate-scss-colors.js` reads `election.json` and generates `src/scss/_colors-auto.scss` with SCSS variables and `.bar-*` classes
-3. **HTML Compilation**: `scripts/build-html.js` injects config data into Pug templates (election name, year, vote-pills)
-4. **Fetch Script**: `scripts/fetch-data.js` downloads/parses Excel, auto-detects active parties, validates, and generates `public/data.json`
-5. **Frontend**: `src/js/config.js` reads runtime data from `data.json` (active parties, election type, total voters)
-
-### Output: `public/data.json`
 ```json
 {
-  "dia1": { "lista": {...}, "sup": {...}, "ppto": {...} },
-  "dia2": { "lista": {...}, "sup": {...}, "ppto": {...} },
-  "total": { "lista": {...}, "sup": {...}, "ppto": {...} },
-  "activeParties": { "lista": ["nau", "mg", ...], "sup": [...], "projects": [...] },
-  "electionType": "firstRound",
-  "totalVoters": 26501
+  "key": "cero",
+  "excelNames": ["Trinidad y Amanda", "0%"],
+  "displayName": "Trinidad y Amanda",
+  "color": "#FFD700",
+  "active": false
 }
 ```
 
-## Testing New Excel Files
+- `displayName` es el nombre que ve la gente. Se puede cambiar libremente.
+- `color` es el color de la lista en gráficos y píldoras.
+- `excelNames` son los encabezados **exactos** que esa lista tiene en la planilla. Si el equipo cambia el encabezado en el Excel, agrega el nuevo nombre aquí.
+- `key` es un identificador interno. **No lo cambies** una vez que la lista existe.
 
-Before using a new Excel file in production, test it for compatibility:
+Una misma lista puede aparecer en varias secciones (`lista` = Directiva FEUC, `sup` = Consejería Superior, `ct` = Consejerías Territoriales). Si cambias su nombre o color, cámbialo en cada sección donde aparece.
+
+### Reglas para no romper nada
+
+- En `config/election.json`: el texto va entre comillas dobles `"así"`, va una coma entre elementos y **no** va coma después del último. Si el sitio deja de funcionar tras una edición, casi siempre es una coma o comilla.
+- En los archivos `.pug`: no cambies los espacios al inicio de las líneas, ni lo que está entre llaves `{...}` o paréntesis `(...)`. Cambia solo el texto visible.
+- Una lista nueva que aparezca en la planilla **debe agregarse primero** a `config/election.json`. Si no, el programa se detiene a propósito y avisa qué encabezado no reconoce, en vez de perder votos en silencio.
+- Si tienes dudas, pide a alguien técnico que revise antes de publicar.
+
+---
+
+## Technical reference
+
+### Stack
+
+- **Build:** [Vite](https://vitejs.dev/) 5, Node.js 18+ (tested on 22)
+- **Templates:** [Pug](https://pugjs.org/), compiled to `index.html` by `scripts/build-html.js`
+- **Styles:** Sass + [Bulma](https://bulma.io/) 0.2.3
+- **Charts / binding:** [Chart.js](https://www.chartjs.org/) 2, [Rivets.js](http://rivetsjs.com/)
+- **Data:** an Excel workbook (SharePoint link or local file) parsed into `public/data.json`
+
+### Quick start
 
 ```bash
-# 1. Run the test script
-npm run test-excel -- temp/new-election.xlsx
-
-# 2. Check the output
-# - OK = ready to use
-# - UNMAPPED = need to update config/election.json or config/territories.json
+git clone https://github.com/NateCor/conteo2027.git
+cd conteo2027
+npm install
+cp .env.example .env          # optional: paste the SharePoint share link as SHEET_URL
+npm run fetch-data -- --file path/to/count.xlsx   # or without --file to use SHEET_URL
+npm run dev
 ```
 
-If there are unmapped entries, update the config files (not the scripts — all maps are in `config/`).
+### Commands
 
-## Deployment
+| Command | What it does |
+|---|---|
+| `npm run dev` | Generates SCSS colors, compiles Pug, starts the Vite dev server |
+| `npm run fetch-data` | Downloads `SHEET_URL` (or `-- --file x.xlsx`), validates, writes `public/data.json` |
+| `npm run fetch-data -- --total-voters N` | Overrides `election.totalVoters` for participation math |
+| `npm run build` | fetch-data + colors + Pug + production build into `dist/` |
+| `npm run test-excel -- file.xlsx` | Reports unmapped territories, mesas, lists or projects in a workbook |
+| `SHEET_URL='<link>' node scripts/live-poll.js 20` | Election-night loop: re-fetches every 20 s, rewrites `data.json` only on change |
 
-The `dist/` folder contains static files suitable for any static host:
+### Live pipeline
 
-- **Vercel**: Connect GitHub repo, build command: `npm run build`, output: `dist`
-- **Netlify**: Same configuration as Vercel
-- **GitHub Pages**: Use GitHub Actions to build and deploy
-- **AWS S3**: Upload `dist/` contents to S3 bucket
+1. `scripts/live-poll.js` runs `fetch-data.js` every N seconds. A sheet that fails validation (mid-edit, unknown header) exits non-zero and `data.json` is left untouched.
+2. `fetch-data.js` writes `data.json` atomically (temp file + rename), so a viewer never reads a half-written file.
+3. `src/js/liveRefresh.js` re-fetches `data.json` every `election.refreshSeconds`. It re-renders only when the content changed and keeps the viewer's selections. A failed or unparseable response keeps the last good data. It backs off on errors (60 s max) and pauses while the tab is hidden. A time-bucket query parameter (`?t=`) keeps CDN caches from serving data older than one interval.
 
-### Automated Updates
+SharePoint `:x:/g/personal/...` share links are rewritten to the download endpoint automatically. A non-xlsx response (login page, viewer HTML) is rejected with a clear message.
 
-For live election night updates, set up a GitHub Action to run every 5 minutes:
+### Project structure
 
-```yaml
-name: Update Data
-on:
-  schedule:
-    - cron: '*/5 * * * *'
-jobs:
-  update:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v3
-      - run: npm ci
-      - run: npm run fetch-data
-      - run: npm run build
-      - run: npm run deploy
+```
+config/
+  election.json        # ✏️ lists, colors, names, election metadata (single source of truth)
+  territories.json     # Excel territory/mesa names → internal ids (57 mesas, 22 territories)
+  padron.json          # eligible voters per territory (Tricel padrón) for participation %
+scripts/
+  fetch-data.js        # download, validation, parsing → public/data.json
+  live-poll.js         # election-night polling loop
+  build-html.js        # Pug → index.html (injects config)
+  generate-scss-colors.js  # election.json colors → src/scss/_colors-auto.scss
+  test-excel.js        # workbook compatibility check
+src/
+  js/main.js           # page logic, charts, header ranking and badges (✏️ TEXTOS block)
+  js/liveRefresh.js    # auto-refresh loop
+  js/config.js         # config + runtime data helpers
+  js/dataFetcher.js    # default data object built from config
+  pug/                 # page templates (✏️ section titles, footer, link-preview text)
+  scss/style.scss      # entry; ✏️ brand color
+  scss/custom.scss     # layout and component styles
+  scss/_dark.scss      # dark theme (html.dark)
+public/
+  data.json            # generated results (tracked, but regenerate; never hand-edit)
+  og-image.png         # link-preview image
 ```
 
-## Troubleshooting
+### Excel format
 
-### Data Not Updating
-- Check `.env` has correct `SHEET_URL` (or use `--file` flag)
-- Verify Excel is publicly accessible
-- Check `temp/last_count.xlsx` cache isn't stale (delete it to force re-download)
+- Sheets: **"Directiva FEUC"**, **"Consejería Superior"**, optional **"Presupuestos Participativos"** and **"Consejerías Territoriales"**.
+- Main sheets: Campus, Territorio, Mesa, then one Día 1 / Día 2 column pair per list, then Blancos, Nulos and a per-day "Mesas Escrutada" checkbox pair (booleans or ☐/☑).
+- Consejerías Territoriales: one 5-column block per list ("Candidaturas X": Nombre, Día 1, Día 2, Total, Total Global). The parser cross-checks every candidate against "Total Global".
+- Rows labelled "Total" or "% de válidamente emitidas" are skipped. Totals are computed, not read.
+- An unknown list header is a hard failure: add it to `config/election.json` (`excelNames`) first. A configured list missing from the sheet just isn't active this round.
+- First vs. second round is detected from the number of lists in the sheet. `election.round` only controls the header before data loads.
 
-### Wrong Totals
-- Ensure Excel has "Total" row at the end
-- Check territory/mesa mappings in `config/territories.json`
-- Verify column headers match `excelNames` in `config/election.json`
+### Pitfalls
 
-### Build Errors
-- Delete `node_modules` and `package-lock.json`, then `npm install`
-- Ensure Node.js version is 18+ (check with `node --version`)
+- List `key`s and project `key`s share one namespace (SCSS classes, chart keys). Check for collisions before adding one.
+- `public/data.json` is tracked but generated. Don't commit regenerated test data, and don't run `git checkout -- public/data.json` while the live poller is serving.
+- New bindings that show counts or percentages need the Rivets formatters `| num` / `| pc` (Chilean format: 4.142 · 57,89 %).
+- Bulma 0.2.3 has no dark-mode support. New components need explicit `html.dark` overrides in `_dark.scss`.
 
-### Header Shows Wrong Election Type
-- The header auto-detects from the Excel: >2 parties = first round, 2 parties = second round
-- Run `npm run fetch-data` to regenerate `data.json` with the correct election type
-- Refresh the page (the dev server serves `data.json` statically)
+### Deployment
 
-## Git Ignore
+The build is a static site (`dist/`) for any static host. The plan is a subdomain of elpuclitico.cl on free static hosting. A subpath deployment would need `base` set in `vite.config.js`.
 
-The following files are excluded from version control:
+Speed of live updates depends on how `data.json` is republished. A scheduled GitHub Actions job runs every 5 minutes at best and is often delayed, which is too slow for election night. Pushing `data.json` straight to the host whenever `live-poll.js` sees a change (e.g. Cloudflare Pages direct upload) keeps updates within seconds.
 
-- `node_modules/` — Dependencies
-- `dist/` — Build output
-- `public/data.json` — Generated data
-- `src/scss/_colors-auto.scss` — Auto-generated SCSS
-- `*.xlsx`, `*.xls` — Excel data files
-- `temp/` — Cache directory
-- `.env` — Environment variables
+### Credits and license
 
-## Contributing
-
-1. Fork the repository
-2. Create a feature branch: `git checkout -b feature-name`
-3. Commit changes: `git commit -am 'Add feature'`
-4. Push to branch: `git push origin feature-name`
-5. Submit a pull request
-
-## License
-
-ISC License — See original repository for details.
-
-## Acknowledgments
-
-- Original 2017 version by [@wachunei](https://github.com/wachunei)
-- FEUC student organizations
-- El PUClítico journalism team
+- Original 2017 version by [Pedro Pablo Aste Kompen (@wachunei)](https://github.com/wachunei) for El PUClítico.
+- Modernized for 2027 by [Nathan Cortez (@NateCor)](https://github.com/NateCor).
+- The site footer declares [CC BY-NC-ND 4.0](http://creativecommons.org/licenses/by-nc-nd/4.0/).

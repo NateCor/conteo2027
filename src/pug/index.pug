@@ -1,3 +1,8 @@
+//- ✏️ EDITABLE: títulos visibles de la parte superior ("Lista FEUC",
+//- "Consejero Superior", "Detalle", "Mesas escrutadas:", "Modo oscuro").
+//- Cambia solo el texto al final de cada línea; no cambies la sangría
+//- (los espacios al inicio) ni lo que va entre paréntesis o llaves {}.
+//- Los nombres de partidos NO se cambian aquí: van en config/election.json.
 doctype html
 include mixins
 html
@@ -53,7 +58,7 @@ html
                   .color-dot(rv-style-background="party.color")
                   .name {party.name}
                   .percentage {party.pc | pc}%
-                  .badge(rv-if="party.badge", rv-class-is-tie="party.badge | eq 'Empate'") {party.badge}
+                  .badge(rv-if="party.badge", rv-class-is-tie="party.tie") {party.badge}
             .column
               h2.title.is-4 Consejero Superior
               .party-ranked-list
@@ -62,7 +67,7 @@ html
                   .color-dot(rv-style-background="party.color")
                   .name {party.name}
                   .percentage {party.pc | pc}%
-                  .badge(rv-if="party.badge", rv-class-is-tie="party.badge | eq 'Empate'") {party.badge}
+                  .badge(rv-if="party.badge", rv-class-is-tie="party.tie") {party.badge}
     section.section
       .container
         h2.title.is-2 Detalle

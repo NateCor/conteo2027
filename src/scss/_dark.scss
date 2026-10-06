@@ -1,5 +1,6 @@
-// Dark theme. Activated by `html.dark` (set before first paint by the
-// inline script in head.pug: saved choice, else the OS preference).
+// Dark theme. Activated by `html.dark`, set before first paint by the inline
+// script in head.pug ONLY when the viewer chose dark (light is the default
+// for everyone; the OS setting is ignored on purpose).
 //
 // Rules:
 // - Party colors never change. Where a color sinks into the dark background
@@ -9,6 +10,8 @@
 // - Neutral surfaces use El PUClítico's own near-black (#0f0e17), so dark
 //   mode reads as their site, not a generic dark theme.
 
+// ✏️ EDITABLE: colores del modo oscuro (fondo, tarjetas, texto). Formato
+// #RRGGBB. Mantén el texto claro sobre fondos oscuros para que se lea.
 $dk-bg: #0f0e17;          // elpuclitico.cl near-black
 $dk-surface: #1a1924;     // boxes, inputs
 $dk-surface-2: #252431;   // pills, tags, day buttons
@@ -17,7 +20,6 @@ $dk-border: #4a4958;
 $dk-text: #d9dbe2;
 $dk-text-strong: #f3f4f7;
 $dk-text-muted: #b4b8c4;
-$dk-outline: rgba(255, 255, 255, 0.4);
 
 html.dark {
   color-scheme: dark; // native selects + scrollbars follow

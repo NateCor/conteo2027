@@ -23,6 +23,19 @@ Chart.defaults.global.elements.arc.borderColor = isDark() ? ARC_BORDER.dark : AR
 
 const getDefaults = (n) => Array(n).fill(100 / n);
 
+// ✏️ EDITABLE: textos que aparecen en la página y se generan desde código.
+// Puedes cambiar lo que está entre comillas. No borres las comillas, las
+// comas ni los nombres de la izquierda (vivo, reconectando, etc.).
+const TEXTOS = {
+  vivo: '● En vivo · actualizado',          // + hora, ej. "● En vivo · actualizado 21:05:10"
+  reconectando: '● Reconectando… · datos de', // + hora de los últimos datos buenos
+  badgeAvanza: 'Avanza',                      // conteo terminado, 1° y 2° lugar
+  badgeVa: 'Va',                              // conteo en curso: "Va 1°" / "Va 2°"
+  badgeEmpate: 'Empate',                      // empate en el corte del 2° lugar
+  errorCarga: 'No se pudo cargar data.json — verifica que corriste ' +
+    '<code>npm run fetch-data</code>. Revisa la consola para detalles.',
+};
+
 $(document).ready(() => {
 
   // Theme switch: light by default for everyone; the viewer's choice is
@@ -162,7 +175,6 @@ $(document).ready(() => {
   const fmtPc = (v) => (Number(v) || 0).toLocaleString('es-CL', { maximumFractionDigits: 2 });
   rivets.formatters.num = fmtNum;
   rivets.formatters.pc = fmtPc;
-  rivets.formatters.eq = (v, x) => v === x;
 
   rivets.bind($('#bind-total-lista'), totalLista);
   rivets.bind($('#bind-progress'), mesasEscrutadas);
@@ -271,8 +283,7 @@ $(document).ready(() => {
       // blank charts with no explanation.
       $('#header').after(
         '<div class="container" id="data-error"><div class="notification is-danger">' +
-        'No se pudo cargar data.json — verifica que corriste ' +
-        '<code>npm run fetch-data</code>. Revisa la consola para detalles.' +
+        TEXTOS.errorCarga +
         '</div></div>'
       );
     } else if (!visible) {
@@ -287,11 +298,11 @@ $(document).ready(() => {
       if (state === 'live') {
         showLoadError(false);
         $liveStatus.removeClass('is-stale').addClass('is-live')
-          .text(`● En vivo · actualizado ${lastUpdatedAt ? hhmmss(lastUpdatedAt) : ''}`);
+          .text(`${TEXTOS.vivo} ${lastUpdatedAt ? hhmmss(lastUpdatedAt) : ''}`);
       } else {
         if (!hasData) showLoadError(true);
         $liveStatus.removeClass('is-live').addClass('is-stale')
-          .text(`● Reconectando… · datos de ${lastUpdatedAt ? hhmmss(lastUpdatedAt) : '—'}`);
+          .text(`${TEXTOS.reconectando} ${lastUpdatedAt ? hhmmss(lastUpdatedAt) : '—'}`);
       }
     },
   });
@@ -436,6 +447,7 @@ $(document).ready(() => {
           pc: total[`${p.key}pc`] || 0,
           votes: total[p.key] || 0,
           advances: false,
+          tie: false,
           badge: '',
         })).sort((a, b) => b.votes - a.votes);
       };
@@ -456,11 +468,12 @@ $(document).ready(() => {
         parties.forEach((p, i) => {
           if (p.votes <= 0) return;
           if (tiedAtCutoff && p.votes === cutoff) {
-            p.badge = 'Empate';
+            p.badge = TEXTOS.badgeEmpate;
+            p.tie = true;
           } else if (i < 2) {
-            p.badge = complete ? 'Avanza' : `Va ${i + 1}°`;
+            p.badge = complete ? TEXTOS.badgeAvanza : `${TEXTOS.badgeVa} ${i + 1}°`;
+            p.advances = true;
           }
-          p.advances = p.badge !== '' && p.badge !== 'Empate';
         });
         return parties;
       };
