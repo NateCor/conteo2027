@@ -16,6 +16,9 @@ html
           span#live-status.is-stale ● Conectando…
       #bar-graph-hero.hero-body
         .container
+          p#bind-progress.count-progress
+            | Mesas escrutadas: #[strong {actual} de {total}]
+            span.count-progress-pc  ({pc | pc}%)
           // Second Round: Traditional 2-bar display (dynamic)
           .columns#bind-second-round
             .column
@@ -23,7 +26,7 @@ html
               .bar-full-graph
                 .bar-item(rv-each-party="lista.parties")
                   .legend {party.name}
-                  .percentage {party.pc}%
+                  .percentage {party.pc | pc}%
                 .bar-full-item
                   .bar-holder
                     .bar(rv-each-party="lista.parties", rv-style-background="party.color", rv-width="party.pc")
@@ -32,7 +35,7 @@ html
               .bar-full-graph
                 .bar-item(rv-each-party="sup.parties")
                   .legend {party.name}
-                  .percentage {party.pc}%
+                  .percentage {party.pc | pc}%
                 .bar-full-item
                   .bar-holder
                     .bar(rv-each-party="sup.parties", rv-style-background="party.color", rv-width="party.pc")
@@ -45,8 +48,8 @@ html
                   .rank {party.index}
                   .color-dot(rv-style-background="party.color")
                   .name {party.name}
-                  .percentage {party.pc}%
-                  .badge(rv-if="party.advances") Avanza
+                  .percentage {party.pc | pc}%
+                  .badge(rv-if="party.badge", rv-class-is-tie="party.badge | eq 'Empate'") {party.badge}
             .column
               h2.title.is-4 Consejero Superior
               .party-ranked-list
@@ -54,8 +57,8 @@ html
                   .rank {party.index}
                   .color-dot(rv-style-background="party.color")
                   .name {party.name}
-                  .percentage {party.pc}%
-                  .badge(rv-if="party.advances") Avanza
+                  .percentage {party.pc | pc}%
+                  .badge(rv-if="party.badge", rv-class-is-tie="party.badge | eq 'Empate'") {party.badge}
     section.section
       .container
         h2.title.is-2 Detalle

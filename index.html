@@ -4,6 +4,17 @@
     <title>Elecciones FEUC 2027 | El PUClítico</title>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Conteo de votos en vivo, mesa a mesa: Lista FEUC, Consejería Superior y Consejerías Territoriales.">
+    <meta property="og:type" content="website">
+    <meta property="og:site_name" content="El PUClítico">
+    <meta property="og:locale" content="es_CL">
+    <meta property="og:title" content="Elecciones FEUC 2027 · Resultados en vivo">
+    <meta property="og:description" content="Conteo de votos en vivo, mesa a mesa: Lista FEUC, Consejería Superior y Consejerías Territoriales.">
+    <meta property="og:image" content="/og-image.png">
+    <meta property="og:image:width" content="1200">
+    <meta property="og:image:height" content="630">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="theme-color" content="#00ACCD">
     <link rel="icon" type="image/png" href="/src/images/favicon.png">
     <link rel="stylesheet" type="text/css" href="/src/scss/style.scss">
     <script type="module" src="/src/js/main.js"></script>
@@ -16,6 +27,7 @@
       </div>
       <div class="hero-body" id="bar-graph-hero">
         <div class="container">
+          <p class="count-progress" id="bind-progress">Mesas escrutadas: <strong>{actual} de {total}</strong><span class="count-progress-pc"> ({pc | pc}%)</span></p>
           <!-- Second Round: Traditional 2-bar display (dynamic)-->
           <div class="columns" id="bind-second-round">
             <div class="column">
@@ -23,7 +35,7 @@
               <div class="bar-full-graph">
                 <div class="bar-item" rv-each-party="lista.parties">
                   <div class="legend">{party.name}</div>
-                  <div class="percentage">{party.pc}%</div>
+                  <div class="percentage">{party.pc | pc}%</div>
                 </div>
                 <div class="bar-full-item">
                   <div class="bar-holder">
@@ -37,7 +49,7 @@
               <div class="bar-full-graph">
                 <div class="bar-item" rv-each-party="sup.parties">
                   <div class="legend">{party.name}</div>
-                  <div class="percentage">{party.pc}%</div>
+                  <div class="percentage">{party.pc | pc}%</div>
                 </div>
                 <div class="bar-full-item">
                   <div class="bar-holder">
@@ -56,8 +68,8 @@
                   <div class="rank">{party.index}</div>
                   <div class="color-dot" rv-style-background="party.color"></div>
                   <div class="name">{party.name}</div>
-                  <div class="percentage">{party.pc}%</div>
-                  <div class="badge" rv-if="party.advances">Avanza</div>
+                  <div class="percentage">{party.pc | pc}%</div>
+                  <div class="badge" rv-if="party.badge" rv-class-is-tie="party.badge | eq 'Empate'">{party.badge}</div>
                 </div>
               </div>
             </div>
@@ -68,8 +80,8 @@
                   <div class="rank">{party.index}</div>
                   <div class="color-dot" rv-style-background="party.color"></div>
                   <div class="name">{party.name}</div>
-                  <div class="percentage">{party.pc}%</div>
-                  <div class="badge" rv-if="party.advances">Avanza</div>
+                  <div class="percentage">{party.pc | pc}%</div>
+                  <div class="badge" rv-if="party.badge" rv-class-is-tie="party.badge | eq 'Empate'">{party.badge}</div>
                 </div>
               </div>
             </div>
@@ -99,43 +111,43 @@
               <div class="votes">
                 <div class="vote vote-nau" title="NAU!">
                   <div class="label">NAU!</div>
-                  <div class="units">{nau}</div>
-                  <div class="percentage">{naupc}%</div>
+                  <div class="units">{nau | num}</div>
+                  <div class="percentage">{naupc | pc}%</div>
                 </div>
                 <div class="vote vote-mg" title="Amanecer">
                   <div class="label">Amanecer</div>
-                  <div class="units">{mg}</div>
-                  <div class="percentage">{mgpc}%</div>
+                  <div class="units">{mg | num}</div>
+                  <div class="percentage">{mgpc | pc}%</div>
                 </div>
                 <div class="vote vote-sdd" title="Solidaridad">
                   <div class="label">Solidaridad</div>
-                  <div class="units">{sdd}</div>
-                  <div class="percentage">{sddpc}%</div>
+                  <div class="units">{sdd | num}</div>
+                  <div class="percentage">{sddpc | pc}%</div>
                 </div>
                 <div class="vote vote-elp" title="1A">
                   <div class="label">1A</div>
-                  <div class="units">{elp}</div>
-                  <div class="percentage">{elppc}%</div>
+                  <div class="units">{elp | num}</div>
+                  <div class="percentage">{elppc | pc}%</div>
                 </div>
                 <div class="vote vote-proy" title="Avanzar">
                   <div class="label">Avanzar</div>
-                  <div class="units">{proy}</div>
-                  <div class="percentage">{proypc}%</div>
+                  <div class="units">{proy | num}</div>
+                  <div class="percentage">{proypc | pc}%</div>
                 </div>
               </div>
               <div class="votes">
                 <div class="vote" title="Blancos">
                   <div class="label">Blancos</div>
-                  <div class="units">{b}</div>
-                  <div class="percentage">{bpc}%</div>
+                  <div class="units">{b | num}</div>
+                  <div class="percentage">{bpc | pc}%</div>
                 </div>
                 <div class="vote" title="Nulos">
                   <div class="label">Nulos</div>
-                  <div class="units">{n}</div>
-                  <div class="percentage">{npc}%</div>
+                  <div class="units">{n | num}</div>
+                  <div class="percentage">{npc | pc}%</div>
                 </div>
               </div>
-              <div class="vote-counter">votos: {votos} - válidos: {votosve} <span rv-if="escrutada"><span class="tag is-small is-info">escrutada</span></span><span rv-unless="escrutada"><span class="tag is-small">no escrutada</span></span>
+              <div class="vote-counter">votos: {votos | num} - válidos: {votosve | num} <span rv-if="escrutada"><span class="tag is-small is-info">escrutada</span></span><span rv-unless="escrutada"><span class="tag is-small">no escrutada</span></span>
               </div>
             </div>
             <div class="column" id="bind-total-sup">
@@ -146,48 +158,48 @@
               <div class="votes">
                 <div class="vote vote-nau" title="NAU!">
                   <div class="label">NAU!</div>
-                  <div class="units">{nau}</div>
-                  <div class="percentage">{naupc}%</div>
+                  <div class="units">{nau | num}</div>
+                  <div class="percentage">{naupc | pc}%</div>
                 </div>
                 <div class="vote vote-mg" title="Amanecer">
                   <div class="label">Amanecer</div>
-                  <div class="units">{mg}</div>
-                  <div class="percentage">{mgpc}%</div>
+                  <div class="units">{mg | num}</div>
+                  <div class="percentage">{mgpc | pc}%</div>
                 </div>
                 <div class="vote vote-sdd" title="Solidaridad">
                   <div class="label">Solidaridad</div>
-                  <div class="units">{sdd}</div>
-                  <div class="percentage">{sddpc}%</div>
+                  <div class="units">{sdd | num}</div>
+                  <div class="percentage">{sddpc | pc}%</div>
                 </div>
                 <div class="vote vote-elp" title="1A">
                   <div class="label">1A</div>
-                  <div class="units">{elp}</div>
-                  <div class="percentage">{elppc}%</div>
+                  <div class="units">{elp | num}</div>
+                  <div class="percentage">{elppc | pc}%</div>
                 </div>
                 <div class="vote vote-proy" title="Avanzar">
                   <div class="label">Avanzar</div>
-                  <div class="units">{proy}</div>
-                  <div class="percentage">{proypc}%</div>
+                  <div class="units">{proy | num}</div>
+                  <div class="percentage">{proypc | pc}%</div>
                 </div>
                 <div class="vote vote-cero" title="Trinidad y Amanda">
                   <div class="label">Trinidad y Amanda</div>
-                  <div class="units">{cero}</div>
-                  <div class="percentage">{ceropc}%</div>
+                  <div class="units">{cero | num}</div>
+                  <div class="percentage">{ceropc | pc}%</div>
                 </div>
               </div>
               <div class="votes">
                 <div class="vote" title="Blancos">
                   <div class="label">Blancos</div>
-                  <div class="units">{b}</div>
-                  <div class="percentage">{bpc}%</div>
+                  <div class="units">{b | num}</div>
+                  <div class="percentage">{bpc | pc}%</div>
                 </div>
                 <div class="vote" title="Nulos">
                   <div class="label">Nulos</div>
-                  <div class="units">{n}</div>
-                  <div class="percentage">{npc}%</div>
+                  <div class="units">{n | num}</div>
+                  <div class="percentage">{npc | pc}%</div>
                 </div>
               </div>
-              <div class="vote-counter">votos: {votos} - válidos: {votosve} <span rv-if="escrutada"><span class="tag is-small is-info">escrutada</span></span><span rv-unless="escrutada"><span class="tag is-small">no escrutada</span></span>
+              <div class="vote-counter">votos: {votos | num} - válidos: {votosve | num} <span rv-if="escrutada"><span class="tag is-small is-info">escrutada</span></span><span rv-unless="escrutada"><span class="tag is-small">no escrutada</span></span>
               </div>
             </div>
           </div>
@@ -296,43 +308,43 @@
               <div class="votes">
                 <div class="vote vote-nau" title="NAU!">
                   <div class="label">NAU!</div>
-                  <div class="units">{nau}</div>
-                  <div class="percentage">{naupc}%</div>
+                  <div class="units">{nau | num}</div>
+                  <div class="percentage">{naupc | pc}%</div>
                 </div>
                 <div class="vote vote-mg" title="Amanecer">
                   <div class="label">Amanecer</div>
-                  <div class="units">{mg}</div>
-                  <div class="percentage">{mgpc}%</div>
+                  <div class="units">{mg | num}</div>
+                  <div class="percentage">{mgpc | pc}%</div>
                 </div>
                 <div class="vote vote-sdd" title="Solidaridad">
                   <div class="label">Solidaridad</div>
-                  <div class="units">{sdd}</div>
-                  <div class="percentage">{sddpc}%</div>
+                  <div class="units">{sdd | num}</div>
+                  <div class="percentage">{sddpc | pc}%</div>
                 </div>
                 <div class="vote vote-elp" title="1A">
                   <div class="label">1A</div>
-                  <div class="units">{elp}</div>
-                  <div class="percentage">{elppc}%</div>
+                  <div class="units">{elp | num}</div>
+                  <div class="percentage">{elppc | pc}%</div>
                 </div>
                 <div class="vote vote-proy" title="Avanzar">
                   <div class="label">Avanzar</div>
-                  <div class="units">{proy}</div>
-                  <div class="percentage">{proypc}%</div>
+                  <div class="units">{proy | num}</div>
+                  <div class="percentage">{proypc | pc}%</div>
                 </div>
               </div>
               <div class="votes">
                 <div class="vote" title="Blancos">
                   <div class="label">Blancos</div>
-                  <div class="units">{b}</div>
-                  <div class="percentage">{bpc}%</div>
+                  <div class="units">{b | num}</div>
+                  <div class="percentage">{bpc | pc}%</div>
                 </div>
                 <div class="vote" title="Nulos">
                   <div class="label">Nulos</div>
-                  <div class="units">{n}</div>
-                  <div class="percentage">{npc}%</div>
+                  <div class="units">{n | num}</div>
+                  <div class="percentage">{npc | pc}%</div>
                 </div>
               </div>
-              <div class="vote-counter">votos: {votos} - válidos: {votosve} <span rv-if="escrutada"><span class="tag is-small is-info">escrutada</span></span><span rv-unless="escrutada"><span class="tag is-small">no escrutada</span></span>
+              <div class="vote-counter">votos: {votos | num} - válidos: {votosve | num} <span rv-if="escrutada"><span class="tag is-small is-info">escrutada</span></span><span rv-unless="escrutada"><span class="tag is-small">no escrutada</span></span>
               </div>
             </div>
             <div class="column" id="bind-mesa-sup">
@@ -343,48 +355,48 @@
               <div class="votes">
                 <div class="vote vote-nau" title="NAU!">
                   <div class="label">NAU!</div>
-                  <div class="units">{nau}</div>
-                  <div class="percentage">{naupc}%</div>
+                  <div class="units">{nau | num}</div>
+                  <div class="percentage">{naupc | pc}%</div>
                 </div>
                 <div class="vote vote-mg" title="Amanecer">
                   <div class="label">Amanecer</div>
-                  <div class="units">{mg}</div>
-                  <div class="percentage">{mgpc}%</div>
+                  <div class="units">{mg | num}</div>
+                  <div class="percentage">{mgpc | pc}%</div>
                 </div>
                 <div class="vote vote-sdd" title="Solidaridad">
                   <div class="label">Solidaridad</div>
-                  <div class="units">{sdd}</div>
-                  <div class="percentage">{sddpc}%</div>
+                  <div class="units">{sdd | num}</div>
+                  <div class="percentage">{sddpc | pc}%</div>
                 </div>
                 <div class="vote vote-elp" title="1A">
                   <div class="label">1A</div>
-                  <div class="units">{elp}</div>
-                  <div class="percentage">{elppc}%</div>
+                  <div class="units">{elp | num}</div>
+                  <div class="percentage">{elppc | pc}%</div>
                 </div>
                 <div class="vote vote-proy" title="Avanzar">
                   <div class="label">Avanzar</div>
-                  <div class="units">{proy}</div>
-                  <div class="percentage">{proypc}%</div>
+                  <div class="units">{proy | num}</div>
+                  <div class="percentage">{proypc | pc}%</div>
                 </div>
                 <div class="vote vote-cero" title="Trinidad y Amanda">
                   <div class="label">Trinidad y Amanda</div>
-                  <div class="units">{cero}</div>
-                  <div class="percentage">{ceropc}%</div>
+                  <div class="units">{cero | num}</div>
+                  <div class="percentage">{ceropc | pc}%</div>
                 </div>
               </div>
               <div class="votes">
                 <div class="vote" title="Blancos">
                   <div class="label">Blancos</div>
-                  <div class="units">{b}</div>
-                  <div class="percentage">{bpc}%</div>
+                  <div class="units">{b | num}</div>
+                  <div class="percentage">{bpc | pc}%</div>
                 </div>
                 <div class="vote" title="Nulos">
                   <div class="label">Nulos</div>
-                  <div class="units">{n}</div>
-                  <div class="percentage">{npc}%</div>
+                  <div class="units">{n | num}</div>
+                  <div class="percentage">{npc | pc}%</div>
                 </div>
               </div>
-              <div class="vote-counter">votos: {votos} - válidos: {votosve} <span rv-if="escrutada"><span class="tag is-small is-info">escrutada</span></span><span rv-unless="escrutada"><span class="tag is-small">no escrutada</span></span>
+              <div class="vote-counter">votos: {votos | num} - válidos: {votosve | num} <span rv-if="escrutada"><span class="tag is-small is-info">escrutada</span></span><span rv-unless="escrutada"><span class="tag is-small">no escrutada</span></span>
               </div>
             </div>
           </div>
@@ -436,43 +448,43 @@
               <div class="votes">
                 <div class="vote vote-nau" title="NAU!">
                   <div class="label">NAU!</div>
-                  <div class="units">{nau}</div>
-                  <div class="percentage">{naupc}%</div>
+                  <div class="units">{nau | num}</div>
+                  <div class="percentage">{naupc | pc}%</div>
                 </div>
                 <div class="vote vote-mg" title="Amanecer">
                   <div class="label">Amanecer</div>
-                  <div class="units">{mg}</div>
-                  <div class="percentage">{mgpc}%</div>
+                  <div class="units">{mg | num}</div>
+                  <div class="percentage">{mgpc | pc}%</div>
                 </div>
                 <div class="vote vote-sdd" title="Solidaridad">
                   <div class="label">Solidaridad</div>
-                  <div class="units">{sdd}</div>
-                  <div class="percentage">{sddpc}%</div>
+                  <div class="units">{sdd | num}</div>
+                  <div class="percentage">{sddpc | pc}%</div>
                 </div>
                 <div class="vote vote-elp" title="1A">
                   <div class="label">1A</div>
-                  <div class="units">{elp}</div>
-                  <div class="percentage">{elppc}%</div>
+                  <div class="units">{elp | num}</div>
+                  <div class="percentage">{elppc | pc}%</div>
                 </div>
                 <div class="vote vote-proy" title="Avanzar">
                   <div class="label">Avanzar</div>
-                  <div class="units">{proy}</div>
-                  <div class="percentage">{proypc}%</div>
+                  <div class="units">{proy | num}</div>
+                  <div class="percentage">{proypc | pc}%</div>
                 </div>
               </div>
               <div class="votes">
                 <div class="vote" title="Blancos">
                   <div class="label">Blancos</div>
-                  <div class="units">{b}</div>
-                  <div class="percentage">{bpc}%</div>
+                  <div class="units">{b | num}</div>
+                  <div class="percentage">{bpc | pc}%</div>
                 </div>
                 <div class="vote" title="Nulos">
                   <div class="label">Nulos</div>
-                  <div class="units">{n}</div>
-                  <div class="percentage">{npc}%</div>
+                  <div class="units">{n | num}</div>
+                  <div class="percentage">{npc | pc}%</div>
                 </div>
               </div>
-              <div class="vote-counter">votos: {votos} - válidos: {votosve} <span rv-if="escrutada"><span class="tag is-small is-info">escrutado</span></span><span rv-unless="escrutada"><span class="tag is-small">no escrutado</span></span>
+              <div class="vote-counter">votos: {votos | num} - válidos: {votosve | num} <span rv-if="escrutada"><span class="tag is-small is-info">escrutado</span></span><span rv-unless="escrutada"><span class="tag is-small">no escrutado</span></span>
               </div>
             </div>
             <div class="column" id="bind-terri-sup">
@@ -483,48 +495,48 @@
               <div class="votes">
                 <div class="vote vote-nau" title="NAU!">
                   <div class="label">NAU!</div>
-                  <div class="units">{nau}</div>
-                  <div class="percentage">{naupc}%</div>
+                  <div class="units">{nau | num}</div>
+                  <div class="percentage">{naupc | pc}%</div>
                 </div>
                 <div class="vote vote-mg" title="Amanecer">
                   <div class="label">Amanecer</div>
-                  <div class="units">{mg}</div>
-                  <div class="percentage">{mgpc}%</div>
+                  <div class="units">{mg | num}</div>
+                  <div class="percentage">{mgpc | pc}%</div>
                 </div>
                 <div class="vote vote-sdd" title="Solidaridad">
                   <div class="label">Solidaridad</div>
-                  <div class="units">{sdd}</div>
-                  <div class="percentage">{sddpc}%</div>
+                  <div class="units">{sdd | num}</div>
+                  <div class="percentage">{sddpc | pc}%</div>
                 </div>
                 <div class="vote vote-elp" title="1A">
                   <div class="label">1A</div>
-                  <div class="units">{elp}</div>
-                  <div class="percentage">{elppc}%</div>
+                  <div class="units">{elp | num}</div>
+                  <div class="percentage">{elppc | pc}%</div>
                 </div>
                 <div class="vote vote-proy" title="Avanzar">
                   <div class="label">Avanzar</div>
-                  <div class="units">{proy}</div>
-                  <div class="percentage">{proypc}%</div>
+                  <div class="units">{proy | num}</div>
+                  <div class="percentage">{proypc | pc}%</div>
                 </div>
                 <div class="vote vote-cero" title="Trinidad y Amanda">
                   <div class="label">Trinidad y Amanda</div>
-                  <div class="units">{cero}</div>
-                  <div class="percentage">{ceropc}%</div>
+                  <div class="units">{cero | num}</div>
+                  <div class="percentage">{ceropc | pc}%</div>
                 </div>
               </div>
               <div class="votes">
                 <div class="vote" title="Blancos">
                   <div class="label">Blancos</div>
-                  <div class="units">{b}</div>
-                  <div class="percentage">{bpc}%</div>
+                  <div class="units">{b | num}</div>
+                  <div class="percentage">{bpc | pc}%</div>
                 </div>
                 <div class="vote" title="Nulos">
                   <div class="label">Nulos</div>
-                  <div class="units">{n}</div>
-                  <div class="percentage">{npc}%</div>
+                  <div class="units">{n | num}</div>
+                  <div class="percentage">{npc | pc}%</div>
                 </div>
               </div>
-              <div class="vote-counter">votos: {votos} - válidos: {votosve} <span rv-if="escrutada"><span class="tag is-small is-info">escrutado</span></span><span rv-unless="escrutada"><span class="tag is-small">no escrutado</span></span>
+              <div class="vote-counter">votos: {votos | num} - válidos: {votosve | num} <span rv-if="escrutada"><span class="tag is-small is-info">escrutado</span></span><span rv-unless="escrutada"><span class="tag is-small">no escrutado</span></span>
               </div>
             </div>
           </div>
@@ -552,7 +564,7 @@
                   <div class="bar-holder">
                     <div class="bar" rv-width="cand.pc"></div>
                   </div>
-                  <div class="percentage is-wide">{cand.votos} ({cand.pc}%)</div>
+                  <div class="percentage is-wide">{cand.votos | num} ({cand.pc | pc}%)</div>
                 </div>
               </div>
             </div>
@@ -560,7 +572,7 @@
               <div class="chartgraph">
                 <canvas id="ct"></canvas>
               </div>
-              <div class="vote-counter">votos: {votos} - válidos: {votosve} <span rv-if="escrutada"><span class="tag is-small is-info">escrutada</span></span><span rv-unless="escrutada"><span class="tag is-small">no escrutada</span></span>
+              <div class="vote-counter">votos: {votos | num} - válidos: {votosve | num} <span rv-if="escrutada"><span class="tag is-small is-info">escrutada</span></span><span rv-unless="escrutada"><span class="tag is-small">no escrutada</span></span>
               </div>
             </div>
           </div>
@@ -612,7 +624,7 @@
                   <div class="bar-holder">
                     <div class="bar bar-default" rv-width="ppto.pc"></div>
                   </div>
-                  <div class="percentage">{ppto.pc}%</div>
+                  <div class="percentage">{ppto.pc | pc}%</div>
                 </div>
               </div>
             </div>
@@ -623,70 +635,70 @@
               <div class="votes">
                 <div class="vote vote-tdicai" title="TDI CAi">
                   <div class="label">TDI CAi</div>
-                  <div class="units">{tdicai}</div>
-                  <div class="percentage">{tdicaipc}%</div>
+                  <div class="units">{tdicai | num}</div>
+                  <div class="percentage">{tdicaipc | pc}%</div>
                 </div>
                 <div class="vote vote-tdicoll" title="ESI">
                   <div class="label">ESI</div>
-                  <div class="units">{tdicoll}</div>
-                  <div class="percentage">{tdicollpc}%</div>
+                  <div class="units">{tdicoll | num}</div>
+                  <div class="percentage">{tdicollpc | pc}%</div>
                 </div>
                 <div class="vote vote-ani" title="Animalia">
                   <div class="label">Animalia</div>
-                  <div class="units">{ani}</div>
-                  <div class="percentage">{anipc}%</div>
+                  <div class="units">{ani | num}</div>
+                  <div class="percentage">{anipc | pc}%</div>
                 </div>
                 <div class="vote vote-caco" title="Paulo Freire">
                   <div class="label">Paulo Freire</div>
-                  <div class="units">{caco}</div>
-                  <div class="percentage">{cacopc}%</div>
+                  <div class="units">{caco | num}</div>
+                  <div class="percentage">{cacopc | pc}%</div>
                 </div>
                 <div class="vote vote-spch" title="Obra UC">
                   <div class="label">Obra UC</div>
-                  <div class="units">{spch}</div>
-                  <div class="percentage">{spchpc}%</div>
+                  <div class="units">{spch | num}</div>
+                  <div class="percentage">{spchpc | pc}%</div>
                 </div>
                 <div class="vote vote-jsf" title="UCeanos">
                   <div class="label">UCeanos</div>
-                  <div class="units">{jsf}</div>
-                  <div class="percentage">{jsfpc}%</div>
+                  <div class="units">{jsf | num}</div>
+                  <div class="percentage">{jsfpc | pc}%</div>
                 </div>
                 <div class="vote vote-clmun" title="TVP">
                   <div class="label">TVP</div>
-                  <div class="units">{clmun}</div>
-                  <div class="percentage">{clmunpc}%</div>
+                  <div class="units">{clmun | num}</div>
+                  <div class="percentage">{clmunpc | pc}%</div>
                 </div>
                 <div class="vote vote-mapau" title="MAPAU">
                   <div class="label">MAPAU</div>
-                  <div class="units">{mapau}</div>
-                  <div class="percentage">{mapaupc}%</div>
+                  <div class="units">{mapau | num}</div>
+                  <div class="percentage">{mapaupc | pc}%</div>
                 </div>
                 <div class="vote vote-pry" title="Proyecta">
                   <div class="label">Proyecta</div>
-                  <div class="units">{pry}</div>
-                  <div class="percentage">{prypc}%</div>
+                  <div class="units">{pry | num}</div>
+                  <div class="percentage">{prypc | pc}%</div>
                 </div>
               </div>
               <div class="votes">
                 <div class="vote" title="Blancos">
                   <div class="label">Blancos</div>
-                  <div class="units">{b}</div>
-                  <div class="percentage">{bpc}%</div>
+                  <div class="units">{b | num}</div>
+                  <div class="percentage">{bpc | pc}%</div>
                 </div>
                 <div class="vote" title="Nulos">
                   <div class="label">Nulos</div>
-                  <div class="units">{n}</div>
-                  <div class="percentage">{npc}%</div>
+                  <div class="units">{n | num}</div>
+                  <div class="percentage">{npc | pc}%</div>
                 </div>
               </div>
-              <div class="vote-counter">votos: {votos} - válidos: {votosve} <span rv-if="escrutada"><span class="tag is-small is-info">escrutado</span></span><span rv-unless="escrutada"><span class="tag is-small">no escrutado</span></span>
+              <div class="vote-counter">votos: {votos | num} - válidos: {votosve | num} <span rv-if="escrutada"><span class="tag is-small is-info">escrutado</span></span><span rv-unless="escrutada"><span class="tag is-small">no escrutado</span></span>
               </div>
             </div>
           </div>
         </div>
         <div class="columns">
           <div class="column">
-            <div class="box" id="bind-mesas"><span class="title is-3">Mesas Escrutadas</span><span>  </span><span class="subtitle">{actual} de {total}</span>
+            <div class="box" id="bind-mesas"><span class="title is-3">Mesas Escrutadas</span><span>  </span><span class="subtitle">{actual} de {total} ({pc | pc}%)</span>
               <div class="table-wrap">
                 <table class="table is-narrow">
                   <thead>
@@ -713,7 +725,7 @@
                   <div class="bar-holder">
                     <div class="bar bar-default" rv-width="terri.pc"></div>
                   </div>
-                  <div class="percentage">{terri.pc}%</div>
+                  <div class="percentage">{terri.pc | pc}%</div>
                 </div>
               </div>
             </div>

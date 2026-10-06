@@ -76,7 +76,7 @@ $(document).ready(() => {
   let terriSup = _.extend({}, defaultObject);
   let projects = _.extend({ projects: defaultProjects }, defaultObject);
   let participacion = { terris: [] };
-  let mesasEscrutadas = { mesas: [], actual: 0, total: 0 };
+  let mesasEscrutadas = { mesas: [], actual: 0, total: 0, pc: 0 };
   // CT: per-territory candidates (day-aware display values)
   // CT pie holds raw votes (unlike the other pies which hold percentages),
   // so it needs its own tooltip: "Nombre: 382 votos (25.4%)".
@@ -92,8 +92,8 @@ $(document).ready(() => {
             const total = vals.reduce((s, v) => s + (v || 0), 0);
             const val = vals[tooltipItem.index];
             const lab = data.labels[tooltipItem.index];
-            const pct = total > 0 ? ((val / total) * 100).toFixed(1) : 0;
-            return `${lab}: ${val} votos (${pct}%)`;
+            const pct = total > 0 ? fmtPc(Math.round((val / total) * 1000) / 10) : 0;
+            return `${lab}: ${fmtNum(val)} votos (${pct}%)`;
           },
         },
       },
@@ -132,7 +132,16 @@ $(document).ready(() => {
     el.style.backgroundColor = value;
   };
 
+  // Chilean number format: 4.142 votos, 12,5 %. Percentages switch to a
+  // decimal comma too, or "4.142" and "12.5" would read ambiguously.
+  const fmtNum = (v) => (Number(v) || 0).toLocaleString('es-CL', { maximumFractionDigits: 0 });
+  const fmtPc = (v) => (Number(v) || 0).toLocaleString('es-CL', { maximumFractionDigits: 2 });
+  rivets.formatters.num = fmtNum;
+  rivets.formatters.pc = fmtPc;
+  rivets.formatters.eq = (v, x) => v === x;
+
   rivets.bind($('#bind-total-lista'), totalLista);
+  rivets.bind($('#bind-progress'), mesasEscrutadas);
   rivets.bind($('#bind-total-sup'), totalSup);
   rivets.bind($('#bind-mesa-lista'), mesaLista);
   rivets.bind($('#bind-mesa-sup'), mesaSup);
@@ -380,7 +389,19 @@ $(document).ready(() => {
       // Hide PPTO section if no active projects
       updatePptoVisibility();
 
-      // Update header data with ranked parties
+      // Counting progress per contest: one flag per mesa per day.
+      const countProgress = (type) => {
+        const ids = Object.keys(mainData.total[type].mesa);
+        let done = 0;
+        ids.forEach((id) => {
+          if (mainData.dia1[type].mesa[id] && mainData.dia1[type].mesa[id].escrutada) done++;
+          if (mainData.dia2[type].mesa[id] && mainData.dia2[type].mesa[id].escrutada) done++;
+        });
+        return { done, total: ids.length * 2 };
+      };
+
+      // Header ranking: by raw votes (rounded percentages can misorder two
+      // close lists and hide a tie).
       const updateHeaderParties = (type) => {
         const parties = displayParties(type);
         const total = mainData.total[type].total;
@@ -390,25 +411,40 @@ $(document).ready(() => {
           color: p.color,
           pc: total[`${p.key}pc`] || 0,
           votes: total[p.key] || 0,
-          advances: false
-        })).sort((a, b) => b.pc - a.pc);
+          advances: false,
+          badge: '',
+        })).sort((a, b) => b.votes - a.votes);
       };
 
-      // Mark top 2 as advancing in first round and add rank index
-      const markAdvancing = (parties) => {
-        if (headerData.electionType === 'firstRound') {
-          // Only lists with votes can advance: on an empty or partial
-          // count a 0% list must not wear the badge.
-          parties.slice(0, 2).forEach((p) => { p.advances = p.votes > 0; });
-        }
+      // First-round badges, at most two lists:
+      //  - tie at the 2nd/3rd cutoff  -> "Empate" on every tied list
+      //  - count complete             -> "Avanza"
+      //  - count in progress          -> "Va 1°" / "Va 2°" (not a result yet)
+      // Lists with 0 votes never get a badge. No "Gana" badge on purpose:
+      // an absolute-majority call mid-count would mislead.
+      const markAdvancing = (parties, type) => {
         parties.forEach((p, i) => { p.index = i + 1; });
+        if (headerData.electionType !== 'firstRound') return parties;
+        const prog = countProgress(type);
+        const complete = prog.total > 0 && prog.done === prog.total;
+        const cutoff = parties[1] ? parties[1].votes : 0;
+        const tiedAtCutoff = cutoff > 0 && parties[2] && parties[2].votes === cutoff;
+        parties.forEach((p, i) => {
+          if (p.votes <= 0) return;
+          if (tiedAtCutoff && p.votes === cutoff) {
+            p.badge = 'Empate';
+          } else if (i < 2) {
+            p.badge = complete ? 'Avanza' : `Va ${i + 1}°`;
+          }
+          p.advances = p.badge !== '' && p.badge !== 'Empate';
+        });
         return parties;
       };
 
       // Mutate arrays in-place so Rivets re-renders reliably
-      const newLista = markAdvancing(updateHeaderParties('lista'));
+      const newLista = markAdvancing(updateHeaderParties('lista'), 'lista');
       headerData.lista.parties.splice(0, headerData.lista.parties.length, ...newLista);
-      const newSup = markAdvancing(updateHeaderParties('sup'));
+      const newSup = markAdvancing(updateHeaderParties('sup'), 'sup');
       headerData.sup.parties.splice(0, headerData.sup.parties.length, ...newSup);
 
       updateHeaderVisibility();
@@ -438,6 +474,9 @@ $(document).ready(() => {
       mesasEscrutadas.actual = escrutadasActual;
       // Multiply total by 2 because it's 2 days per mesa
       mesasEscrutadas.total = mesaEntries.length * 2; 
+      mesasEscrutadas.pc = mesasEscrutadas.total
+        ? Math.round((mesasEscrutadas.actual / mesasEscrutadas.total) * 1000) / 10
+        : 0;
 
       _.each(mainData.total.lista.terri, (terri) => {
         let updatedTerri = {

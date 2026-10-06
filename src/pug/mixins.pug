@@ -21,7 +21,7 @@ mixin bar-item(name, pc, colorcode)
         .bar(class=`bar-${colorcode}`, rv-width=`${pc}`)
       else
         .bar.bar-default(rv-width=`${pc}`)
-    .percentage {#{pc}}%
+    .percentage {#{pc} | pc}%
 
 mixin selector(kind)
   p.control
@@ -42,14 +42,14 @@ mixin vote(classname, units, percentage, label)
     if label
       .label= label
     .units
-      | {#{units}}
+      | {#{units} | num}
     if percentage
       .percentage
-        | {#{percentage}}%
+        | {#{percentage} | pc}%
 
 mixin vote-counter
   .vote-counter
-    | votos: {votos} - válidos: {votosve}
+    | votos: {votos | num} - válidos: {votosve | num}
     = ' '
     span(rv-if='escrutada')
       span.tag.is-small.is-info

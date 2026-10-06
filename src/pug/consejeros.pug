@@ -15,7 +15,7 @@
           .legend {cand.name}
           .bar-holder
             .bar(rv-width='cand.pc')
-          .percentage.is-wide {cand.votos} ({cand.pc}%)
+          .percentage.is-wide {cand.votos | num} ({cand.pc | pc}%)
     .column
       +canvas('ct')
       +vote-counter

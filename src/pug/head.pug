@@ -2,6 +2,23 @@ head
   title #{election.name} | El PUClítico
   meta(charset='utf-8')
   meta(name='viewport', content='width=device-width, initial-scale=1.0')
+  //- Link previews (WhatsApp, X, Instagram, Telegram). Scrapers need an
+  //- absolute image URL: set election.siteUrl once the subdomain exists.
+  - const desc = 'Conteo de votos en vivo, mesa a mesa: Lista FEUC, Consejería Superior y Consejerías Territoriales.'
+  - const base = (election.siteUrl || '').replace(/\/$/, '')
+  meta(name='description', content=desc)
+  meta(property='og:type', content='website')
+  meta(property='og:site_name', content='El PUClítico')
+  meta(property='og:locale', content='es_CL')
+  meta(property='og:title', content=`${election.name} · Resultados en vivo`)
+  meta(property='og:description', content=desc)
+  meta(property='og:image', content=`${base}/og-image.png`)
+  meta(property='og:image:width', content='1200')
+  meta(property='og:image:height', content='630')
+  if base
+    meta(property='og:url', content=`${base}/`)
+  meta(name='twitter:card', content='summary_large_image')
+  meta(name='theme-color', content='#00ACCD')
   link(rel='icon', type='image/png', href='/src/images/favicon.png')
   link(rel='stylesheet', type='text/css', href='/src/scss/style.scss')
   script(type='module', src='/src/js/main.js')

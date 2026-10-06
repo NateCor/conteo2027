@@ -407,8 +407,20 @@ $vote-units-bg: rgba(0, 0, 0, 0.15);
       text-transform: uppercase;
       letter-spacing: 0.5px;
       margin-left: 12px;
+      white-space: nowrap;
+
+      &.is-tie { background: rgba(255, 210, 122, 0.35); }
     }
   }
+}
+
+/* Counting progress line (hero) */
+.count-progress {
+  margin-bottom: 12px;
+  font-size: 15px;
+  opacity: 0.95;
+
+  .count-progress-pc { opacity: 0.8; }
 }
 
 /* Live-refresh status pill (top bar) */
