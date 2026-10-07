@@ -8,7 +8,7 @@
     "excluidos": "Bachilleratos no votan ('bachillerato no cuenta en el conteo'): 5500/5502/5501/5503/3803 = 177 estudiantes",
     "notes": [
       "Gobierno (Excel) = Administración Pública (lista oficial) — territorio propio, ya no agregado a 'soc'",
-      "Ciencia de Datos (2300), Cs. de la Computación (0420) y Estadística (0620) → Ciencias Exactas según lista oficial, NO Ingeniería",
+      "Cs. de la Computación (0420, LICC) → Ingeniería (territorio = Ingeniería + LICC), corrección del equipo oct 2026. Ciencia de Datos (2300) y Estadística (0620) siguen en Ciencias Exactas",
       "Oriente = Actuación, Arte, Estética y Música (confirmado)",
       "Lo Contador incluye Planificación Urbana (confirmado)",
       "2104 'Pedagogía para Profesionales': padrón la marca Villa, lista oficial no la incluye en Villarrica → asignada a Educación (PFP); confirmar",
@@ -29,8 +29,8 @@
     "der": 1831,
     "educa": 2531,
     "hum": 1262,
-    "astrofismat": 1385,
-    "ing": 4694,
+    "astrofismat": 1042,
+    "ing": 5037,
     "constru": 984,
     "med": 735,
     "salud": 2181,
@@ -521,10 +521,10 @@
       "cod": "0420",
       "nombre": "Lic en Ing en Ciencia de Comp",
       "est": 343,
-      "territorio": "astrofismat",
-      "territorioOficial": "Ciencias Exactas",
+      "territorio": "ing",
+      "territorioOficial": "Ingeniería",
       "confianza": "alta",
-      "nota": "Cs. de la Computación → Exactas según lista oficial"
+      "nota": "LICC → Ingeniería (territorio Ingeniería + LICC), corrección del equipo oct 2026"
     },
     {
       "cod": "0620",
