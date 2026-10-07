@@ -14,6 +14,9 @@
 //     so the site keeps serving the last good data mid-edit.
 //   - Open pages pick up the new data.json by themselves within
 //     election.refreshSeconds (src/js/liveRefresh.js); nobody reloads.
+//   - PUBLISH=1 also uploads data.json to the public host (scripts/publish.js)
+//     whenever the published copy differs from the local one. A failed upload
+//     is retried on the next poll, so a short host outage heals by itself.
 
 import { spawnSync } from 'child_process';
 import crypto from 'crypto';
@@ -41,10 +44,50 @@ let lastHash = fs.existsSync(OUTPUT_FILE)
   ? sha256(fs.readFileSync(OUTPUT_FILE))
   : null;
 let polls = 0;
+const PUBLISH = process.env.PUBLISH === '1';
+let publishedHash = null; // hash of the copy currently on the public host
+let publishFailures = 0;
+// A rejected login must NOT be retried every poll: cPanel locks the account
+// after a few failures. On a login rejection publishing pauses until the
+// credentials file changes (someone saved a corrected password).
+const CREDS_FILE = process.env.CONTEO_CREDS || path.join(process.env.HOME || '', '.config', 'conteo', 'ftp.env');
+const credsStamp = () => { try { return fs.statSync(CREDS_FILE).mtimeMs; } catch (e) { return 0; } };
+let authBlockedAt = null;
+
+function publishIfNeeded(hash) {
+  if (!PUBLISH || hash === publishedHash) return;
+  if (authBlockedAt !== null) {
+    if (credsStamp() === authBlockedAt) return; // still the rejected credentials
+    console.log(`[${stamp()}]   credentials file changed — resuming publishing`);
+    authBlockedAt = null;
+  }
+  const res = spawnSync(process.execPath, [path.join(__dirname, 'publish.js'), 'data'], {
+    cwd: ROOT_DIR,
+    env: process.env,
+    encoding: 'utf8',
+    timeout: 90000,
+  });
+  if (res.status === 0) {
+    publishedHash = hash;
+    publishFailures = 0;
+    console.log(`[${stamp()}]   published (${hash}) ${String(res.stdout).trim()}`);
+  } else {
+    publishFailures++;
+    const why = res.signal ? `signal ${res.signal}` : `exit ${res.status}`;
+    const detail = String(res.stderr || res.stdout || '').trim().split('\n').slice(-2).join(' | ');
+    if (/\b(530|401|403)\b|Access denied|Login/i.test(detail)) {
+      authBlockedAt = credsStamp();
+      console.log(`[${stamp()}]   PUBLISH LOGIN REJECTED — paused until ${CREDS_FILE} changes: ${detail.slice(0, 200)}`);
+      return;
+    }
+    console.log(`[${stamp()}]   PUBLISH FAILED #${publishFailures} (${why}) — retry next poll: ${detail.slice(0, 300)}`);
+  }
+}
 
 console.log(`[${stamp()}] live-poll started — every ${intervalSeconds}s`);
 console.log(`  SHEET_URL: ${process.env.SHEET_URL.slice(0, 80)}...`);
 console.log(`  initial data.json hash: ${lastHash ?? '(none)'}`);
+console.log(`  publishing to host: ${PUBLISH ? 'ON' : 'off'}`);
 
 setInterval(() => {
   polls++;
@@ -74,4 +117,5 @@ setInterval(() => {
   } else {
     console.log(`[${stamp()}] poll ${polls}: no change (${newHash})`);
   }
+  publishIfNeeded(newHash);
 }, intervalSeconds * 1000);

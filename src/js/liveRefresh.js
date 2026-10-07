@@ -3,11 +3,10 @@
 // the page only when the content actually changed. Viewers never reload.
 //
 // - Interval comes from config/election.json `election.refreshSeconds`.
-// - The URL carries a time-bucket parameter (?t=<interval index>): every
-//   viewer in the same window shares one CDN cache entry (CDN-friendly), yet
-//   no CDN can serve data older than one interval (GitHub Pages' Fastly
-//   caches for 10 min otherwise). `cache: 'no-cache'` makes the browser
-//   revalidate instead of trusting its own cache.
+// - `cache: 'no-cache'` makes the browser revalidate with the server every
+//   time (If-None-Match / If-Modified-Since). When nothing changed the host
+//   answers 304 with no body, which is very light on shared hosting; the
+//   .htaccess in public/ also tells the server never to cache data.json.
 // - A failed or half-written response never replaces good data: the parse
 //   happens before the hand-off, and the page keeps the last good numbers.
 // - Polling pauses while the tab is hidden and fires immediately when it
@@ -38,8 +37,7 @@ export function startLiveRefresh({ onData, onStatus }) {
     if (inFlight) return;
     inFlight = true;
     try {
-      const bucket = Math.floor(Date.now() / INTERVAL_MS);
-      const res = await fetch(`${DATA_URL}?t=${bucket}`, { cache: 'no-cache' });
+      const res = await fetch(DATA_URL, { cache: 'no-cache' });
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
       const text = await res.text();
       if (text !== lastText) {
