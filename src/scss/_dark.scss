@@ -98,6 +98,10 @@ html.dark {
     .votes .vote.vote-#{$mov} { background-color: $color; }
   }
 
+  // Neutral pills (Blancos/Nulos) have no party class: Bulma's .label color
+  // (#363636) would sit on a dark pill. Party pills keep their own label colors.
+  .votes .vote:not([class*="vote-"]) .label { color: $dk-text; opacity: 0.85; }
+
   .vote-counter { color: $dk-text-muted; }
 
   // Bar graphs (CT, participation, PPTO)
