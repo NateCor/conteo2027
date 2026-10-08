@@ -904,19 +904,18 @@ function calculateAggregates(converted) {
   console.log(`  ✓ PPTO total: ${pDataTotal.total.votos} votes`);
 }
 
-// Percentages follow the official sheet ("% de válidamente emitidas"):
-// each list's % is over VALID votes (blancos and nulos excluded), which is
-// also the base for the absolute-majority rule. Blancos and nulos show
-// their share of ALL votes cast, so the two pills still carry information.
+// Percentages are over ALL votes cast, blancos and nulos included: the
+// team's definition of "válidamente emitidos" (confirmed election night,
+// 2026-10-08) counts them. Lists, blancos and nulos share one base and
+// add up to 100%.
 function calculatePercentages(obj, keys) {
   const total = keys.reduce((sum, k) => sum + obj[k], 0);
   obj.votos = total;
   obj.votosve = total - (obj.b || 0) - (obj.n || 0);
-  const pct = (v, base) => (base > 0 ? Math.round((v / base) * 100 * 100) / 100 : 0);
 
   if (total > 0) {
     keys.forEach(k => {
-      obj[k + 'pc'] = (k === 'b' || k === 'n') ? pct(obj[k], total) : pct(obj[k], obj.votosve);
+      obj[k + 'pc'] = Math.round((obj[k] / total) * 100 * 100) / 100;
     });
   }
 }
