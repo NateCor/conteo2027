@@ -37,6 +37,10 @@ const TEXTOS = {
   badgeAvanza: 'Avanza',                      // conteo terminado, 1° y 2° lugar
   badgeVa: 'Va',                              // conteo en curso: "Va 1°" / "Va 2°"
   badgeEmpate: 'Empate',                      // empate en el corte del 2° lugar
+  escrutada: 'escrutada',                     // etiqueta bajo los gráficos
+  noEscrutada: 'no escrutada',
+  enConteo: 'en conteo',                      // mesa con votos pero sin marcar escrutada
+  deMesas: 'mesas escrutadas',                // "37 de 111 mesas escrutadas"
   errorCarga: 'No se pudo cargar data.json — verifica que corriste ' +
     '<code>npm run fetch-data</code>. Revisa la consola para detalles.',
 };
@@ -464,12 +468,34 @@ $(document).ready(() => {
         })).sort((a, b) => b.votes - a.votes);
       };
 
-      // First-round badges, at most two lists:
-      //  - tie at the 2nd/3rd cutoff  -> "Empate" on every tied list
-      //  - count complete             -> "Avanza"
-      //  - count in progress          -> "Va 1°" / "Va 2°" (not a result yet)
-      // Lists with 0 votes never get a badge. No "Gana" badge on purpose:
-      // an absolute-majority call mid-count would mislead.
+      // Most votes still possible in this contest: for every territory with
+      // a mesa-day not yet escrutada, its padrón (+ margenPadron slack)
+      // minus the votes already cast there. Unknown padrón -> Infinity
+      // (never call a result we can't bound).
+      const remainingVotes = (type) => {
+        const padron = mainData.padronTerritorio || {};
+        const slack = 1 + (mainData.margenPadron ?? 0.05);
+        const open = new Set();
+        Object.entries(mainData.total[type].mesa).forEach(([id, m]) => {
+          const days = oneDay(id) ? ['dia1'] : ['dia1', 'dia2'];
+          if (days.some((d) => !(mainData[d][type].mesa[id] || {}).escrutada)) open.add(m.territoryId);
+        });
+        let left = 0;
+        for (const t of open) {
+          if (!padron[t]) return Infinity;
+          const cast = (mainData.total[type].terri[t] || {}).votos || 0;
+          left += Math.max(0, Math.ceil(padron[t] * slack) - cast);
+        }
+        return left;
+      };
+
+      // First-round badges, at most two lists, never on 0 votes:
+      //  - official call set by the team (election.avanzaOficial) -> "Avanza"
+      //  - lead over 3rd larger than every vote still possible   -> "Avanza"
+      //    (mathematically irreversible, works before 100% escrutado)
+      //  - tie at the 2nd/3rd cutoff -> "Empate" on every tied list
+      //  - otherwise "Va 1°" / "Va 2°" (not a result yet)
+      // No "Gana" badge on purpose.
       const markAdvancing = (parties, type) => {
         // Equal vote counts share a rank number (1, 1, 3), so a tie never
         // reads as one list leading the other.
@@ -478,24 +504,33 @@ $(document).ready(() => {
           p.index = prev && p.votes > 0 && p.votes === prev.votes ? prev.index : i + 1;
         });
         if (headerData.electionType !== 'firstRound') return parties;
-        const prog = countProgress(type);
-        const complete = prog.total > 0 && prog.done === prog.total;
+        const official = ((mainData.avanzaOficial || {})[type]) || [];
+        if (official.length) {
+          parties.forEach((p) => {
+            if (official.includes(p.key)) { p.badge = TEXTOS.badgeAvanza; p.advances = true; }
+          });
+          return parties;
+        }
+        const left = remainingVotes(type);
         const cutoff = parties[1] ? parties[1].votes : 0;
-        const tiedAtCutoff = cutoff > 0 && parties[2] && parties[2].votes === cutoff;
-        // Top two tied with each other (but clear of 3rd): both advance, so
-        // while counting both show "Empate"; once complete both show "Avanza".
+        const third = parties[2] ? parties[2].votes : 0;
+        const tiedAtCutoff = cutoff > 0 && parties[2] && third === cutoff;
         const tiedFirst = !tiedAtCutoff && cutoff > 0 && parties[0].votes === cutoff;
         parties.forEach((p, i) => {
           if (p.votes <= 0) return;
+          const secured = i < 2 && !tiedAtCutoff && p.votes - third > left;
           if (tiedAtCutoff && p.votes === cutoff) {
             p.badge = TEXTOS.badgeEmpate;
             p.tie = true;
-          } else if (i < 2 && tiedFirst && !complete) {
+          } else if (secured) {
+            p.badge = TEXTOS.badgeAvanza;
+            p.advances = true;
+          } else if (i < 2 && tiedFirst) {
             p.badge = TEXTOS.badgeEmpate;
             p.tie = true;
             p.advances = true;
           } else if (i < 2) {
-            p.badge = complete ? TEXTOS.badgeAvanza : `${TEXTOS.badgeVa} ${i + 1}°`;
+            p.badge = `${TEXTOS.badgeVa} ${i + 1}°`;
             p.advances = true;
           }
         });
@@ -562,10 +597,37 @@ $(document).ready(() => {
     const listaKeys = [...displayParties('lista').map(p => p.key + 'pc'), 'bpc', 'npc'];
     const supKeys = [...displayParties('sup').map(p => p.key + 'pc'), 'bpc', 'npc'];
 
+    // "escrutada" tag under each pie, computed from the per-mesa checkboxes
+    // for the selected scope and day (the sheet's flags, never "has votes").
+    const progressFor = (type, dia, keep) => {
+      let done = 0;
+      let total = 0;
+      Object.entries(mainData.total[type].mesa).forEach(([id, m]) => {
+        if (keep && !keep(id, m)) return;
+        (dia === 'total' ? ['dia1', 'dia2'] : [dia]).forEach((d) => {
+          if (d === 'dia2' && oneDay(id)) return;
+          total++;
+          if ((mainData[d][type].mesa[id] || {}).escrutada) done++;
+        });
+      });
+      return { done, total };
+    };
+    const tagScope = (obj, prog) => {
+      obj.escrutada = prog.total > 0 && prog.done === prog.total;
+      obj.escrLabel = `${fmtNum(prog.done)} de ${fmtNum(prog.total)} ${TEXTOS.deMesas}`;
+    };
+    const tagMesa = (obj, prog) => {
+      obj.escrutada = prog.total > 0 && prog.done === prog.total;
+      obj.escrLabel = obj.escrutada ? TEXTOS.escrutada
+        : (obj.votos > 0 ? TEXTOS.enConteo : TEXTOS.noEscrutada);
+    };
+
     if (sender !== 'mesa' && sender !== 'terri' && sender !== 'ppto') {
       totalLista = _.extendOwn(totalLista, mainData[diaTotal].lista.total);
       totalSup = _.extendOwn(totalSup, mainData[diaTotal].sup.total);
 
+      tagScope(totalLista, progressFor('lista', diaTotal));
+      tagScope(totalSup, progressFor('sup', diaTotal));
       updateChartData(chartTotalLista, totalLista, listaKeys);
       updateChartData(chartTotalSup, totalSup, supKeys);
     }
@@ -581,6 +643,8 @@ $(document).ready(() => {
         mainData[diaMesa].sup.mesa[selectedMesa]
       );
 
+      tagMesa(mesaLista, progressFor('lista', diaMesa, (id) => id === selectedMesa));
+      tagMesa(mesaSup, progressFor('sup', diaMesa, (id) => id === selectedMesa));
       updateChartData(chartMesaLista, mesaLista, listaKeys);
       updateChartData(chartMesaSup, mesaSup, supKeys);
     }
@@ -596,6 +660,8 @@ $(document).ready(() => {
         mainData[diaTerri].sup.terri[selectedTerri]
       );
 
+      tagScope(terriLista, progressFor('lista', diaTerri, (id, m) => m.territoryId === selectedTerri));
+      tagScope(terriSup, progressFor('sup', diaTerri, (id, m) => m.territoryId === selectedTerri));
       updateChartData(chartTerriLista, terriLista, listaKeys);
       updateChartData(chartTerriSup, terriSup, supKeys);
     }

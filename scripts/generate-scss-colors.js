@@ -60,6 +60,26 @@ function generateScss() {
     lines.push(`  ${e.key}: $color-${e.key},`);
   }
   lines.push(');');
+  lines.push('');
+
+  // Text color for each party's pill, picked from the background's
+  // luminance (WCAG): dark text on light colors (lime, pink, gold, orange),
+  // white on dark ones. Used in both themes, so a new list never needs a
+  // hand-made exception.
+  const lum = (hex) => {
+    let h = hex.replace('#', '');
+    if (h.length === 3) h = h.split('').map((c) => c + c).join('');
+    const [r, g, b] = [0, 2, 4].map((i) => {
+      const v = parseInt(h.slice(i, i + 2), 16) / 255;
+      return v <= 0.03928 ? v / 12.92 : ((v + 0.055) / 1.055) ** 2.4;
+    });
+    return 0.2126 * r + 0.7152 * g + 0.0722 * b;
+  };
+  lines.push('$party-ink: (');
+  for (const e of entries) {
+    lines.push(`  ${e.key}: ${lum(e.color) > 0.179 ? '#111111' : '#ffffff'},`);
+  }
+  lines.push(');');
 
   fs.writeFileSync(OUTPUT_FILE, lines.join('\n') + '\n');
   console.log(`Generated ${OUTPUT_FILE} with ${entries.length} color entries`);

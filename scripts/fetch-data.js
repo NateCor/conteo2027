@@ -408,6 +408,12 @@ function transformWorkbook(workbook) {
   converted.activeParties = detectedActive;
   converted.electionType = detectedActive.lista.length > 2 ? 'firstRound' : 'secondRound';
   converted.totalVoters = TOTAL_VOTERS;
+  // For the header's "Avanza" call: eligible voters per territory, and the
+  // team's official call if they set one (config is re-read every poll, so
+  // an edit reaches the site within one poll, with no rebuild).
+  converted.padronTerritorio = PADRON_TERRI;
+  converted.avanzaOficial = ELECTION_CONFIG.election.avanzaOficial || {};
+  converted.margenPadron = ELECTION_CONFIG.election.margenPadron ?? 0.05;
 
   return converted;
 }

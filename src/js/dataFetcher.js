@@ -12,6 +12,7 @@ function buildDefaultObject() {
     votosve: 0,
     votos: 0,
     escrutada: false,
+    escrLabel: '',
     participacion: 0,
   };
   // Add all party keys (union of lista and sup — sup-only keys like the

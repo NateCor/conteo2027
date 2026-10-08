@@ -222,16 +222,12 @@ $vote-units-bg: rgba(0, 0, 0, 0.15);
 
     @each $mov, $color in $party-colors {
       &.vote-#{$mov} {
+        // Text color comes from $party-ink (by background luminance)
+        $ink: map-get($party-ink, $mov);
         background-color: $color;
-        // Light backgrounds need dark text
-        @if $mov == mg or $mov == tdicai or $mov == clmun or $mov == cero { color: black; }
-        @else { color: white; }
+        color: $ink;
 
-        .label {
-          @if $mov == mg or $mov == tdicai or $mov == clmun or $mov == cero { color: #444; }
-          @else { color: white; }
-          opacity: 1;
-        }
+        .label, .percentage { color: $ink; opacity: 1; }
       }
     }
 

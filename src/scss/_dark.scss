@@ -95,7 +95,12 @@ html.dark {
     .units { background: rgba(0, 0, 0, 0.25); }
   }
   @each $mov, $color in $party-colors {
-    .votes .vote.vote-#{$mov} { background-color: $color; }
+    .votes .vote.vote-#{$mov} {
+      $ink: map-get($party-ink, $mov);
+      background-color: $color;
+      color: $ink;
+      .label, .percentage { color: $ink; opacity: 1; }
+    }
   }
 
   // Neutral pills (Blancos/Nulos) have no party class: Bulma's .label color
