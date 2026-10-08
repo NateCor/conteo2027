@@ -7,11 +7,13 @@ export const defaultChartsOptions = {
   },
   tooltips: {
     callbacks: {
+      // Pie data are vote counts (see updateChartData in main.js)
       label: function (tooltipItem, data) {
-        let val = data.datasets[tooltipItem.datasetIndex]
-          .data[tooltipItem.index];
-        let lab = data.labels[tooltipItem.index];
-        return `${lab}: ${val}%`;
+        const ds = data.datasets[tooltipItem.datasetIndex];
+        const lab = data.labels[tooltipItem.index];
+        if (ds.placeholder) return `${lab}: sin votos aún`;
+        const val = ds.data[tooltipItem.index] || 0;
+        return `${lab}: ${val.toLocaleString('es-CL')} votos`;
       },
     },
   },

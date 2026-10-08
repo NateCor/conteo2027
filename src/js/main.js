@@ -4,6 +4,7 @@ import { defaultObject } from './dataFetcher.js';
 import { startLiveRefresh } from './liveRefresh.js';
 import { defaultProjects } from './projectsArray.js';
 import rivets from 'rivets';
+import electionConfig from '../../config/election.json';
 import _ from 'underscore';
 import { getActiveProjects, getActiveParties, getAllParties, getElectionType, setRuntimeData, colorFor } from './config.js';
 
@@ -22,6 +23,10 @@ Chart.defaults.global.elements.arc.borderWidth = 2;
 Chart.defaults.global.elements.arc.borderColor = isDark() ? ARC_BORDER.dark : ARC_BORDER.light;
 
 const getDefaults = (n) => Array(n).fill(100 / n);
+
+// Mesas that only vote on Día 1 (config election.mesasUnDia, e.g. Villarrica)
+const ONE_DAY = new Set(electionConfig.election.mesasUnDia || []);
+const oneDay = (id) => ONE_DAY.has(id);
 
 // ✏️ EDITABLE: textos que aparecen en la página y se generan desde código.
 // Puedes cambiar lo que está entre comillas. No borres las comillas, las
@@ -203,14 +208,19 @@ $(document).ready(() => {
 
   // Shared chart update: pick the *pc keys, parse, fall back to equal slices
   // when every value is 0 (e.g. before data loads or for an unescrutada view).
+  // Slices come from raw vote COUNTS, not percentages: list % is over valid
+  // votes while blancos/nulos % is over all votes, so mixing them would
+  // distort the slices. The tooltip shows the count.
   const updateChartData = (chart, dataObj, pcKeys) => {
-    const newData = _.chain(dataObj)
-      .pick(pcKeys)
-      .map(parseFloat).value();
+    const countKeys = pcKeys.map((k) => k.replace(/pc$/, ''));
+    const newData = countKeys.map((k) => parseFloat(dataObj[k]) || 0);
+    const ds = chart.data.datasets[0];
     if (_.any(newData, (n) => n > 0)) {
-      chart.data.datasets[0].data = newData;
+      ds.data = newData;
+      ds.placeholder = false;
     } else {
-      chart.data.datasets[0].data = getDefaults(pcKeys.length);
+      ds.data = getDefaults(pcKeys.length);
+      ds.placeholder = true;
     }
     chart.update();
   };
@@ -428,11 +438,13 @@ $(document).ready(() => {
       const countProgress = (type) => {
         const ids = Object.keys(mainData.total[type].mesa);
         let done = 0;
+        let total = 0;
         ids.forEach((id) => {
+          total += oneDay(id) ? 1 : 2;
           if (mainData.dia1[type].mesa[id] && mainData.dia1[type].mesa[id].escrutada) done++;
-          if (mainData.dia2[type].mesa[id] && mainData.dia2[type].mesa[id].escrutada) done++;
+          if (!oneDay(id) && mainData.dia2[type].mesa[id] && mainData.dia2[type].mesa[id].escrutada) done++;
         });
-        return { done, total: ids.length * 2 };
+        return { done, total };
       };
 
       // Header ranking: by raw votes (rounded percentages can misorder two
@@ -515,14 +527,14 @@ $(document).ready(() => {
           escrutadasActual++;
         }
 
-        if (mainData.dia2.lista.mesa[mesa.id].escrutada) {
+        if (!oneDay(mesa.id) && mainData.dia2.lista.mesa[mesa.id].escrutada) {
           escrutadasActual++;
         }
       });
 
       mesasEscrutadas.actual = escrutadasActual;
-      // Multiply total by 2 because it's 2 days per mesa
-      mesasEscrutadas.total = mesaEntries.length * 2; 
+      // 2 counts per mesa (one per day), except single-day mesas (Villarrica)
+      mesasEscrutadas.total = mesaEntries.reduce((n, m) => n + (oneDay(m.id) ? 1 : 2), 0);
       mesasEscrutadas.pc = mesasEscrutadas.total
         ? Math.round((mesasEscrutadas.actual / mesasEscrutadas.total) * 1000) / 10
         : 0;

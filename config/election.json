@@ -2,7 +2,7 @@
   "_ayuda": [
     "✏️ ESTE ES EL ARCHIVO PRINCIPAL PARA EDITAR. Guía completa: README.md, sección 'Cambios comunes'.",
     "election.name: título de la página. election.totalVoters: personas habilitadas para votar (para % de participación).",
-    "election.refreshSeconds: cada cuántos segundos la página busca datos nuevos. election.siteUrl: dirección final del sitio (para vista previa en WhatsApp).",
+    "election.mesasUnDia: mesas que votan solo el Día 1 (ej. Villarrica), no cuentan para el Día 2 en 'Mesas escrutadas'. election.refreshSeconds: cada cuántos segundos la página busca datos nuevos. election.siteUrl: dirección final del sitio (para vista previa en WhatsApp).",
     "Cada partido: key = id interno (no cambiar una vez usado); excelNames = encabezados exactos de la planilla; displayName = nombre que se ve; color = #RRGGBB.",
     "lista = Directiva FEUC, sup = Consejería Superior, ct = Consejerías Territoriales, projects = Presupuesto Participativo.",
     "Reglas JSON: texto entre comillas dobles, coma entre elementos, sin coma después del último. Si el sitio falla tras editar, revisa comas y comillas."
@@ -14,6 +14,7 @@
     "totalVoters": 30668,
     "refreshSeconds": 15,
     "siteUrl": "https://elecciones.elpuclitico.cl",
+    "mesasUnDia": ["vill"],
     "lastUpdated": "2026-10-05",
     "notes": "Padrón Tricel oct 2026: 30.845 matriculados, menos 177 de bachillerato (no votan) = 30.668 habilitados."
   },
