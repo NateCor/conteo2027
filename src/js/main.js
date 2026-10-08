@@ -459,17 +459,29 @@ $(document).ready(() => {
       // Lists with 0 votes never get a badge. No "Gana" badge on purpose:
       // an absolute-majority call mid-count would mislead.
       const markAdvancing = (parties, type) => {
-        parties.forEach((p, i) => { p.index = i + 1; });
+        // Equal vote counts share a rank number (1, 1, 3), so a tie never
+        // reads as one list leading the other.
+        parties.forEach((p, i) => {
+          const prev = parties[i - 1];
+          p.index = prev && p.votes > 0 && p.votes === prev.votes ? prev.index : i + 1;
+        });
         if (headerData.electionType !== 'firstRound') return parties;
         const prog = countProgress(type);
         const complete = prog.total > 0 && prog.done === prog.total;
         const cutoff = parties[1] ? parties[1].votes : 0;
         const tiedAtCutoff = cutoff > 0 && parties[2] && parties[2].votes === cutoff;
+        // Top two tied with each other (but clear of 3rd): both advance, so
+        // while counting both show "Empate"; once complete both show "Avanza".
+        const tiedFirst = !tiedAtCutoff && cutoff > 0 && parties[0].votes === cutoff;
         parties.forEach((p, i) => {
           if (p.votes <= 0) return;
           if (tiedAtCutoff && p.votes === cutoff) {
             p.badge = TEXTOS.badgeEmpate;
             p.tie = true;
+          } else if (i < 2 && tiedFirst && !complete) {
+            p.badge = TEXTOS.badgeEmpate;
+            p.tie = true;
+            p.advances = true;
           } else if (i < 2) {
             p.badge = complete ? TEXTOS.badgeAvanza : `${TEXTOS.badgeVa} ${i + 1}°`;
             p.advances = true;
