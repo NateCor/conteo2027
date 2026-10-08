@@ -299,9 +299,16 @@ function validateExcel(workbook) {
     
     headers.forEach(header => {
       // "Mesas Escrutadas"/"Mesas Escrutada" carry per-day count checkboxes
-      if (header && !knownColumns.has(header) && !String(header).startsWith('Mesas Escrutada')) {
-        validationErrors.push(`Unknown column "${header}" in ${sheetMap[type]}. Add it to config/election.json first!`);
+      if (!header || knownColumns.has(header) || String(header).startsWith('Mesas Escrutada')) return;
+      // Summary columns the team adds mid-count ("Total Territorio", ...)
+      // carry no votes of their own: skip them with a warning instead of
+      // rejecting the whole sheet. Votes are only ever read from columns
+      // that map to a configured list, so a skipped column can't lose any.
+      if (/^total\b/i.test(String(header))) {
+        validationWarnings.push(`Ignoring summary column "${header}" in ${sheetMap[type]}`);
+        return;
       }
+      validationErrors.push(`Unknown column "${header}" in ${sheetMap[type]}. Add it to config/election.json first!`);
     });
   });
   
