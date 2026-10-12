@@ -23,15 +23,11 @@ mixin bar-item(name, pc, colorcode)
         .bar.bar-default(rv-width=`${pc}`)
     .percentage {#{pc} | pc}%
 
-mixin selector(kind)
+//- Options are filled from data.json at runtime (main.js populateSelectors),
+//- so mesas added, renamed or removed in the sheet show up by themselves.
+mixin selector(label)
   p.control
-    select.input.is-large
-      if block
-        block
-      if kind === "territorios"
-        include territorios-options
-      else if kind === "mesas"
-        include mesas-options
+    select.input.is-large(aria-label=label)
 
 mixin canvas(id)
   .chartgraph

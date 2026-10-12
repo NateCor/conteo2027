@@ -279,6 +279,7 @@ $(document).ready(() => {
   const applyData = (object) => {
     setRuntimeData(object);
     mainData = object;
+    populateSelectors();
     updateMainDataElements('getData');
     if (object.ct && object.ct.terriList && object.ct.terriList.length) {
       populateCtSelector();
@@ -320,6 +321,32 @@ $(document).ready(() => {
       }
     },
   });
+
+  // Mesa and Territorio selectors are built from the data itself, so they
+  // always match the sheet (mesas added, renamed or removed mid-count).
+  // The viewer's current pick survives live refreshes.
+  const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+  const byName = (a, b) => a.name.localeCompare(b.name, 'es');
+  const fillSelect = ($sel, html) => {
+    const keep = $sel.val();
+    $sel.html(html);
+    if (keep && $sel.find(`option[value="${keep}"]`).length) $sel.val(keep);
+    else $sel.prop('selectedIndex', 0);
+  };
+  const populateSelectors = () => {
+    const terris = Object.values(mainData.total.lista.terri).sort(byName);
+    const mesas = Object.values(mainData.total.lista.mesa);
+    fillSelect($('form[name=selected-terri] select'),
+      terris.map((t) => `<option value="${esc(t.id)}">${esc(t.name)}</option>`).join(''));
+    fillSelect($('form[name=selected-mesa] select'), terris.map((t) => {
+      const opts = mesas.filter((m) => m.territoryId === t.id).sort(byName)
+        .map((m) => `<option value="${esc(m.id)}">${esc(m.name)}</option>`).join('');
+      return opts ? `<optgroup label="${esc(t.name)}">${opts}</optgroup>` : '';
+    }).join(''));
+    const $ppto = $('form[name=selected-ppto] select');
+    fillSelect($ppto, '<option value="total">Total Universidad</option>' +
+      terris.map((t) => `<option value="${esc(t.id)}">${esc(t.name)}</option>`).join(''));
+  };
 
   // CT: fill the territory selector from the Excel's own territory names
   const populateCtSelector = () => {
@@ -399,6 +426,9 @@ $(document).ready(() => {
 
     let selectedMesa = $('form[name=selected-mesa] select').val();
     let selectedTerri = $('form[name=selected-terri] select').val();
+    // A scope missing from the data renders as zeros, never as the
+    // previously selected scope's numbers.
+    const pick = (obj) => obj || defaultObject;
     let selectedPpto = $('form[name=selected-ppto] select').val();
 
     if (sender === 'getData') {
@@ -635,12 +665,12 @@ $(document).ready(() => {
     if (sender !== 'total' && sender !== 'terri' && sender !== 'ppto') {
       mesaLista = _.extendOwn(
         mesaLista,
-        mainData[diaMesa].lista.mesa[selectedMesa]
+        pick(mainData[diaMesa].lista.mesa[selectedMesa])
       );
 
       mesaSup = _.extendOwn(
         mesaSup,
-        mainData[diaMesa].sup.mesa[selectedMesa]
+        pick(mainData[diaMesa].sup.mesa[selectedMesa])
       );
 
       tagMesa(mesaLista, progressFor('lista', diaMesa, (id) => id === selectedMesa));
@@ -652,12 +682,12 @@ $(document).ready(() => {
     if (sender !== 'total' && sender !== 'mesa' && sender !== 'ppto') {
       terriLista = _.extendOwn(
         terriLista,
-        mainData[diaTerri].lista.terri[selectedTerri]
+        pick(mainData[diaTerri].lista.terri[selectedTerri])
       );
 
       terriSup = _.extendOwn(
         terriSup,
-        mainData[diaTerri].sup.terri[selectedTerri]
+        pick(mainData[diaTerri].sup.terri[selectedTerri])
       );
 
       tagScope(terriLista, progressFor('lista', diaTerri, (id, m) => m.territoryId === selectedTerri));
@@ -667,9 +697,9 @@ $(document).ready(() => {
     }
 
     if (sender !== 'total' && sender !== 'mesa' && sender !== 'terri') {
-      let extendObj = selectedPpto === 'total' ?
+      let extendObj = pick(selectedPpto === 'total' ?
         mainData[diaPpto].ppto.total :
-        mainData[diaPpto].ppto.terri[selectedPpto];
+        mainData[diaPpto].ppto.terri[selectedPpto]);
 
       projects = _.extendOwn(
         projects,
