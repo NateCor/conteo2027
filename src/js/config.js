@@ -1,18 +1,5 @@
 import electionConfig from '../../config/election.json';
 
-// Export election metadata
-export const ELECTION = electionConfig.election;
-export const TOTAL_VOTERS = electionConfig.election.totalVoters;
-
-// Build party configuration from election config
-export const PARTY_CONFIG = {
-  lista: buildPartyMap(electionConfig.parties.lista),
-  sup: buildPartyMap(electionConfig.parties.sup)
-};
-
-// Build project configuration from election config
-export const PROJECT_CONFIG = buildProjectMap(electionConfig.projects);
-
 // Global key → color map across all party groups and projects
 const COLOR_BY_KEY = {};
 ['lista', 'sup', 'ct'].forEach(group => {
@@ -27,30 +14,6 @@ let runtimeData = null;
 // Set runtime data (called after data.json is fetched)
 export function setRuntimeData(data) {
   runtimeData = data;
-}
-
-// Helper function to build party map
-function buildPartyMap(parties) {
-  const map = {};
-  parties.forEach(party => {
-    map[party.key] = {
-      name: party.displayName,
-      color: party.color
-    };
-  });
-  return map;
-}
-
-// Helper function to build project map
-function buildProjectMap(projects) {
-  const map = {};
-  projects.forEach(project => {
-    map[project.key] = {
-      name: project.displayName,
-      color: project.color
-    };
-  });
-  return map;
 }
 
 // Get active party keys — prefers runtime data (from Excel), falls back to config active flags

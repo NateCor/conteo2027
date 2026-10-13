@@ -123,9 +123,9 @@ $(document).ready(() => {
   let projects = _.extend({ projects: defaultProjects }, defaultObject);
   let participacion = { terris: [] };
   let mesasEscrutadas = { mesas: [], actual: 0, total: 0, pc: 0 };
-  // CT: per-territory candidates (day-aware display values)
-  // CT pie holds raw votes (unlike the other pies which hold percentages),
-  // so it needs its own tooltip: "Nombre: 382 votos (25.4%)".
+  // CT: per-territory candidates (day-aware display values). Like every pie
+  // it plots vote counts; its tooltip also shows the share:
+  // "Nombre: 382 votos (25,4%)".
   const chartCt = new Chart($('#ct'), {
     type: 'pie',
     data: listaDefaultData(),
@@ -469,18 +469,6 @@ $(document).ready(() => {
       updatePptoVisibility();
 
       // Counting progress per contest: one flag per mesa per day.
-      const countProgress = (type) => {
-        const ids = Object.keys(mainData.total[type].mesa);
-        let done = 0;
-        let total = 0;
-        ids.forEach((id) => {
-          total += oneDay(id) ? 1 : 2;
-          if (mainData.dia1[type].mesa[id] && mainData.dia1[type].mesa[id].escrutada) done++;
-          if (!oneDay(id) && mainData.dia2[type].mesa[id] && mainData.dia2[type].mesa[id].escrutada) done++;
-        });
-        return { done, total };
-      };
-
       // Header ranking: by raw votes (rounded percentages can misorder two
       // close lists and hide a tie).
       const updateHeaderParties = (type) => {
@@ -577,7 +565,6 @@ $(document).ready(() => {
 
       let escrutadasActual = 0;
       const mesaEntries = Object.values(mainData.total.lista.mesa);
-      mesasEscrutadas.total = mesaEntries.length;
       mesasEscrutadas.mesas = [];
       
       mesaEntries.forEach((mesa) => {

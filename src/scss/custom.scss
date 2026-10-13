@@ -68,25 +68,7 @@
         transition: all 0.2s;
       }
 
-      .bar-default {
-        background: lighten($primary, 5);
-      }
 
-      .bar-mg {
-        background: $color-mg;
-      }
-      .bar-nau {
-        background: $color-nau;
-      }
-      .bar-sdd {
-        background: $color-sdd;
-      }
-      .bar-elp {
-        background: $color-elp;
-      }
-      .bar-proy {
-        background: $color-proy;
-      }
     }
 
     &.project-bar-item {
@@ -176,21 +158,6 @@
       }
     }
 
-    .bar-mg {
-      background: $color-mg;
-    }
-    .bar-nau {
-      background: $color-nau;
-    }
-    .bar-sdd {
-      background: $color-sdd;
-    }
-    .bar-elp {
-      background: $color-elp;
-    }
-    .bar-proy {
-      background: $color-proy;
-    }
   }
 }
 
@@ -327,24 +294,6 @@ $vote-units-bg: rgba(0, 0, 0, 0.15);
     &:hover {
       background: #f4f4f4;
       color: #333;
-    }
-  }
-}
-
-.terri-mov {
-  display: block;
-  color: #666;
-  font-size: 12px;
-  text-transform: uppercase;
-  position: relative;
-
-  @each $mov, $color in $party-colors {
-    &.#{$mov}:before {
-      content: '•';
-      margin-right: 6px;
-      font-size: 20px;
-      display: inline-block;
-      color: $color;
     }
   }
 }

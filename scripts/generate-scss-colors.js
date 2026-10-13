@@ -53,7 +53,7 @@ function generateScss() {
 
   lines.push('');
 
-  // Generate .vote-* and .terri-mov color maps for @each loops
+  // Color maps for the @each loops in custom.scss/_dark.scss ($party-colors)
   lines.push('// Map for @each loops: $key: $color-variable');
   lines.push('$party-colors: (');
   for (const e of entries) {
