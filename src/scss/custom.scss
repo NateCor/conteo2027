@@ -202,8 +202,11 @@ $vote-units-bg: rgba(0, 0, 0, 0.15);
   display: flex;
   justify-content: center;
   margin: 10px 0;
-
   align-items: stretch;
+  // Many options (e.g. 9 PPTO projects + blancos/nulos) wrap onto a second
+  // row on phones instead of pushing the page sideways.
+  flex-wrap: wrap;
+  row-gap: 6px;
 
   .vote {
     flex: 1;
@@ -266,7 +269,7 @@ $vote-units-bg: rgba(0, 0, 0, 0.15);
       font-size: 9px;
       margin: 0 0 2px;
       padding: 0;
-      opacity: 0.7;
+      opacity: 0.85;
       overflow: hidden;
       text-overflow: ellipsis;
     }

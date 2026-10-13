@@ -453,15 +453,20 @@ function parseMainSheet(sheet, converted, tipo) {
   for (let i = 2; i < rows.length; i++) {
     const row = rows[i];
     let rawTerritory = row[1];
-    const rawMesa = row[2];
-    
-    // Skip total/summary rows (check both territory column and first column)
-    if (rawTerritory === 'Total' || rawTerritory === '% de válidamente emitidas' || 
-        row[0] === 'Total' || row[0] === '% de válidamente emitidas') {
+    let rawMesa = row[2];
+
+    // Summary rows end the mesa list
+    if (isSummaryRow(row)) {
       break;
     }
 
-    // Skip if no mesa (empty row or summary row)
+    // A territory row with votes but no mesa name is a single-mesa
+    // territory (2025 sheet: "Gobierno y Administración Pública"): use the
+    // territory as the mesa name instead of silently dropping its votes.
+    const hasVotes = row.slice(3).some((v) => typeof v === 'number');
+    if (!rawMesa && rawTerritory && hasVotes) {
+      rawMesa = String(rawTerritory).trim();
+    }
     if (!rawMesa) {
       continue;
     }
@@ -515,6 +520,13 @@ function parseMainSheet(sheet, converted, tipo) {
   console.log(`  ✓ Parsed ${mesaCount} mesas for ${tipo}`);
 }
 
+// Summary rows at the bottom of a sheet ("Total", "TOTAL+ nulos & blancos",
+// "% de válidamente emitidas", "% total") end the mesa list. Matched in any
+// of the first three columns, any case: older sheets put them under "Mesa".
+function isSummaryRow(row) {
+  return row.slice(0, 3).some((c) => typeof c === 'string' && /^\s*(total\b|%)/i.test(c));
+}
+
 function parsePptoSheet(sheet, converted) {
   if (!sheet) {
     console.log('  Skipping ppto - sheet not found');
@@ -533,8 +545,7 @@ function parsePptoSheet(sheet, converted) {
     let rawTerritory = row[1];
 
     // Skip total/summary rows
-    if (rawTerritory === 'Total' || rawTerritory === '% de válidamente emitidas' || 
-        row[0] === 'Total' || row[0] === '% de válidamente emitidas') {
+    if (isSummaryRow(row)) {
       break;
     }
 

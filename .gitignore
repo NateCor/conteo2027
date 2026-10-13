@@ -43,4 +43,4 @@ npm-debug.log*
 Thumbs.db
 desktop.ini
 public/data.json.tmp
-test/golden/
+test/
