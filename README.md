@@ -11,7 +11,9 @@ Basada en el [conteo2017](https://github.com/wachunei/conteo2017) original de Pe
 ### Qué hace la página
 
 - **Arriba:** el ranking de listas para Directiva FEUC y Consejería Superior, y cuántas mesas van escrutadas ("Mesas escrutadas: 37 de 114").
-- **Insignias:** mientras se cuenta, las dos primeras listas muestran "Va 1°" y "Va 2°". Solo cuando todas las mesas de esa votación están escrutadas cambian a "Avanza". Si hay empate en el segundo lugar, las listas empatadas muestran "Empate". No existe una insignia "Gana", a propósito.
+- **Insignias:** mientras se cuenta, las dos primeras listas muestran "Va 1°" y "Va 2°". Cambian a "Avanza" cuando ya es matemáticamente imposible que el 3° las alcance (aunque falten mesas), o cuando el equipo marca el resultado oficial (ver "Anunciar quién avanza"). Si hay empate, las listas empatadas muestran "Empate" y comparten el número de lugar. No existe una insignia "Gana", a propósito.
+- **Bajo cada gráfico:** cuántas mesas de esa vista están marcadas como escrutadas en la planilla ("108 de 111 mesas escrutadas"). En una mesa sola: "escrutada", "en conteo" (tiene votos pero falta marcarla) o "no escrutada".
+- **Selectores de mesa y territorio:** se arman solos con lo que trae la planilla. Si el equipo agrega, renombra o quita una mesa, aparece sola.
 - **Detalle:** resultados por día (Día 1, Día 2, ambos), por mesa, por territorio, Consejerías Territoriales, participación por territorio y Presupuesto Participativo (esta última sección se oculta sola si la planilla no la trae).
 - **En vivo:** la página revisa si hay datos nuevos cada 15 segundos y se actualiza sola. La píldora junto al título dice "● En vivo · actualizado HH:MM:SS". Si dice "Reconectando…", la página sigue mostrando los últimos números buenos mientras vuelve la conexión.
 - **Modo oscuro:** el interruptor "Modo oscuro" de arriba cambia los colores. Todos parten en modo claro; la elección queda guardada en ese dispositivo.
@@ -43,7 +45,9 @@ Casi todo se cambia en **un solo archivo: `config/election.json`**. Ábrelo con 
 | Imagen de la vista previa al compartir el link | Reemplaza `public/og-image.png` (1200×630 px) |
 | Color de marca (encabezado celeste) | `src/scss/style.scss`, primera línea |
 | Colores del modo oscuro | `src/scss/_dark.scss` (bloque marcado con ✏️) |
-| El link de la planilla online | Archivo `.env` (copia `.env.example`) |
+| El link de la planilla online | Archivo `.env` (copia `.env.example`), o en el VPS: `~/.config/conteo/poller.env` |
+| Anunciar quién avanza (resultado oficial) | `config/election.json` → `election` → `avanzaOficial` |
+| Mesas que votan solo el Día 1 (Villarrica) | `config/election.json` → `election` → `mesasUnDia` |
 
 Todos los lugares pensados para editar a mano están marcados en el código con **✏️ EDITABLE**.
 
@@ -65,6 +69,21 @@ Todos los lugares pensados para editar a mano están marcados en el código con 
 - `key` es un identificador interno. **No lo cambies** una vez que la lista existe.
 
 Una misma lista puede aparecer en varias secciones (`lista` = Directiva FEUC, `sup` = Consejería Superior, `ct` = Consejerías Territoriales). Si cambias su nombre o color, cámbialo en cada sección donde aparece.
+
+### Anunciar quién avanza
+
+Cuando el Tricel o El PUClítico ya anunció quién pasa a segunda vuelta, aunque falten mesas, escribe las claves (`key`) de esas listas en `config/election.json`:
+
+```json
+"avanzaOficial": { "lista": ["nau", "mg"], "sup": ["nau", "mg"] },
+```
+
+En menos de un minuto la página muestra "Avanza" en esas listas. Para volver al cálculo automático, deja las listas vacías: `{ "lista": [], "sup": [] }`.
+
+### Durante el conteo: la planilla
+
+- Marquen la casilla de "Mesas Escrutadas" de **cada día** en **las dos hojas** (Directiva FEUC y Consejería Superior) apenas una mesa termina. De eso dependen los contadores y la insignia "Avanza".
+- Columnas de resumen nuevas que empiecen con "Total" se ignoran solas. Cualquier otra columna nueva detiene la actualización (a propósito) hasta agregarla a `config/election.json`.
 
 ### Reglas para no romper nada
 
@@ -105,7 +124,15 @@ npm run dev
 | `npm run fetch-data -- --total-voters N` | Overrides `election.totalVoters` for participation math |
 | `npm run build` | fetch-data + colors + Pug + production build into `dist/` |
 | `npm run test-excel -- file.xlsx` | Reports unmapped territories, mesas, lists or projects in a workbook |
-| `SHEET_URL='<link>' node scripts/live-poll.js 20` | Election-night loop: re-fetches every 20 s, rewrites `data.json` only on change |
+| `SHEET_URL='<link>' node scripts/live-poll.js 20` | Election-night loop: re-fetches every 20 s, rewrites `data.json` only on change (`PUBLISH=1` also uploads it) |
+| `node scripts/publish.js site\|data` | Upload `dist/` or `data.json` to the host over FTPS (or Web Disk) |
+| `npm test` | Both regression harnesses below; run before every deploy |
+
+### Testing before a deploy
+
+- `node scripts/regression.mjs` parses every real workbook in `~/tricel_2026/legacy` (or `CONTEO_FIXTURES`) in a throwaway copy and diffs the result against `test/golden/`. Any change in a parsed number fails.
+- `node scripts/ui-check.mjs` builds the site, opens it in headless Chromium for each golden and walks every mesa, territory and CT view, diffing what a viewer sees against `test/ui-golden/`. It also fails on JS errors, horizontal overflow on a 375 px phone, and any vote-pill text under 4.5:1 contrast in either theme.
+- `--update` re-records goldens; only after reviewing the diff. `test/` is gitignored (the workbooks are not public).
 
 ### Live pipeline
 
@@ -147,8 +174,9 @@ public/
 - Sheets: **"Directiva FEUC"**, **"Consejería Superior"**, optional **"Presupuestos Participativos"** and **"Consejerías Territoriales"**.
 - Main sheets: Campus, Territorio, Mesa, then one Día 1 / Día 2 column pair per list, then Blancos, Nulos and a per-day "Mesas Escrutada" checkbox pair (booleans or ☐/☑).
 - Consejerías Territoriales: one 5-column block per list ("Candidaturas X": Nombre, Día 1, Día 2, Total, Total Global). The parser cross-checks every candidate against "Total Global".
-- Rows labelled "Total" or "% de válidamente emitidas" are skipped. Totals are computed, not read.
-- An unknown list header is a hard failure: add it to `config/election.json` (`excelNames`) first. A configured list missing from the sheet just isn't active this round.
+- The mesa list ends at the first summary row ("Total", "TOTAL+ nulos & blancos", "% ..."), matched case-insensitively in the first three columns. Totals are computed, not read. A territory row with votes but no mesa name counts as a single-mesa territory.
+- Header columns starting with "Total" are skipped with a warning.
+- Any other unknown list header is a hard failure: add it to `config/election.json` (`excelNames`) first. A configured list missing from the sheet just isn't active this round.
 - First vs. second round is detected from the number of lists in the sheet. `election.round` only controls the header before data loads.
 
 ### Pitfalls
@@ -156,13 +184,15 @@ public/
 - List `key`s and project `key`s share one namespace (SCSS classes, chart keys). Check for collisions before adding one.
 - `public/data.json` is tracked but generated. Don't commit regenerated test data, and don't run `git checkout -- public/data.json` while the live poller is serving.
 - New bindings that show counts or percentages need the Rivets formatters `| num` / `| pc` (Chilean format: 4.142 · 57,89 %).
+- Mesa/territory selectors are generated from data.json at runtime (`populateSelectors` in main.js); there is no hand-maintained option list.
+- Pill text color comes from the generated `$party-ink` map (WCAG luminance of each party color); never hand-list "light" parties.
 - Bulma 0.2.3 has no dark-mode support. New components need explicit `html.dark` overrides in `_dark.scss`.
 
 ### Deployment
 
-The build is a static site (`dist/`) for any static host. The plan is a subdomain of elpuclitico.cl on free static hosting. A subpath deployment would need `base` set in `vite.config.js`.
+The build is a static site (`dist/`) for any static host. It runs at https://elecciones.elpuclitico.cl (V2Networks cPanel, LiteSpeed). A subpath deployment would need `base` set in `vite.config.js`.
 
-Speed of live updates depends on how `data.json` is republished. A scheduled GitHub Actions job runs every 5 minutes at best and is often delayed, which is too slow for election night. Pushing `data.json` straight to the host whenever `live-poll.js` sees a change (e.g. Cloudflare Pages direct upload) keeps updates within seconds.
+Live updates: the VPS runs `live-poll.js` with `PUBLISH=1` as the systemd user unit `conteo-poller` (settings in `~/.config/conteo/poller.env`), so `data.json` reaches the public host within ~20-40 s of a sheet edit. A one-time `npm run build` + `node scripts/publish.js site` publishes the page itself. The VPS is the only feeder: if it stops, the public page keeps the last numbers and shows "Reconectando".
 
 ### Credits and license
 
