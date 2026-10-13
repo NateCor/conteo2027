@@ -58,7 +58,8 @@ html(lang='es')
                   .color-dot(rv-style-background="party.color")
                   .name {party.name}
                   .percentage {party.pc | pc}%
-                  .badge(rv-if="party.badge", rv-class-is-tie="party.tie") {party.badge}
+                  .badge-slot
+                    .badge(rv-if="party.badge", rv-class-is-tie="party.tie") {party.badge}
             .column
               h2.title.is-4 Consejero Superior
               .party-ranked-list
@@ -67,7 +68,8 @@ html(lang='es')
                   .color-dot(rv-style-background="party.color")
                   .name {party.name}
                   .percentage {party.pc | pc}%
-                  .badge(rv-if="party.badge", rv-class-is-tie="party.tie") {party.badge}
+                  .badge-slot
+                    .badge(rv-if="party.badge", rv-class-is-tie="party.tie") {party.badge}
     section.section
       .container
         h2.title.is-2 Detalle

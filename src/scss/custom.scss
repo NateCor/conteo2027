@@ -295,8 +295,14 @@ $vote-units-bg: rgba(0, 0, 0, 0.15);
   -webkit-user-select: none;
   -moz-user-select: none;
 
+  // Visually hidden but focusable, so keyboard users can switch days
   input {
-    display: none;
+    position: absolute;
+    opacity: 0;
+    width: 1px;
+    height: 1px;
+
+    &:focus-visible + label { outline: 2px solid $primary; outline-offset: 2px; }
 
     &:checked + label {
       background: $primary;
@@ -309,7 +315,9 @@ $vote-units-bg: rgba(0, 0, 0, 0.15);
     vertical-align: bottom;
     display: inline-block;
     margin: 5px;
-    padding: 4px 10px 4px 5px;
+    padding: 8px 14px;
+    min-height: 40px;
+    line-height: 24px;
     background: #f0f0f0;
     border-radius: 3px;
     cursor: pointer;
@@ -397,18 +405,27 @@ $vote-units-bg: rgba(0, 0, 0, 0.15);
       font-weight: bold;
     }
     
+    // Fixed-width slot: rows with and without a badge keep the % column
+    // aligned. Dark badge on the cyan hero for readable white text.
+    .badge-slot {
+      flex: 0 0 76px;
+      margin-left: 10px;
+      text-align: right;
+    }
+
     .badge {
-      background: rgba(255, 255, 255, 0.25);
+      display: inline-block;
+      background: rgba(15, 14, 23, 0.6);
       color: white;
       padding: 4px 8px;
       border-radius: 4px;
       font-size: 10px;
+      font-weight: bold;
       text-transform: uppercase;
       letter-spacing: 0.5px;
-      margin-left: 12px;
       white-space: nowrap;
 
-      &.is-tie { background: rgba(255, 210, 122, 0.35); }
+      &.is-tie { background: #8a4b00; }
     }
   }
 }
@@ -430,10 +447,10 @@ $vote-units-bg: rgba(0, 0, 0, 0.15);
   border-radius: 12px;
   font-size: 12px;
   vertical-align: middle;
-  background: rgba(0, 0, 0, 0.2);
+  background: rgba(0, 0, 0, 0.4);
   white-space: nowrap;
 
-  &.is-live { color: #b8f5b0; }
+  &.is-live { color: #c8ffbf; }
   &.is-stale { color: #ffd27a; }
 }
 
@@ -444,6 +461,16 @@ $vote-units-bg: rgba(0, 0, 0, 0.15);
   #logo {
     width: 140px;
   }
+
+  // Phones: day buttons stay on one row, the big selects stay tappable but
+  // don't dwarf the content, and section padding gives width back.
+  .day-selector {
+    font-size: 14px;
+    label { margin: 3px 2px; padding: 8px 10px; }
+  }
+  .input.is-large { font-size: 1rem; height: 2.5em; }
+  .section { padding: 1.5rem 0.75rem; }
+  .box { padding: 0.9rem; }
 
   #header .title {
     margin: 5px 10px;
@@ -462,10 +489,10 @@ $vote-units-bg: rgba(0, 0, 0, 0.15);
         font-size: 14px;
       }
 
+      .badge-slot { flex-basis: 62px; margin-left: 6px; }
       .badge {
         font-size: 9px;
         padding: 3px 6px;
-        margin-left: 8px;
       }
     }
   }
