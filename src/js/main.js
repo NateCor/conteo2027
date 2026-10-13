@@ -335,7 +335,8 @@ $(document).ready(() => {
   };
   const populateSelectors = () => {
     const terris = Object.values(mainData.total.lista.terri).sort(byName);
-    const mesas = Object.values(mainData.total.lista.mesa);
+    // Union of both contests, so a mesa present in only one sheet is listed
+    const mesas = Object.values({ ...mainData.total.sup.mesa, ...mainData.total.lista.mesa });
     fillSelect($('form[name=selected-terri] select'),
       terris.map((t) => `<option value="${esc(t.id)}">${esc(t.name)}</option>`).join(''));
     fillSelect($('form[name=selected-mesa] select'), terris.map((t) => {

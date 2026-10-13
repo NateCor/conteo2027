@@ -140,6 +140,7 @@ const OVERFLOW = `(() => { const w = document.documentElement.clientWidth; const
 
 let failed = 0;
 fs.mkdirSync(GOLDEN_UI, { recursive: true });
+if (!fs.existsSync(GOLDEN_IN) || !fs.readdirSync(GOLDEN_IN).length) { console.log('✗ no data goldens in test/golden: run node scripts/regression.mjs --update first'); process.exit(1); }
 const cases = fs.readdirSync(GOLDEN_IN).filter((f) => f.endsWith('.json')).sort();
 for (const file of cases) {
   currentData = fs.readFileSync(path.join(GOLDEN_IN, file), 'utf8');
@@ -158,9 +159,11 @@ for (const file of cases) {
   if (jsErrors.length) problems.push(`JS errors: ${[...new Set(jsErrors)].slice(0, 3).join(' / ')}`);
   const json = JSON.stringify(snap, null, 1);
   const gfile = path.join(GOLDEN_UI, file);
-  if (UPDATE || !fs.existsSync(gfile)) {
+  if (UPDATE) {
     fs.writeFileSync(gfile, json);
     console.log(`● ${name}: UI golden recorded`);
+  } else if (!fs.existsSync(gfile)) {
+    problems.push('no UI golden to compare against. Record with --update from a known-good commit first.');
   } else if (fs.readFileSync(gfile, 'utf8') !== json) {
     const a = JSON.parse(fs.readFileSync(gfile, 'utf8'));
     const diffs = [];

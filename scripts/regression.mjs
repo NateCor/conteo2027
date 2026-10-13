@@ -28,6 +28,32 @@ const CASES = [
   ['2025-primera-vuelta', 'Conteo Elecciones FEUC 2025 (Puclitico).xlsx'],
 ];
 
+// Invariant independent of any golden: for every list column, the parsed
+// total must equal the sheet's own TOTAL row (when the file has cached values).
+const xlsx = (await import(path.join(ROOT, 'node_modules', 'xlsx', 'xlsx.js'))).default;
+const config = JSON.parse(fs.readFileSync(path.join(ROOT, 'config', 'election.json'), 'utf8'));
+function checkSheetTotals(file, data) {
+  const wb = xlsx.readFile(file);
+  const errs = [];
+  for (const [sheet, type] of [['Directiva FEUC', 'lista'], ['Consejería Superior', 'sup']]) {
+    const ws = wb.Sheets[sheet];
+    if (!ws) continue;
+    const rows = xlsx.utils.sheet_to_json(ws, { header: 1, raw: true });
+    const total = rows.find((r) => r.slice(0, 3).some((c) => typeof c === 'string' && /^\s*total\s*$/i.test(c)));
+    if (!total) continue;
+    const keyOf = {};
+    for (const p of config.parties[type]) for (const n of p.excelNames) keyOf[n.replace(/^>>/, '').trim()] = p.key;
+    keyOf.Blancos = 'b'; keyOf.Nulos = 'n';
+    rows[0].forEach((h, i) => {
+      const k = keyOf[String(h || '').replace(/^>>/, '').trim()];
+      if (k && typeof total[i] === 'number' && data.total[type].total[k] !== total[i]) {
+        errs.push(`${type} ${h}: sheet ${total[i]} vs parsed ${data.total[type].total[k]}`);
+      }
+    });
+  }
+  return errs;
+}
+
 const sandbox = fs.mkdtempSync(path.join(os.tmpdir(), 'conteo-reg-'));
 for (const d of ['scripts', 'config']) fs.cpSync(path.join(ROOT, d), path.join(sandbox, d), { recursive: true });
 fs.copyFileSync(path.join(ROOT, 'package.json'), path.join(sandbox, 'package.json'));
@@ -43,14 +69,22 @@ let failed = 0;
 let skipped = 0;
 for (const [name, file] of CASES) {
   const src = path.join(FIXTURES, file);
-  if (!fs.existsSync(src)) { console.log(`- ${name}: fixture missing, skipped`); skipped++; continue; }
+  if (!fs.existsSync(src)) { console.log(`✗ ${name}: fixture missing: ${src}`); failed++; skipped++; continue; }
   const out = path.join(sandbox, 'public', 'data.json');
   fs.rmSync(out, { force: true });
   const res = spawnSync(process.execPath, ['scripts/fetch-data.js', '--file', src], { cwd: sandbox, encoding: 'utf8' });
   if (res.status !== 0) { console.log(`✗ ${name}: parser exited ${res.status}\n${(res.stdout + res.stderr).slice(-600)}`); failed++; continue; }
-  const json = JSON.stringify(canon(JSON.parse(fs.readFileSync(out, 'utf8'))), null, 1);
+  const parsed = JSON.parse(fs.readFileSync(out, 'utf8'));
+  const totalErr = checkSheetTotals(src, parsed);
+  if (totalErr.length) { console.log(`✗ ${name}: parsed totals != sheet TOTAL row\n  ${totalErr.join('\n  ')}`); failed++; continue; }
+  const json = JSON.stringify(canon(parsed), null, 1);
   const goldenFile = path.join(GOLDEN_DIR, `${name}.json`);
-  if (UPDATE || !fs.existsSync(goldenFile)) {
+  if (!UPDATE && !fs.existsSync(goldenFile)) {
+    console.log(`✗ ${name}: no golden to compare against. Record goldens with --update from a known-good commit first.`);
+    failed++;
+    continue;
+  }
+  if (UPDATE) {
     fs.writeFileSync(goldenFile, json);
     console.log(`● ${name}: golden recorded`);
     continue;
