@@ -28,6 +28,11 @@ const getDefaults = (n) => Array(n).fill(100 / n);
 const ONE_DAY = new Set(electionConfig.election.mesasUnDia || []);
 const oneDay = (id) => ONE_DAY.has(id);
 
+// Frozen first-round view: ?vuelta=1 reads the archived file named in
+// config (election.primeraVueltaArchivo) instead of the live data.json.
+const ARCHIVO_1V = electionConfig.election.primeraVueltaArchivo || '';
+const VISTA_1V = !!ARCHIVO_1V && new URLSearchParams(window.location.search).get('vuelta') === '1';
+
 // ✏️ EDITABLE: textos que aparecen en la página y se generan desde código.
 // Puedes cambiar lo que está entre comillas. No borres las comillas, las
 // comas ni los nombres de la izquierda (vivo, reconectando, etc.).
@@ -41,11 +46,14 @@ const TEXTOS = {
   noEscrutada: 'no escrutada',
   enConteo: 'en conteo',                      // mesa con votos pero sin marcar escrutada
   deMesas: 'mesas escrutadas',                // "37 de 111 mesas escrutadas"
+  primeraVuelta: '● Primera vuelta · resultados finales', // vista congelada (?vuelta=1)
   errorCarga: 'No se pudo cargar data.json — verifica que corriste ' +
     '<code>npm run fetch-data</code>. Revisa la consola para detalles.',
 };
 
 $(document).ready(() => {
+
+  $(VISTA_1V ? '#tab-1v' : '#tab-2v').addClass('is-active').attr('aria-current', 'page');
 
   // Theme switch: light by default for everyone; the viewer's choice is
   // saved and restored. The OS dark setting is deliberately ignored.
@@ -307,10 +315,14 @@ $(document).ready(() => {
   };
 
   startLiveRefresh({
+    url: VISTA_1V ? `/${ARCHIVO_1V}` : '/data.json',
     onData: applyData,
     onStatus: ({ state, checkedAt, hasData }) => {
       if (checkedAt) lastUpdatedAt = checkedAt;
-      if (state === 'live') {
+      if (state === 'live' && VISTA_1V) {
+        showLoadError(false);
+        $liveStatus.removeClass('is-stale').addClass('is-live').text(TEXTOS.primeraVuelta);
+      } else if (state === 'live') {
         showLoadError(false);
         $liveStatus.removeClass('is-stale').addClass('is-live')
           .text(`${TEXTOS.vivo} ${lastUpdatedAt ? hhmmss(lastUpdatedAt) : ''}`);
@@ -468,6 +480,21 @@ $(document).ready(() => {
 
       // Hide PPTO section if no active projects
       updatePptoVisibility();
+
+      // Pills are generated for every configured list/project. Hide the ones
+      // not in this sheet: runoff lists that didn't pass, old PPTO projects.
+      // (First round keeps every configured list visible, as before.)
+      const showPills = (scope, all, active) => {
+        const on = new Set(active.map((p) => p.key));
+        all.forEach((key) => $(scope).find(`.vote-${key}`).toggle(on.has(key)));
+      };
+      if (!headerData.isFirstRound) {
+        showPills('#bind-total-lista, #bind-mesa-lista, #bind-terri-lista',
+          getAllParties('lista').map((p) => p.key), activeLista);
+        showPills('#bind-total-sup, #bind-mesa-sup, #bind-terri-sup',
+          getAllParties('sup').map((p) => p.key), activeSup);
+      }
+      showPills('#bind-ppto-section', electionConfig.projects.map((p) => p.key), activeProjs);
 
       // Counting progress per contest: one flag per mesa per day.
       // Header ranking: by raw votes (rounded percentages can misorder two

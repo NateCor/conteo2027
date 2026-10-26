@@ -14,11 +14,12 @@
 // - Failures back off (2x per failure, capped at 60 s) and recover alone.
 import electionConfig from '../../config/election.json';
 
-const DATA_URL = '/data.json';
 const INTERVAL_MS = Math.max(5, electionConfig.election.refreshSeconds || 15) * 1000;
 const MAX_BACKOFF_MS = 60000;
 
-export function startLiveRefresh({ onData, onStatus }) {
+// `url` lets the frozen first-round view read its own file (?vuelta=1).
+export function startLiveRefresh({ onData, onStatus, url = '/data.json' }) {
+  const DATA_URL = url;
   let lastText = null;
   let timer = null;
   let inFlight = false;

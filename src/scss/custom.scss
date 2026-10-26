@@ -379,6 +379,27 @@ $vote-units-bg: rgba(0, 0, 0, 0.15);
   }
 }
 
+/* First/second round tabs (hero) */
+.round-tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 14px;
+
+  a {
+    padding: 6px 14px;
+    border-radius: 18px;
+    background: rgba(0, 0, 0, 0.25);
+    color: white;
+    font-size: 14px;
+    font-weight: 600;
+    text-decoration: none;
+
+    &:hover { background: rgba(0, 0, 0, 0.4); }
+    &.is-active { background: white; color: #0f0e17; }
+  }
+}
+
 /* Counting progress line (hero) */
 .count-progress {
   margin-bottom: 12px;

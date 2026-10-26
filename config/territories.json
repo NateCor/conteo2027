@@ -28,7 +28,9 @@
     "Psicología": "psi",
     "Química": "quim",
     "Sociales y Teología": "soc",
-    "Villarica": "vill"
+    "Sociales y Teologia": "soc",
+    "Villarica": "vill",
+    "Villarrica": "vill"
   },
   "mesas": {
     "Ing. en RRNN": "agronat",
@@ -87,6 +89,7 @@
     "Sociales 2": "soc2",
     "Sociales 3": "soc3",
     "Sociología 1": "socio1",
-    "Campus Villarica": "vill"
+    "Campus Villarica": "vill",
+    "Campus Villarrica": "vill"
   }
 }

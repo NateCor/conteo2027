@@ -24,7 +24,12 @@ const PADRON_PATH = path.join(ROOT_DIR, 'config', 'padron.json');
 const PADRON = fs.existsSync(PADRON_PATH)
   ? JSON.parse(fs.readFileSync(PADRON_PATH, 'utf8'))
   : null;
-const PADRON_TERRI = (PADRON && PADRON.totalPorTerritorio) || {};
+const PADRON_CONFIG = (PADRON && PADRON.totalPorTerritorio) || {};
+// Effective padrón for this run. When the sheet has a "Padron Por
+// Territorio" column (runoff 2027 onward) its numbers win, because the team
+// confirms them against the Tricel; otherwise config/padron.json is used.
+let PADRON_TERRI = PADRON_CONFIG;
+const sheetPadron = {};
 
 const SHEET_URL = process.env.SHEET_URL;
 const CACHE_FILE = path.join(ROOT_DIR, 'temp', 'last_count.xlsx');
@@ -54,7 +59,7 @@ const TERRITORY_MAP = TERRITORIES_CONFIG.territories;
 const MESA_MAP = TERRITORIES_CONFIG.mesas;
 
 // Effective total voters: CLI flag takes precedence, then config
-const TOTAL_VOTERS = CLI_TOTAL_VOTERS || ELECTION_CONFIG.election.totalVoters;
+let TOTAL_VOTERS = CLI_TOTAL_VOTERS || ELECTION_CONFIG.election.totalVoters;
 
 // Detected active parties/projects from Excel (populated during validation)
 const detectedActive = { lista: [], sup: [], projects: [] };
@@ -300,6 +305,9 @@ function validateExcel(workbook) {
     headers.forEach(header => {
       // "Mesas Escrutadas"/"Mesas Escrutada" carry per-day count checkboxes
       if (!header || knownColumns.has(header) || String(header).startsWith('Mesas Escrutada')) return;
+      // "Padron Por Territorio": eligible voters per territory, typed by the
+      // team on the first row of each territory. Read by parseMainSheet.
+      if (/^padr[oó]n/i.test(String(header))) return;
       // Summary columns the team adds mid-count ("Total Territorio", ...)
       // carry no votes of their own: skip them with a warning instead of
       // rejecting the whole sheet. Votes are only ever read from columns
@@ -402,6 +410,12 @@ function transformWorkbook(workbook) {
     parseCtSheet(workbook.Sheets[ctSheetName], converted);
   }
 
+  if (Object.keys(sheetPadron).length) {
+    PADRON_TERRI = sheetPadron;
+    if (!CLI_TOTAL_VOTERS) TOTAL_VOTERS = Object.values(sheetPadron).reduce((a, b) => a + b, 0);
+    console.log(`  Padrón from sheet: ${Object.keys(sheetPadron).length} territories, ${TOTAL_VOTERS} voters`);
+  }
+
   calculateAggregates(converted);
 
   // Add election metadata for the frontend
@@ -441,6 +455,9 @@ function parseMainSheet(sheet, converted, tipo) {
       break;
     }
   }
+  const padronCol = tipo === 'lista'
+    ? headers.findIndex((h) => typeof h === 'string' && /^padr[oó]n/i.test(h.trim()))
+    : -1;
   const toBool = (v) => {
     if (v === true || v === 1) return true;
     if (typeof v === 'string') {
@@ -493,6 +510,10 @@ function parseMainSheet(sheet, converted, tipo) {
       converted.dia2[tipo].mesa[mesaId].territoryId = territoryId;
     }
 
+    if (padronCol !== -1 && typeof row[padronCol] === 'number' && row[padronCol] > 0) {
+      sheetPadron[territoryId] = (sheetPadron[territoryId] || 0) + row[padronCol];
+    }
+
     // Real per-day count flags from the sheet (when the columns exist)
     if (escrutadaD1 !== -1) {
       converted.dia1[tipo].mesa[mesaId].escrutadaRaw = toBool(row[escrutadaD1]);
@@ -516,6 +537,33 @@ function parseMainSheet(sheet, converted, tipo) {
     }
   }
   
+  // Runoff 2027 sheet: the Consejería Superior checkboxes are formulas that
+  // mirror Directiva FEUC (=IF('Directiva FEUC'!L12,...)), and from row 13
+  // on they point one row too high, so CS would show the wrong mesas as
+  // counted. When the CS flags are formulas into another sheet, the team
+  // only ticks Directiva: take each mesa's flags from Directiva by NAME.
+  if (tipo === 'sup' && escrutadaD1 !== -1) {
+    const range = xlsx.utils.decode_range(sheet['!ref']);
+    let mirrored = false;
+    for (let r = 2; r <= range.e.r && !mirrored; r++) {
+      const cell = sheet[xlsx.utils.encode_cell({ r, c: escrutadaD1 })];
+      if (cell && typeof cell.f === 'string' && cell.f.includes('!')) mirrored = true;
+    }
+    if (mirrored) {
+      let copied = 0;
+      for (const dia of ['dia1', 'dia2']) {
+        for (const [id, m] of Object.entries(converted[dia].sup.mesa)) {
+          const src = converted[dia].lista.mesa[id];
+          if (src && Object.prototype.hasOwnProperty.call(src, 'escrutadaRaw')) {
+            m.escrutadaRaw = src.escrutadaRaw;
+            copied++;
+          }
+        }
+      }
+      console.log(`  ⚠ CS checkboxes are formulas linked to Directiva: using Directiva's ticks by mesa name (${copied} mesa-days)`);
+    }
+  }
+
   const mesaCount = Object.keys(converted.dia1[tipo].mesa).length;
   console.log(`  ✓ Parsed ${mesaCount} mesas for ${tipo}`);
 }

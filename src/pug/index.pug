@@ -25,6 +25,12 @@ html(lang='es')
             span.theme-label 🌙 Modo oscuro
       #bar-graph-hero.hero-body
         .container
+          //- ✏️ EDITABLE: nombres de las pestañas de vuelta. Aparecen solo si
+          //- config/election.json tiene "primeraVueltaArchivo".
+          if election.primeraVueltaArchivo
+            nav.round-tabs(aria-label='Vuelta')
+              a#tab-2v(href='./') Segunda vuelta · en vivo
+              a#tab-1v(href='./?vuelta=1') Primera vuelta · resultados finales
           p#bind-progress.count-progress
             | Mesas escrutadas: #[strong {actual} de {total}]
             span.count-progress-pc  ({pc | pc}%)

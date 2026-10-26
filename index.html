@@ -37,6 +37,7 @@
       </div>
       <div class="hero-body" id="bar-graph-hero">
         <div class="container">
+          <nav class="round-tabs" aria-label="Vuelta"><a id="tab-2v" href="./">Segunda vuelta · en vivo</a><a id="tab-1v" href="./?vuelta=1">Primera vuelta · resultados finales</a></nav>
           <p class="count-progress" id="bind-progress">Mesas escrutadas: <strong>{actual} de {total}</strong><span class="count-progress-pc"> ({pc | pc}%)</span></p>
           <!-- Second Round: Traditional 2-bar display (dynamic)-->
           <div class="columns" id="bind-second-round">
@@ -520,10 +521,35 @@
                 <canvas id="ppto"></canvas>
               </div>
               <div class="votes">
-                <div class="vote vote-tdicai" title="TDI CAi">
-                  <div class="label">TDI CAi</div>
+                <div class="vote vote-tdicai" title="Trabajos de Invierno (TDI)">
+                  <div class="label">Trabajos de Invierno (TDI)</div>
                   <div class="units">{tdicai | num}</div>
                   <div class="percentage">{tdicaipc | pc}%</div>
+                </div>
+                <div class="vote vote-suma" title="Suma UC">
+                  <div class="label">Suma UC</div>
+                  <div class="units">{suma | num}</div>
+                  <div class="percentage">{sumapc | pc}%</div>
+                </div>
+                <div class="vote vote-pry" title="Proyecta UC">
+                  <div class="label">Proyecta UC</div>
+                  <div class="units">{pry | num}</div>
+                  <div class="percentage">{prypc | pc}%</div>
+                </div>
+                <div class="vote vote-escu" title="Escuelita UC">
+                  <div class="label">Escuelita UC</div>
+                  <div class="units">{escu | num}</div>
+                  <div class="percentage">{escupc | pc}%</div>
+                </div>
+                <div class="vote vote-spch" title="La Obra UC">
+                  <div class="label">La Obra UC</div>
+                  <div class="units">{spch | num}</div>
+                  <div class="percentage">{spchpc | pc}%</div>
+                </div>
+                <div class="vote vote-sonr" title="Cuidando Sonrisas">
+                  <div class="label">Cuidando Sonrisas</div>
+                  <div class="units">{sonr | num}</div>
+                  <div class="percentage">{sonrpc | pc}%</div>
                 </div>
                 <div class="vote vote-tdicoll" title="ESI">
                   <div class="label">ESI</div>
@@ -540,11 +566,6 @@
                   <div class="units">{caco | num}</div>
                   <div class="percentage">{cacopc | pc}%</div>
                 </div>
-                <div class="vote vote-spch" title="Obra UC">
-                  <div class="label">Obra UC</div>
-                  <div class="units">{spch | num}</div>
-                  <div class="percentage">{spchpc | pc}%</div>
-                </div>
                 <div class="vote vote-jsf" title="UCeanos">
                   <div class="label">UCeanos</div>
                   <div class="units">{jsf | num}</div>
@@ -559,11 +580,6 @@
                   <div class="label">MAPAU</div>
                   <div class="units">{mapau | num}</div>
                   <div class="percentage">{mapaupc | pc}%</div>
-                </div>
-                <div class="vote vote-pry" title="Proyecta">
-                  <div class="label">Proyecta</div>
-                  <div class="units">{pry | num}</div>
-                  <div class="percentage">{prypc | pc}%</div>
                 </div>
               </div>
               <div class="votes">

@@ -98,7 +98,7 @@ async function load(width, theme) {
 
 // Everything a viewer can see, view by view (runs in the page)
 const COLLECT = `(async () => {
-  const t = (s) => [...document.querySelectorAll(s)].map(e => e.innerText.replace(/\\s+/g, ' ').trim()).filter(Boolean);
+  const t = (s) => [...document.querySelectorAll(s)].filter(e => e.getClientRects().length).map(e => e.innerText.replace(/\\s+/g, ' ').trim()).filter(Boolean);
   const tick = () => new Promise(r => setTimeout(r, 30));
   const pick = async (sel, value) => { const el = document.querySelector(sel); el.value = value; el.dispatchEvent(new Event('change', { bubbles: true })); await tick(); };
   const day = async (name, v) => { const r = document.querySelector('input[name=' + name + '][value=' + v + ']'); r.checked = true; r.dispatchEvent(new Event('change', { bubbles: true })); await tick(); };
