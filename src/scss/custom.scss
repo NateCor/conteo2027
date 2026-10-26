@@ -379,6 +379,59 @@ $vote-units-bg: rgba(0, 0, 0, 0.15);
   }
 }
 
+/* Runoff header: vote counts, 50% mark, vote gap */
+#bind-second-round {
+  .bar-full-graph { align-items: flex-start; }
+  // Name / % / votes stack as one block per list, hugging the bar.
+  .bar-full-graph .bar-item {
+    flex: 0 0 auto;
+    min-width: 64px;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    &:first-of-type { align-items: flex-end; }
+  }
+  .bar-item .vote-count {
+    font-size: 13px;
+    color: white;
+    white-space: nowrap;
+    line-height: 1.3;
+  }
+  .bar-full-item { position: relative; padding-bottom: 20px; }
+  // 50% tick: a short line continuing the bar's centre line, label below it.
+  .half-mark {
+    position: absolute;
+    left: 50%;
+    top: 54px;
+    transform: translateX(-50%);
+    font-size: 12px;
+    font-weight: 700;
+    color: white;
+    line-height: 13px;
+    padding-top: 6px;
+    &::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: calc(50% - 0.5px);
+      height: 6px;
+      border-left: 1px solid black;
+    }
+  }
+  .runoff-margin {
+    text-align: center;
+    color: white;
+    font-weight: 700;
+    font-size: 15px;
+    margin-top: 4px;
+  }
+  // Desktop: the two contests sit side by side; keep them visibly apart.
+  @media (min-width: 769px) {
+    > .column { padding-left: 28px; padding-right: 28px; }
+    > .column + .column { border-left: 1px solid rgba(255, 255, 255, 0.3); }
+  }
+}
+
 /* First/second round tabs (hero) */
 .round-tabs {
   display: flex;

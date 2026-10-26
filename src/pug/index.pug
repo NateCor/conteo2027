@@ -42,18 +42,26 @@ html(lang='es')
                 .bar-item(rv-each-party="lista.parties")
                   .legend {party.name}
                   .percentage {party.pc | pc}%
+                  .vote-count {party.votes | num} votos
                 .bar-full-item
                   .bar-holder
                     .bar(rv-each-party="lista.parties", rv-style-background="party.color", rv-width="party.pc")
+                  .half-mark 50%
+              //- ✏️ EDITABLE: el texto "Diferencia" está en src/js/main.js (TEXTOS).
+              p.runoff-margin(rv-show="lista.margin") {lista.margin}
             .column
               h2.title.is-4 Total Consejería Superior
               .bar-full-graph
                 .bar-item(rv-each-party="sup.parties")
                   .legend {party.name}
                   .percentage {party.pc | pc}%
+                  .vote-count {party.votes | num} votos
                 .bar-full-item
                   .bar-holder
                     .bar(rv-each-party="sup.parties", rv-style-background="party.color", rv-width="party.pc")
+                  .half-mark 50%
+              //- ✏️ EDITABLE: el texto "Diferencia" está en src/js/main.js (TEXTOS).
+              p.runoff-margin(rv-show="sup.margin") {sup.margin}
           // First Round: Ranked party display
           .columns#bind-header
             .column

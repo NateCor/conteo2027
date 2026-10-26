@@ -47,13 +47,16 @@
                 <div class="bar-item" rv-each-party="lista.parties">
                   <div class="legend">{party.name}</div>
                   <div class="percentage">{party.pc | pc}%</div>
+                  <div class="vote-count">{party.votes | num} votos</div>
                 </div>
                 <div class="bar-full-item">
                   <div class="bar-holder">
                     <div class="bar" rv-each-party="lista.parties" rv-style-background="party.color" rv-width="party.pc"></div>
                   </div>
+                  <div class="half-mark">50%</div>
                 </div>
               </div>
+              <p class="runoff-margin" rv-show="lista.margin">{lista.margin}</p>
             </div>
             <div class="column">
               <h2 class="title is-4">Total Consejería Superior</h2>
@@ -61,13 +64,16 @@
                 <div class="bar-item" rv-each-party="sup.parties">
                   <div class="legend">{party.name}</div>
                   <div class="percentage">{party.pc | pc}%</div>
+                  <div class="vote-count">{party.votes | num} votos</div>
                 </div>
                 <div class="bar-full-item">
                   <div class="bar-holder">
                     <div class="bar" rv-each-party="sup.parties" rv-style-background="party.color" rv-width="party.pc"></div>
                   </div>
+                  <div class="half-mark">50%</div>
                 </div>
               </div>
+              <p class="runoff-margin" rv-show="sup.margin">{sup.margin}</p>
             </div>
           </div>
           <!-- First Round: Ranked party display-->

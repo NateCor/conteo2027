@@ -22,6 +22,8 @@ $dk-text-strong: #f3f4f7;
 $dk-text-muted: #b4b8c4;
 
 html.dark {
+  #bind-second-round .half-mark::before { border-left-color: $dk-text; }
+
   color-scheme: dark; // native selects + scrollbars follow
   background-color: $dk-bg;
 
