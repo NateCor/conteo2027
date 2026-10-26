@@ -11,7 +11,12 @@ export const defaultChartsOptions = {
       label: function (tooltipItem, data) {
         const ds = data.datasets[tooltipItem.datasetIndex];
         const lab = data.labels[tooltipItem.index];
-        if (ds.placeholder) return `${lab}: sin votos aún`;
+        // ✏️ EDITABLE: texto del gráfico antes de que lleguen votos.
+        if (ds.placeholder) {
+          if (lab === 'Blancos') return 'Aún no hay votos en blanco';
+          if (lab === 'Nulos') return 'Aún no hay votos nulos';
+          return `${lab}: sin votos aún`;
+        }
         const val = ds.data[tooltipItem.index] || 0;
         return `${lab}: ${val.toLocaleString('es-CL')} votos`;
       },
