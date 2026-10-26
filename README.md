@@ -204,3 +204,7 @@ Live updates: the VPS runs `live-poll.js` with `PUBLISH=1` as the systemd user u
 ### Vista de primera vuelta
 
 Arriba de la página hay dos pestañas: **Segunda vuelta · en vivo** y **Primera vuelta · resultados finales** (`?vuelta=1`). La primera vuelta sale de `public/primera-vuelta.json`, un archivo congelado que no cambia con el Excel. Para ocultar las pestañas, deja `primeraVueltaArchivo` vacío en `config/election.json`.
+
+### Cómo se calculan los porcentajes
+
+El porcentaje de cada lista es sobre los **votos válidamente emitidos**: no cuenta los votos blancos ni los nulos (regla del Tricel). En segunda vuelta, las dos listas suman 100%. Los blancos y los nulos muestran su porcentaje sobre el total de votos.

@@ -986,18 +986,19 @@ function calculateAggregates(converted) {
   console.log(`  ✓ PPTO total: ${pDataTotal.total.votos} votes`);
 }
 
-// Percentages are over ALL votes cast, blancos and nulos included: the
-// team's definition of "válidamente emitidos" (confirmed election night,
-// 2026-10-08) counts them. Lists, blancos and nulos share one base and
-// add up to 100%.
+// Percentages follow the Tricel rule (confirmed by the team 2026-10-26):
+// each list's % is over VALID votes only (blancos and nulos excluded), so
+// in a runoff the two lists add up to 100%. Blancos and nulos show their
+// share of ALL votes cast, so their pills still carry information.
 function calculatePercentages(obj, keys) {
   const total = keys.reduce((sum, k) => sum + obj[k], 0);
   obj.votos = total;
   obj.votosve = total - (obj.b || 0) - (obj.n || 0);
+  const pct = (v, base) => (base > 0 ? Math.round((v / base) * 100 * 100) / 100 : 0);
 
   if (total > 0) {
     keys.forEach(k => {
-      obj[k + 'pc'] = Math.round((obj[k] / total) * 100 * 100) / 100;
+      obj[k + 'pc'] = (k === 'b' || k === 'n') ? pct(obj[k], total) : pct(obj[k], obj.votosve);
     });
   }
 }
