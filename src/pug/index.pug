@@ -1,5 +1,5 @@
 //- ✏️ EDITABLE: títulos visibles de la parte superior ("Lista FEUC",
-//- "Consejero Superior", "Detalle", "Mesas escrutadas:", "Modo oscuro").
+//- "Consejería Superior", "Detalle", "Mesas escrutadas:", "Modo oscuro").
 //- Cambia solo el texto al final de cada línea; no cambies la sangría
 //- (los espacios al inicio) ni lo que va entre paréntesis o llaves {}.
 //- Los nombres de partidos NO se cambian aquí: van en config/election.json.
@@ -46,7 +46,7 @@ html(lang='es')
                   .bar-holder
                     .bar(rv-each-party="lista.parties", rv-style-background="party.color", rv-width="party.pc")
             .column
-              h2.title.is-4 Total Consejero Superior
+              h2.title.is-4 Total Consejería Superior
               .bar-full-graph
                 .bar-item(rv-each-party="sup.parties")
                   .legend {party.name}
@@ -67,7 +67,7 @@ html(lang='es')
                   .badge-slot
                     .badge(rv-if="party.badge", rv-class-is-tie="party.tie") {party.badge}
             .column
-              h2.title.is-4 Consejero Superior
+              h2.title.is-4 Consejería Superior
               .party-ranked-list
                 .party-item(rv-each-party="sup.parties", rv-class-advances="party.advances")
                   .rank {party.index}
