@@ -18,7 +18,11 @@ export const defaultChartsOptions = {
           return `${lab}: sin votos aún`;
         }
         const val = ds.data[tooltipItem.index] || 0;
-        return `${lab}: ${val.toLocaleString('es-CL')} votos`;
+        const n = val.toLocaleString('es-CL');
+        const uno = val === 1;
+        if (lab === 'Blancos') return uno ? '1 voto en blanco' : `${n} votos en blanco`;
+        if (lab === 'Nulos') return uno ? '1 voto nulo' : `${n} votos nulos`;
+        return `${lab}: ${n} ${uno ? 'voto' : 'votos'}`;
       },
     },
   },
