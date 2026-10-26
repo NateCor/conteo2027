@@ -46,6 +46,7 @@ html(lang='es')
                 .bar-full-item
                   .bar-holder
                     .bar(rv-each-party="lista.parties", rv-style-background="party.color", rv-width="party.pc")
+                  //- ✏️ EDITABLE: etiqueta bajo la línea central de la barra.
                   .half-mark 50%
               //- ✏️ EDITABLE: el texto "Diferencia" está en src/js/main.js (TEXTOS).
               p.runoff-margin(rv-show="lista.margin") {lista.margin}
@@ -59,6 +60,7 @@ html(lang='es')
                 .bar-full-item
                   .bar-holder
                     .bar(rv-each-party="sup.parties", rv-style-background="party.color", rv-width="party.pc")
+                  //- ✏️ EDITABLE: etiqueta bajo la línea central de la barra.
                   .half-mark 50%
               //- ✏️ EDITABLE: el texto "Diferencia" está en src/js/main.js (TEXTOS).
               p.runoff-margin(rv-show="sup.margin") {sup.margin}

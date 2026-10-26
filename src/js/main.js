@@ -48,6 +48,8 @@ const TEXTOS = {
   deMesas: 'mesas escrutadas',                // "37 de 111 mesas escrutadas"
   diferencia: 'Diferencia', // segunda vuelta, bajo la barra: "Diferencia: 1.460 votos"
   empateVotos: 'Empate en votos',
+  voto: 'voto',
+  votos: 'votos',
   primeraVuelta: '● Primera vuelta · resultados finales', // vista congelada (?vuelta=1)
   errorCarga: 'No se pudo cargar data.json — verifica que corriste ' +
     '<code>npm run fetch-data</code>. Revisa la consola para detalles.',
@@ -597,7 +599,7 @@ $(document).ready(() => {
         if (!a || !b || a.votes + b.votes === 0) return '';
         const d = a.votes - b.votes;
         if (d === 0) return TEXTOS.empateVotos;
-        return `${TEXTOS.diferencia}: ${fmtNum(d)} ${d === 1 ? 'voto' : 'votos'}`;
+        return `${TEXTOS.diferencia}: ${fmtNum(d)} ${d === 1 ? TEXTOS.voto : TEXTOS.votos}`;
       };
       headerData.lista.margin = marginText(newLista);
       headerData.sup.margin = marginText(newSup);

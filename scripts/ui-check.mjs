@@ -103,7 +103,7 @@ const COLLECT = `(async () => {
   const pick = async (sel, value) => { const el = document.querySelector(sel); el.value = value; el.dispatchEvent(new Event('change', { bubbles: true })); await tick(); };
   const day = async (name, v) => { const r = document.querySelector('input[name=' + name + '][value=' + v + ']'); r.checked = true; r.dispatchEvent(new Event('change', { bubbles: true })); await tick(); };
   const pane = (id) => t('#' + id + ' .vote').join(' | ') + ' || ' + t('#' + id + ' .vote-counter').join(' ');
-  const out = { header: t('#bind-header .party-item, #bind-second-round .bar-item'), progress: t('#bind-progress'), total: {}, mesas: {}, terris: {}, ct: {} };
+  const out = { header: t('#bind-header .party-item, #bind-second-round .bar-item, #bind-second-round .half-mark, #bind-second-round .runoff-margin'), progress: t('#bind-progress'), total: {}, mesas: {}, terris: {}, ct: {} };
   for (const d of ['dia1', 'dia2', 'total']) { await day('total-dia', d); out.total[d] = [pane('bind-total-lista'), pane('bind-total-sup')]; }
   const opts = (sel) => [...document.querySelectorAll(sel + ' option')].map(o => [o.value, o.textContent.trim()]);
   for (const [v, name] of opts('form[name=selected-mesa] select')) { await pick('form[name=selected-mesa] select', v); out.mesas[name] = [pane('bind-mesa-lista'), pane('bind-mesa-sup')]; }
