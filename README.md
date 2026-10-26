@@ -35,7 +35,8 @@ Casi todo se cambia en **un solo archivo: `config/election.json`**. Ábrelo con 
 | El nombre visible de una lista | `config/election.json` → la lista → `displayName` |
 | El color de una lista | `config/election.json` → la lista → `color` (formato `#RRGGBB`) |
 | El título de la página ("Elecciones FEUC 2027") | `config/election.json` → `election` → `name` |
-| La cantidad de personas habilitadas para votar | `config/election.json` → `election` → `totalVoters` |
+| La cantidad de personas habilitadas para votar | En el Excel, columna **Padron Por Territorio** (un número en la primera fila de cada territorio). Si el Excel no la tiene, `config/election.json` → `election` → `totalVoters` |
+| Las pestañas "Primera vuelta / Segunda vuelta" | `config/election.json` → `election` → `primeraVueltaArchivo` (nombre del archivo con la primera vuelta en `public/`; déjalo `""` para ocultar las pestañas) |
 | Cada cuánto se actualiza la página | `config/election.json` → `election` → `refreshSeconds` |
 | La dirección final del sitio (para la vista previa en WhatsApp) | `config/election.json` → `election` → `siteUrl` |
 | Los textos "En vivo", "Avanza", "Va", "Empate" | `src/js/main.js`, bloque `TEXTOS` al inicio |
@@ -199,3 +200,7 @@ Live updates: the VPS runs `live-poll.js` with `PUBLISH=1` as the systemd user u
 - Original 2017 version by [Pedro Pablo Aste Kompen (@wachunei)](https://github.com/wachunei) for El PUClítico.
 - Modernized for 2027 by [Nathan Cortez (@NateCor)](https://github.com/NateCor).
 - The site footer declares [CC BY-NC-ND 4.0](http://creativecommons.org/licenses/by-nc-nd/4.0/).
+
+### Vista de primera vuelta
+
+Arriba de la página hay dos pestañas: **Segunda vuelta · en vivo** y **Primera vuelta · resultados finales** (`?vuelta=1`). La primera vuelta sale de `public/primera-vuelta.json`, un archivo congelado que no cambia con el Excel. Para ocultar las pestañas, deja `primeraVueltaArchivo` vacío en `config/election.json`.

@@ -19,5 +19,7 @@
             span(class='tag is-medium is-success' rv-if='mesa.dia1') Sí
             span(class='tag is-medium' rv-unless='mesa.dia1') No
           td
-            span(class='tag is-medium is-success' rv-if='mesa.dia2') Sí
-            span(class='tag is-medium' rv-unless='mesa.dia2') No
+            span(rv-if='mesa.unDia' title='Esta mesa vota solo el Día 1') —
+            span(rv-unless='mesa.unDia')
+              span(class='tag is-medium is-success' rv-if='mesa.dia2') Sí
+              span(class='tag is-medium' rv-unless='mesa.dia2') No

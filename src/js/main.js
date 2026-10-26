@@ -601,6 +601,7 @@ $(document).ready(() => {
           name: mesa.name,
           dia1: mainData.dia1.lista.mesa[mesa.id].escrutada,
           dia2: mainData.dia2.lista.mesa[mesa.id].escrutada,
+          unDia: oneDay(mesa.id),
         });
 
         if (mainData.dia1.lista.mesa[mesa.id].escrutada) {

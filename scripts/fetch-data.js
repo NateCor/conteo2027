@@ -410,6 +410,13 @@ function transformWorkbook(workbook) {
     parseCtSheet(workbook.Sheets[ctSheetName], converted);
   }
 
+  const sheetPadronTotal = Object.values(sheetPadron).reduce((a, b) => a + b, 0);
+  const configTotal = ELECTION_CONFIG.election.totalVoters;
+  if (sheetPadronTotal && configTotal && Math.abs(sheetPadronTotal - configTotal) / configTotal > 0.05) {
+    // Implausible padrón (half-typed or filled wrongly): keep config numbers.
+    console.log(`  ⚠ Padrón from sheet (${sheetPadronTotal}) differs >5% from config totalVoters (${configTotal}): ignoring the sheet column`);
+    for (const k of Object.keys(sheetPadron)) delete sheetPadron[k];
+  }
   if (Object.keys(sheetPadron).length) {
     PADRON_TERRI = sheetPadron;
     if (!CLI_TOTAL_VOTERS) TOTAL_VOTERS = Object.values(sheetPadron).reduce((a, b) => a + b, 0);
@@ -511,7 +518,10 @@ function parseMainSheet(sheet, converted, tipo) {
     }
 
     if (padronCol !== -1 && typeof row[padronCol] === 'number' && row[padronCol] > 0) {
-      sheetPadron[territoryId] = (sheetPadron[territoryId] || 0) + row[padronCol];
+      // One number per territory (its first row). Extra numbers further down
+      // the same territory (filled down, per mesa) are ignored, not summed.
+      if (sheetPadron[territoryId] === undefined) sheetPadron[territoryId] = row[padronCol];
+      else console.log(`  ⚠ Padrón: extra number ${row[padronCol]} in "${row[2]}" ignored (only the territory's first row counts)`);
     }
 
     // Real per-day count flags from the sheet (when the columns exist)

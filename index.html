@@ -614,7 +614,7 @@
                   <tr rv-each-mesa="mesas">
                     <td>{mesa.name}</td>
                     <td><span class="tag is-medium is-success" rv-if="mesa.dia1">Sí</span><span class="tag is-medium" rv-unless="mesa.dia1">No</span></td>
-                    <td><span class="tag is-medium is-success" rv-if="mesa.dia2">Sí</span><span class="tag is-medium" rv-unless="mesa.dia2">No</span></td>
+                    <td><span rv-if="mesa.unDia" title="Esta mesa vota solo el Día 1">—</span><span rv-unless="mesa.unDia"><span class="tag is-medium is-success" rv-if="mesa.dia2">Sí</span><span class="tag is-medium" rv-unless="mesa.dia2">No</span></span></td>
                   </tr>
                 </table>
               </div>

@@ -26,6 +26,7 @@ const CASES = [
   ['2026-primera-vuelta', 'Conteo Elecciones FEUC 2026 - Oct 2025.xlsx'],
   ['2026-segunda-vuelta', 'Conteo Elecciones FEUC 2026 - Oct 2025 2da vuelta.xlsx'],
   ['2025-primera-vuelta', 'Conteo Elecciones FEUC 2025 (Puclitico).xlsx'],
+  ['2027-segunda-vuelta-plantilla', 'Conteo FEUC 2027 segunda vuelta plantilla.xlsx'],
 ];
 
 // Invariant independent of any golden: for every list column, the parsed
