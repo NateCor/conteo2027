@@ -26,7 +26,10 @@ const getDefaults = (n) => Array(n).fill(100 / n);
 
 // Mesas that only vote on Día 1 (config election.mesasUnDia, e.g. Villarrica)
 const ONE_DAY = new Set(electionConfig.election.mesasUnDia || []);
-const oneDay = (id) => ONE_DAY.has(id);
+// Mesas that only vote on Día 2 (config election.mesasSoloDia2, e.g. Villarrica Casa Central)
+const ONLY_DAY2 = new Set(electionConfig.election.mesasSoloDia2 || []);
+// Does this mesa vote on this day?
+const votesOn = (id, d) => !(d === 'dia2' && ONE_DAY.has(id)) && !(d === 'dia1' && ONLY_DAY2.has(id));
 
 // Frozen first-round view: ?vuelta=1 reads the archived file named in
 // config (election.primeraVueltaArchivo) instead of the live data.json.
@@ -527,7 +530,7 @@ $(document).ready(() => {
         const slack = 1 + (mainData.margenPadron ?? 0.05);
         const open = new Set();
         Object.entries(mainData.total[type].mesa).forEach(([id, m]) => {
-          const days = oneDay(id) ? ['dia1'] : ['dia1', 'dia2'];
+          const days = ['dia1', 'dia2'].filter((d) => votesOn(id, d));
           if (days.some((d) => !(mainData[d][type].mesa[id] || {}).escrutada)) open.add(m.territoryId);
         });
         let left = 0;
@@ -616,21 +619,22 @@ $(document).ready(() => {
           name: mesa.name,
           dia1: mainData.dia1.lista.mesa[mesa.id].escrutada,
           dia2: mainData.dia2.lista.mesa[mesa.id].escrutada,
-          unDia: oneDay(mesa.id),
+          unDia: ONE_DAY.has(mesa.id),
+          soloDia2: ONLY_DAY2.has(mesa.id),
         });
 
-        if (mainData.dia1.lista.mesa[mesa.id].escrutada) {
+        if (votesOn(mesa.id, 'dia1') && mainData.dia1.lista.mesa[mesa.id].escrutada) {
           escrutadasActual++;
         }
 
-        if (!oneDay(mesa.id) && mainData.dia2.lista.mesa[mesa.id].escrutada) {
+        if (votesOn(mesa.id, 'dia2') && mainData.dia2.lista.mesa[mesa.id].escrutada) {
           escrutadasActual++;
         }
       });
 
       mesasEscrutadas.actual = escrutadasActual;
       // 2 counts per mesa (one per day), except single-day mesas (Villarrica)
-      mesasEscrutadas.total = mesaEntries.reduce((n, m) => n + (oneDay(m.id) ? 1 : 2), 0);
+      mesasEscrutadas.total = mesaEntries.reduce((n, m) => n + ['dia1', 'dia2'].filter((d) => votesOn(m.id, d)).length, 0);
       mesasEscrutadas.pc = mesasEscrutadas.total
         ? Math.round((mesasEscrutadas.actual / mesasEscrutadas.total) * 1000) / 10
         : 0;
@@ -666,7 +670,7 @@ $(document).ready(() => {
       Object.entries(mainData.total[type].mesa).forEach(([id, m]) => {
         if (keep && !keep(id, m)) return;
         (dia === 'total' ? ['dia1', 'dia2'] : [dia]).forEach((d) => {
-          if (d === 'dia2' && oneDay(id)) return;
+          if (!votesOn(id, d)) return;
           total++;
           if ((mainData[d][type].mesa[id] || {}).escrutada) done++;
         });

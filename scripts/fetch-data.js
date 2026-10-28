@@ -92,6 +92,9 @@ function buildProjectMap() {
       map[cleanName] = project.key;
     });
   });
+  // The PP sheet has its own Blancos/Nulos columns (team, 2026-10-28).
+  map['Blancos'] = 'b';
+  map['Nulos'] = 'n';
   return map;
 }
 
