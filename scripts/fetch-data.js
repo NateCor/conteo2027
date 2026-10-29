@@ -879,9 +879,12 @@ function calculateAggregates(converted) {
         
         calculatePercentages(mesa, keys);
         // Real count flag from the sheet when present, else votes>0 heuristic
-        mesa.escrutada = Object.prototype.hasOwnProperty.call(mesa, 'escrutadaRaw')
+        // election.escrutadasForzadas: mark a mesa-day escrutada even when the
+        // sheet's checkbox is missing/empty (team Excel error, e.g. villcc Día 2).
+        const forcedDays = (ELECTION_CONFIG.election.escrutadasForzadas || {})[mesa.id] || [];
+        mesa.escrutada = (Object.prototype.hasOwnProperty.call(mesa, 'escrutadaRaw')
           ? mesa.escrutadaRaw
-          : mesa.votos > 0;
+          : mesa.votos > 0) || forcedDays.includes(dia);
         delete mesa.escrutadaRaw;
       });
 
