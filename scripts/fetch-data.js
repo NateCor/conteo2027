@@ -61,6 +61,10 @@ const MESA_MAP = TERRITORIES_CONFIG.mesas;
 // Effective total voters: CLI flag takes precedence, then config
 let TOTAL_VOTERS = CLI_TOTAL_VOTERS || ELECTION_CONFIG.election.totalVoters;
 
+// Single-day mesas (config election.mesasUnDia / election.mesasSoloDia2)
+const ONLY_DAY1 = new Set(ELECTION_CONFIG.election.mesasUnDia || []);
+const ONLY_DAY2 = new Set(ELECTION_CONFIG.election.mesasSoloDia2 || []);
+
 // Detected active parties/projects from Excel (populated during validation)
 const detectedActive = { lista: [], sup: [], projects: [] };
 
@@ -539,7 +543,12 @@ function parseMainSheet(sheet, converted, tipo) {
       if (partyName) {
         partyName = partyName.replace(/^>>/, '').trim();
       }
-      const day = dayRow[j];
+      // A single-day mesa cannot vote on its off day: votes typed in the
+      // wrong day's columns (row copied from another mesa) belong to the day
+      // the mesa actually votes (e.g. villcc Día 2, row 58 team error 2026-10-29).
+      let day = dayRow[j];
+      if (day === 'Dia 1' && ONLY_DAY2.has(mesaId)) day = 'Dia 2';
+      else if (day === 'Dia 2' && ONLY_DAY1.has(mesaId)) day = 'Dia 1';
       const votes = parseInt(row[j]) || 0;
       const key = PARTY_MAP[partyName];
 
